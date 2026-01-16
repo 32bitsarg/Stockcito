@@ -18,7 +18,7 @@ const plans = [
     features: [
       { name: 'POS Básico', included: true },
       { name: 'Hasta 100 productos', included: true },
-      { name: '1 Usuario', included: true },
+      { name: 'Hasta 5 empleados', included: true },
       { name: 'Reportes Básicos', included: true },
       { name: 'Facturación PDF', included: false },
       { name: 'Control de Stock Avanzado', included: false },

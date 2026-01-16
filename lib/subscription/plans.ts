@@ -4,7 +4,7 @@ export const PLAN_LIMITS = {
   free: {
     maxProducts: 500,
     maxClients: 100,
-    maxUsers: 2,
+    maxUsers: 6, // 1 Owner + 5 Employees
     maxInvoicesPerMonth: 50,
     maxCreditNotesPerMonth: 10,
     reportDaysLimit: 7,
@@ -24,7 +24,7 @@ export const PLAN_LIMITS = {
   premium: {
     maxProducts: -1, // unlimited
     maxClients: -1,
-    maxUsers: 10,
+    maxUsers: -1, // Landing says unlimited
     maxInvoicesPerMonth: -1,
     maxCreditNotesPerMonth: -1,
     reportDaysLimit: -1, // unlimited history
@@ -53,8 +53,8 @@ export const PLAN_PRICES = {
     currency: 'ARS'
   },
   premium: {
-    monthly: 4999,
-    yearly: 49990, // 2 months free
+    monthly: 10000,
+    yearly: 100000, // 2 months free
     currency: 'ARS'
   }
 } as const
