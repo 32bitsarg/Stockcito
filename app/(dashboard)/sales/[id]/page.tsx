@@ -15,7 +15,7 @@ import { RefundSaleButton } from "@/components/sales/refund-sale-button"
 export default async function SaleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const sale = await getSaleById(parseInt(id))
-  
+
   if (!sale) {
     notFound()
   }
@@ -58,7 +58,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             </p>
           </div>
         </div>
-        
+
         {sale.status === 'completed' && (
           <div className="flex gap-2">
             <RefundSaleButton sale={sale} />
@@ -176,7 +176,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             <TableHeader>
               <TableRow>
                 <TableHead>Producto</TableHead>
-                <TableHead className="text-right">Precio Unit.</TableHead>
+                <TableHead className="text-right">Precio Unit. (Final)</TableHead>
                 <TableHead className="text-right">Cant.</TableHead>
                 <TableHead className="text-right">IVA</TableHead>
                 <TableHead className="text-right">Subtotal</TableHead>

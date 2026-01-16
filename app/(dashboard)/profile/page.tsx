@@ -3,9 +3,13 @@ import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { ProfileContent } from "@/components/profile/profile-content"
 
-export default async function ProfilePage() {
+export default async function ProfilePage(props: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const searchParams = await props.searchParams
+    const verify = searchParams.verify === 'true'
     const session = await getSession()
-    
+
     if (!session) {
         redirect("/login")
     }
@@ -47,7 +51,7 @@ export default async function ProfilePage() {
     const isOwner = session.role === 'owner'
 
     return (
-        <ProfileContent 
+        <ProfileContent
             user={{
                 id: user.id,
                 name: user.name,
@@ -61,6 +65,7 @@ export default async function ProfilePage() {
             emailVerified={!!user.emailVerified}
             isAdmin={isAdmin}
             isOwner={isOwner}
+            showVerificationWarning={verify}
         />
     )
 }

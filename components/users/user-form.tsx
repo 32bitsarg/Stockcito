@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { 
-    Loader2, 
-    UserPlus, 
-    Shield, 
-    ShoppingCart, 
-    Eye, 
-    Briefcase, 
-    UtensilsCrossed, 
+import {
+    Loader2,
+    UserPlus,
+    Shield,
+    ShoppingCart,
+    Eye,
+    Briefcase,
+    UtensilsCrossed,
     Crown,
     Mail,
     KeyRound,
@@ -48,7 +48,7 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 
 const ROLE_COLORS: Record<string, string> = {
     owner: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    admin: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    admin: "bg-primary/10 text-primary border-primary/20",
     manager: "bg-purple-500/10 text-purple-600 border-purple-500/20",
     cashier: "bg-green-500/10 text-green-600 border-green-500/20",
     waiter: "bg-orange-500/10 text-orange-600 border-orange-500/20",
@@ -67,7 +67,7 @@ export function UserForm({ user }: UserFormProps) {
     const [email, setEmail] = useState(user?.email || "")
     const [role, setRole] = useState<string>(user?.role || "cashier")
     const [active, setActive] = useState(user?.active ?? true)
-    
+
     // Credentials
     const [credentialMode, setCredentialMode] = useState<CredentialMode>('auto')
     const [pin, setPin] = useState("")
@@ -111,7 +111,7 @@ export function UserForm({ user }: UserFormProps) {
         startTransition(async () => {
             try {
                 let result
-                
+
                 if (isEditing) {
                     result = await updateUser(user.id, {
                         name,
@@ -155,7 +155,7 @@ export function UserForm({ user }: UserFormProps) {
             {/* Section: Basic Info */}
             <section className="space-y-4">
                 <h3 className="text-lg font-semibold">Información básica</h3>
-                
+
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Nombre completo</label>
@@ -191,7 +191,7 @@ export function UserForm({ user }: UserFormProps) {
             {/* Section: Role Selection */}
             <section className="space-y-4">
                 <h3 className="text-lg font-semibold">Rol del empleado</h3>
-                
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     {availableRoles.map(([key, info]) => (
                         <button
@@ -200,8 +200,8 @@ export function UserForm({ user }: UserFormProps) {
                             onClick={() => setRole(key)}
                             className={cn(
                                 "relative p-4 rounded-lg border-2 transition-all text-left",
-                                role === key 
-                                    ? "border-primary bg-primary/5 ring-2 ring-primary/20" 
+                                role === key
+                                    ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                                     : "border-muted hover:border-muted-foreground/25"
                             )}
                         >
@@ -244,7 +244,7 @@ export function UserForm({ user }: UserFormProps) {
             {!isEditing && (
                 <section className="space-y-4">
                     <h3 className="text-lg font-semibold">Credenciales de acceso</h3>
-                    
+
                     {/* Credential mode selection */}
                     <div className="grid grid-cols-3 gap-3">
                         <button
@@ -252,8 +252,8 @@ export function UserForm({ user }: UserFormProps) {
                             onClick={() => setCredentialMode('auto')}
                             className={cn(
                                 "p-4 rounded-lg border-2 transition-all text-center",
-                                credentialMode === 'auto' 
-                                    ? "border-primary bg-primary/5" 
+                                credentialMode === 'auto'
+                                    ? "border-primary bg-primary/5"
                                     : "border-muted hover:border-muted-foreground/25"
                             )}
                         >
@@ -263,14 +263,14 @@ export function UserForm({ user }: UserFormProps) {
                                 Genera PIN
                             </p>
                         </button>
-                        
+
                         <button
                             type="button"
                             onClick={() => setCredentialMode('pin')}
                             className={cn(
                                 "p-4 rounded-lg border-2 transition-all text-center",
-                                credentialMode === 'pin' 
-                                    ? "border-primary bg-primary/5" 
+                                credentialMode === 'pin'
+                                    ? "border-primary bg-primary/5"
                                     : "border-muted hover:border-muted-foreground/25"
                             )}
                         >
@@ -280,18 +280,18 @@ export function UserForm({ user }: UserFormProps) {
                                 Tú eliges el PIN
                             </p>
                         </button>
-                        
+
                         <button
                             type="button"
                             onClick={() => setCredentialMode('password')}
                             className={cn(
                                 "p-4 rounded-lg border-2 transition-all text-center",
-                                credentialMode === 'password' 
-                                    ? "border-primary bg-primary/5" 
+                                credentialMode === 'password'
+                                    ? "border-primary bg-primary/5"
                                     : "border-muted hover:border-muted-foreground/25"
                             )}
                         >
-                            <Lock className="w-5 h-5 mx-auto mb-2 text-blue-600" />
+                            <Lock className="w-5 h-5 mx-auto mb-2 text-primary" />
                             <p className="font-medium text-sm">Contraseña</p>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Login tradicional
@@ -355,13 +355,13 @@ export function UserForm({ user }: UserFormProps) {
                     )}
 
                     {/* Email notification info */}
-                    <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 flex items-start gap-3">
-                        <Mail className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div className="rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 p-4 flex items-start gap-3">
+                        <Mail className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <div>
-                            <p className="font-medium text-sm text-blue-800 dark:text-blue-200">
+                            <p className="font-medium text-sm text-primary dark:text-primary-foreground">
                                 Notificación por email
                             </p>
-                            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                            <p className="text-sm text-primary/80 dark:text-primary-foreground/80 mt-1">
                                 Las credenciales se enviarán automáticamente al email del empleado con instrucciones para acceder.
                             </p>
                         </div>
@@ -373,7 +373,7 @@ export function UserForm({ user }: UserFormProps) {
             {isEditing && (
                 <section className="space-y-4">
                     <h3 className="text-lg font-semibold">Estado del usuario</h3>
-                    
+
                     <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="space-y-1">
                             <p className="font-medium">Usuario activo</p>
@@ -434,12 +434,12 @@ export function UserForm({ user }: UserFormProps) {
 
 function PermissionChip({ label, enabled }: { label: string; enabled: boolean }) {
     return (
-        <Badge 
-            variant="outline" 
+        <Badge
+            variant="outline"
             className={cn(
                 "text-xs",
-                enabled 
-                    ? "bg-green-500/10 text-green-700 border-green-500/20" 
+                enabled
+                    ? "bg-green-500/10 text-green-700 border-green-500/20"
                     : "bg-gray-100 text-gray-400 dark:bg-gray-800"
             )}
         >

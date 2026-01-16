@@ -25,11 +25,11 @@ export async function getSession(): Promise<SessionUser | null> {
 
         const user = await db.user.findUnique({
             where: { id: payload.userId },
-            select: { 
-                id: true, 
-                name: true, 
-                email: true, 
-                role: true, 
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
                 active: true,
                 organizationId: true,
                 permissions: true,
@@ -113,7 +113,7 @@ export async function logoutUser() {
     const { logAudit } = await import('@/actions/auth/audit-actions')
     const { headers } = await import('next/headers')
     const { getClientIP } = await import('@/lib/security/rate-limiter')
-    
+
     const session = await getSession()
     if (session) {
         const headersList = await headers()

@@ -48,12 +48,10 @@ export default async function SuppliersPage(props: {
                     </Button>
                 </Link>
             </div>
-
             <div className="flex items-center gap-2">
                 <SearchInput placeholder="Buscar proveedor..." />
                 <ExportButton data={exportData} filename="proveedores" label="Exportar" />
             </div>
-
             <div className="border rounded-md">
                 <Table>
                     <TableHeader>
@@ -127,5 +125,5 @@ export default async function SuppliersPage(props: {
                 </Table>
             </div>
         </div>
-    )
+    );
 }

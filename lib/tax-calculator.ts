@@ -19,26 +19,35 @@ export type LineCalcResult = {
 };
 
 export function calculateLine(input: LineCalcInput): LineCalcResult {
-  const unit = toDecimal(input.unitPrice);
+  const unit = toDecimal(input.unitPrice); // PRECIO FINAL
   const qty = new Decimal(input.quantity);
   const taxRate = toDecimal(input.taxRate ?? 0);
 
-  const lineBase = unit.times(qty);
+  // 1. Total Final Bruto (antes de desc)
+  const lineTotalGross = unit.times(qty);
 
+  // 2. Calcular Descuento
   let discountAmount = new Decimal(0);
   if (input.discountAmount) {
     discountAmount = toDecimal(input.discountAmount);
   } else if (input.discountRate) {
-    discountAmount = lineBase.times(toDecimal(input.discountRate).dividedBy(100));
+    discountAmount = lineTotalGross.times(toDecimal(input.discountRate).dividedBy(100));
   }
 
-  const taxableBase = lineBase.minus(discountAmount);
-  const taxAmount = taxableBase.times(taxRate.dividedBy(100));
-  const total = taxableBase.plus(taxAmount);
+  // 3. Total Final a Pagar (Total con IVA)
+  const total = lineTotalGross.minus(discountAmount);
+
+  // 4. Desglosar (Sacar IVA hacia adentro)
+  // Neto = Total / (1 + Tasa)
+  const taxableBase = total.dividedBy(new Decimal(1).plus(taxRate.dividedBy(100)));
+  const taxAmount = total.minus(taxableBase);
+
+  // Retro-calcular el precio unitario neto para referencia (aunque usamos el final para operar)
+  const priceNet = taxableBase.dividedBy(qty);
 
   return {
-    priceNet: unit,
-    lineBase: roundMoney(lineBase),
+    priceNet: roundMoney(priceNet),
+    lineBase: roundMoney(lineTotalGross), // Base sobre precio final
     discountAmount: roundMoney(discountAmount),
     taxableBase: roundMoney(taxableBase),
     taxAmount: roundMoney(taxAmount),
