@@ -12,7 +12,7 @@ export default function RegisterPage() {
       />
 
       {/* Right side - Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-white p-6 overflow-y-auto">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-background p-6 overflow-y-auto">
         <div className="w-full max-w-sm space-y-6">
           <div className="space-y-1 text-center md:text-left">
             <h1 className="text-2xl font-bold tracking-tight">Crear cuenta</h1>

@@ -36,10 +36,10 @@ export function DraggableTable({ table, onEdit, isLayoutMode }: DraggableTablePr
 
     const getStatusColors = (status: string) => {
         switch (status) {
-            case 'occupied': return 'bg-red-100 border-red-300 text-red-700'
-            case 'reserved': return 'bg-yellow-100 border-yellow-300 text-yellow-700'
-            case 'cleaning': return 'bg-blue-100 border-blue-300 text-blue-700'
-            default: return 'bg-green-100 border-green-300 text-green-700'
+            case 'occupied': return 'bg-red-100 border-red-300 text-red-900 dark:bg-red-900/50 dark:border-red-900 dark:text-red-100'
+            case 'reserved': return 'bg-yellow-100 border-yellow-300 text-yellow-900 dark:bg-yellow-900/50 dark:border-yellow-900 dark:text-yellow-100'
+            case 'cleaning': return 'bg-blue-100 border-blue-300 text-blue-900 dark:bg-blue-900/50 dark:border-blue-900 dark:text-blue-100'
+            default: return 'bg-green-100 border-green-300 text-green-900 dark:bg-green-900/50 dark:border-green-900 dark:text-green-100'
         }
     }
 
@@ -64,7 +64,7 @@ export function DraggableTable({ table, onEdit, isLayoutMode }: DraggableTablePr
             }}
         >
             {isLayoutMode && (
-                <div className="absolute -top-2 -right-2 bg-white rounded-full p-0.5 border shadow-sm">
+                <div className="absolute -top-2 -right-2 bg-background rounded-full p-0.5 border shadow-sm z-10">
                     <GripVertical className="w-3 h-3 text-muted-foreground" />
                 </div>
             )}
