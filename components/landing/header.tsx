@@ -1,51 +1,77 @@
 "use client"
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { Menu, LogIn, BookOpen } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Menu, LogIn, BookOpen, X, Package } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export function LandingHeader() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  // Detect scroll to add border/shadow
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
-    <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between z-20">
-      <div className="flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">S</div>
-          <div>
-            <div className="text-lg font-extrabold">Stockcito</div>
-            <div className="text-xs text-muted-foreground">POS · Inventario · Facturación</div>
+    <header className={cn(
+      "fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300",
+      scrolled ? "bg-background/80 backdrop-blur-md border-b py-3" : "bg-transparent py-5"
+    )}>
+      <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+            <Package className="w-5 h-5" />
           </div>
+          <span className="text-xl font-bold tracking-tight">Stockcito</span>
         </Link>
-      </div>
 
-      <nav className="flex items-center gap-4">
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/" className="text-sm hover:underline">Inicio</Link>
-          <Link href="/docs" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             <BookOpen className="w-4 h-4" />
             Documentación
           </Link>
-          <Link href="/sales/new" className="text-sm">Ir al POS</Link>
-          <Link href="/login" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-muted-foreground/80"><LogIn className="w-4 h-4" />Ingresar</Link>
-          <Link href="/register" className="rounded-md bg-primary px-4 py-2 text-sm text-white shadow">Probar gratis</Link>
-        </div>
+          <div className="flex items-center gap-4 border-l pl-4 ml-2 h-6">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/login">Ingresar</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/register">Comenzar Gratis</Link>
+            </Button>
+          </div>
+        </nav>
 
-        <button className="md:hidden p-2 rounded-md" aria-label="menu" onClick={() => setOpen(!open)}>
-          <Menu className="h-5 w-5" />
+        {/* Mobile Menu Toggle */}
+        <button className="md:hidden p-2" aria-label="menu" onClick={() => setOpen(!open)}>
+          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
-      </nav>
+      </div>
 
+      {/* Mobile Nav Overlay */}
       {open && (
-        <div className="absolute right-4 top-16 w-48 bg-popover rounded-md shadow-md p-3 md:hidden">
-          <nav className="flex flex-col gap-2">
-            <Link href="/docs" className="text-sm flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Documentación
+        <div className="absolute top-full left-0 right-0 bg-background border-b p-4 md:hidden shadow-xl animate-in slide-in-from-top-5">
+          <nav className="flex flex-col gap-4">
+            <Link
+              href="/docs"
+              className="text-sm font-medium p-2 hover:bg-muted rounded-md flex items-center gap-2"
+              onClick={() => setOpen(false)}
+            >
+              <BookOpen className="w-4 h-4" /> Documentación
             </Link>
-            <Link href="/sales/new" className="text-sm">Ir al POS</Link>
-            <Link href="/login" className="text-sm">Ingresar</Link>
-            <Link href="/register" className="text-sm">Registrarse</Link>
+            <div className="h-px bg-border my-1" />
+            <Button variant="outline" asChild className="w-full justify-start">
+              <Link href="/login" onClick={() => setOpen(false)}>Ingresar</Link>
+            </Button>
+            <Button asChild className="w-full justify-start">
+              <Link href="/register" onClick={() => setOpen(false)}>Crear Cuenta Gratis</Link>
+            </Button>
           </nav>
         </div>
       )}

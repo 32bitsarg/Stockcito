@@ -45,6 +45,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Stockcito — Sistema de gestión para comercios',
     description: 'POS, facturación y control de inventario optimizado para comercios en Argentina. Precios sin IVA, IVA desglosado y reportes fiscales.',
+  },
+  icons: {
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   }
 };
 

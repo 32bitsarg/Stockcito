@@ -2,70 +2,101 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { CreditCard, Box, BarChart2, Crown, Sparkles } from 'lucide-react'
+import { ArrowRight, Package, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 export function LandingHero() {
   return (
-    <section className="w-full max-w-7xl mx-auto py-20 px-6 md:px-0">
-      <div className="grid gap-12 md:grid-cols-2 items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -28 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Badge variant="outline" className="text-xs px-2 py-1">
-              <Sparkles className="w-3 h-3 mr-1" />
-              v0.1 disponible
+    <section className="relative w-full overflow-hidden bg-background pt-16 pb-32 lg:pt-32">
+      <div className="container relative z-10 px-4 md:px-6 mx-auto">
+        <div className="flex flex-col items-center text-center space-y-8">
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Badge variant="outline" className="px-4 py-1.5 text-sm rounded-full border-muted-foreground/20 bg-muted/50 text-foreground mb-4 font-normal">
+              <span className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                v0.1 Early Access
+              </span>
             </Badge>
-          </div>
+          </motion.div>
 
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">Haz ventas más rápido y controla tu stock con facilidad</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl">Stockcito es un sistema pensado para comercios y PyMEs: POS ágil, gestión de inventario, IVA desglosado y facturación en PDF. Comenzá en minutos.</p>
+          {/* Logo Animation */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-2 p-4 bg-primary/5 rounded-2xl"
+          >
+            <Package className="w-16 h-16 text-primary stroke-[1.5]" />
+          </motion.div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/register" className="rounded-md bg-gradient-to-r from-primary to-primary/80 px-6 py-3 text-white font-semibold shadow-lg">
-              Comenzar gratis
-            </Link>
-            <Link href="/sales/new" className="rounded-md border px-6 py-3">Probar POS</Link>
-            <Link href="/subscription/upgrade" className="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 px-6 py-3 text-amber-800 dark:text-amber-200 font-medium flex items-center gap-2">
-              <Crown className="w-4 h-4" />
-              Ver planes
-            </Link>
-          </div>
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl max-w-4xl text-foreground"
+          >
+            Gestión simple para <br />
+            negocios modernos.
+          </motion.h1>
 
-          <div className="mt-6 text-sm text-muted-foreground flex items-center gap-3">
-            <CreditCard className="w-4 h-4 text-muted-foreground" />
-            <span>7 días de prueba Premium gratis. Sin tarjeta requerida.</span>
-          </div>
-        </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mx-auto max-w-[600px] text-muted-foreground md:text-xl font-light"
+          >
+            Punto de venta, control de inventario y facturación en una plataforma minimalista que evoluciona con vos.
+          </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-          className="rounded-xl p-6 shadow-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
-        >
-          <div className="rounded-lg bg-white dark:bg-gray-900 p-6 ring-1 ring-gray-100 dark:ring-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-muted-foreground">Venta rápida</div>
-                <div className="mt-2 text-sm font-semibold">3 items • $3.540,00</div>
-              </div>
-              <div className="text-sm text-muted-foreground">Pago: Efectivo</div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4"
+          >
+            <Button size="lg" className="h-12 px-8 text-base rounded-full" asChild>
+              <Link href="/register">
+                Comenzar gratis
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="ghost" className="h-12 px-8 text-base rounded-full" asChild>
+              <Link href="/login">
+                Ya tengo cuenta
+              </Link>
+            </Button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="pt-8 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-sm text-muted-foreground"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              <span>Sin tarjeta de crédito</span>
             </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="p-3 bg-muted rounded flex items-center gap-2"><Box className="w-4 h-4" /> Buscar</div>
-              <div className="p-3 bg-muted rounded flex items-center gap-2"><BarChart2 className="w-4 h-4" /> Reportes</div>
-              <div className="p-3 bg-muted rounded">Descuentos</div>
-              <div className="p-3 bg-muted rounded">Factura PDF</div>
+            <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-primary" />
+              <span>Control de Inventario</span>
             </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span>Datos en la Nube</span>
+            </div>
+          </motion.div>
 
-            <div className="mt-4 bg-slate-50 dark:bg-slate-800 rounded p-3 text-sm font-mono">#001 • 3 items • Total $3.540,00</div>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

@@ -1,35 +1,75 @@
 "use client"
 
 import { motion } from 'framer-motion'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 
 const testimonials = [
-  { name: 'María G.', text: 'Stockcito me ayudó a organizar el almacén y las ventas. Fácil de usar y rápido.' },
-  { name: 'Juan P.', text: 'La funcionalidad de IVA y la exportación a CSV me salvaron para la contabilidad.' },
-  { name: 'Sofía R.', text: 'Ideal para kioscos y comercios chicos. El POS es muy ágil.' }
+  {
+    name: 'Martín Gomez',
+    role: 'Dueño de Almacén',
+    text: 'Probé muchos sistemas y todos eran complicados. Stockcito es justo lo que necesitaba: rápido y sin vueltas.',
+    initials: 'MG'
+  },
+  {
+    name: 'Sofia Rodriguez',
+    role: 'Kiosco "El Paso"',
+    text: 'Lo uso desde el teléfono para controlar el stock y desde la compu para vender. La sincronización es perfecta.',
+    initials: 'SR'
+  },
+  {
+    name: 'Lucas P.',
+    role: 'Ferretería Barrial',
+    text: 'La función de imprimir tickets fiscales y presupuestos me ordenó el local. El soporte responde al toque.',
+    initials: 'LP'
+  }
 ]
-
-function initials(name: string) {
-  return name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase()
-}
 
 export function LandingTestimonials() {
   return (
-    <section className="w-full max-w-7xl mx-auto py-12 px-6 md:px-0">
-      <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-2xl font-semibold text-center">Lo que dicen nuestros clientes</motion.h2>
+    <section className="w-full py-24 bg-background">
+      <div className="container px-4 md:px-6 mx-auto">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
+          <Badge variant="secondary" className="text-sm py-1 px-4 bg-primary/5 text-primary border-primary/20">
+            Comunidad
+          </Badge>
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            Lo que dicen nuestros <span className="text-primary">Early Adopters</span>
+          </h2>
+          <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
+            Comercios reales que ya están optimizando su día a día con Stockcito v0.1.
+          </p>
+        </div>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {testimonials.map((t, i) => (
-          <motion.blockquote key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="p-6 bg-white border rounded-lg shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold">{initials(t.name)}</div>
-              <div>
-                <div className="text-sm font-semibold">{t.name}</div>
-                <div className="text-xs text-muted-foreground">Comercio local</div>
-              </div>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">"{t.text}"</p>
-          </motion.blockquote>
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Card className="h-full border-muted/60 shadow-none hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                  <Avatar className="h-10 w-10 border">
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">{t.initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <p className="text-sm font-semibold">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed italic">
+                    "{t.text}"
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )
