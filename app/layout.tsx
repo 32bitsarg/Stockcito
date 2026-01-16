@@ -74,7 +74,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
+          <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/20">
             {children}
           </main>
           <RegisterSW />

@@ -56,3 +56,5 @@ next-env.d.ts
 *.rpm
 *.snap
 *.AppImage
+dev.db
+docs/docker-commands.md

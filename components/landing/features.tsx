@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function LandingFeatures() {
   return (
-    <section className="w-full py-24 bg-slate-50 dark:bg-slate-950/50">
+    <section className="w-full py-24 bg-muted/30">
       <div className="container px-4 md:px-6 mx-auto">
         <div className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
           <Badge variant="outline" className="text-sm py-1 px-4 border-primary/30 bg-primary/5 text-primary">
@@ -52,12 +52,12 @@ export function LandingFeatures() {
                   </div>
                   <div className="space-y-2">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="flex justify-between items-center p-2 rounded bg-slate-50 dark:bg-slate-900 border">
+                      <div key={i} className="flex justify-between items-center p-2 rounded bg-muted/50 border">
                         <div className="flex flex-col gap-1">
-                          <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
-                          <div className="h-2 w-12 bg-slate-100 dark:bg-slate-800 rounded" />
+                          <div className="h-3 w-24 bg-muted-foreground/20 rounded" />
+                          <div className="h-2 w-12 bg-muted-foreground/10 rounded" />
                         </div>
-                        <div className="h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded" />
+                        <div className="h-4 w-12 bg-muted-foreground/20 rounded" />
                       </div>
                     ))}
                   </div>
@@ -80,7 +80,7 @@ export function LandingFeatures() {
             <Card className="h-full bg-background/60 backdrop-blur border-primary/10 hover:border-primary/30 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <Bell className="w-5 h-5 text-orange-500" />
+                  <Bell className="w-5 h-5 text-warning" />
                   Alertas de Stock
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -88,9 +88,9 @@ export function LandingFeatures() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/50 rounded-lg">
-                  <div className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
-                  <div className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                <div className="flex items-center gap-3 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                  <div className="h-2 w-2 rounded-full bg-warning animate-pulse" />
+                  <div className="text-sm font-medium text-warning">
                     Coca Cola Zero (Bajo stock: 3)
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export function LandingFeatures() {
             <Card className="bg-background/60 backdrop-blur border-primary/10 hover:border-primary/30 transition-all flex flex-col md:flex-row overflow-hidden group">
               <div className="p-6 md:w-1/2 flex flex-col justify-center">
                 <CardTitle className="flex items-center gap-2 text-xl mb-2">
-                  <FileText className="w-5 h-5 text-green-600" />
+                  <FileText className="w-5 h-5 text-success" />
                   Facturación Simple
                 </CardTitle>
                 <p className="text-muted-foreground mb-4">
@@ -152,12 +152,12 @@ export function LandingFeatures() {
               </div>
               <div className="bg-muted/50 md:w-1/2 p-6 flex items-center justify-center relative">
                 <div className="absolute inset-0 bg-grid-black/[0.05] dark:bg-grid-white/[0.05]" />
-                <div className="w-32 h-40 bg-white dark:bg-background border shadow-sm rotate-3 group-hover:rotate-0 transition-transform origin-bottom-right p-3 flex flex-col gap-2 text-[8px] text-muted-foreground">
-                  <div className="h-2 w-12 bg-gray-200 rounded mb-1" />
+                <div className="w-32 h-40 bg-card border shadow-sm rotate-3 group-hover:rotate-0 transition-transform origin-bottom-right p-3 flex flex-col gap-2 text-[8px] text-muted-foreground">
+                  <div className="h-2 w-12 bg-muted rounded mb-1" />
                   <div className="space-y-1">
-                    <div className="h-1 w-full bg-gray-100 rounded" />
-                    <div className="h-1 w-full bg-gray-100 rounded" />
-                    <div className="h-1 w-20 bg-gray-100 rounded" />
+                    <div className="h-1 w-full bg-muted/50 rounded" />
+                    <div className="h-1 w-full bg-muted/50 rounded" />
+                    <div className="h-1 w-20 bg-muted/50 rounded" />
                   </div>
                   <div className="mt-auto pt-2 border-t flex justify-between font-bold text-foreground">
                     <span>Total</span>

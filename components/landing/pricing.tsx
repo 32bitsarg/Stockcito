@@ -53,7 +53,7 @@ const plans = [
 
 export function LandingPricing() {
   return (
-    <section className="w-full py-24 bg-slate-50 dark:bg-slate-950/50" id="pricing">
+    <section className="w-full py-24 bg-muted/30" id="pricing">
       <div className="container px-4 md:px-6 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -104,16 +104,16 @@ export function LandingPricing() {
                     {plan.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center gap-3 text-sm">
                         {feature.included ? (
-                          <div className="h-5 w-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                          <div className="h-5 w-5 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0">
                             <Check className="h-3 w-3" />
                           </div>
                         ) : (
-                          <div className="h-5 w-5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                          <div className="h-5 w-5 rounded-full bg-muted/50 text-muted-foreground/60 flex items-center justify-center shrink-0">
                             <X className="h-3 w-3" />
                           </div>
                         )}
                         <span className={cn(
-                          !feature.included && "text-muted-foreground decoration-slate-400"
+                          !feature.included && "text-muted-foreground decoration-muted-foreground/60"
                         )}>
                           {feature.name}
                         </span>
