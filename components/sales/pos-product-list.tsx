@@ -10,17 +10,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 // Types matching the POS Interface
+// We use a simplified version compatible with the Prisma Product type required by POSProductCard
 interface Product {
     id: number
     name: string
     sku: string | null
-    price: number | any
+    price: any // Using any to be compatible with Decimal from Prisma
     stock: number
-    taxRate: number | any
+    taxRate: any
     category?: {
         name: string
     } | null
+    // Add optional fields to satisfy Prisma Product type if needed, 
+    // or better, we cast to any when passing to POSProductCard if we can't fully match
+    [key: string]: any
 }
 
 interface POSProductListProps {
@@ -80,7 +85,7 @@ export function POSProductList({ products, onAddToCart }: POSProductListProps) {
                                 {products.map(product => (
                                     <POSProductCard
                                         key={product.id}
-                                        product={product}
+                                        product={product as any}
                                         onAddToCart={onAddToCart}
                                     />
                                 ))}
