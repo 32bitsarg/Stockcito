@@ -197,7 +197,7 @@ export function POSInterface() {
                 router.refresh()
             } else {
                 toast.error("Error al procesar la venta", {
-                    description: result.error || "Ocurrió un error desconocido",
+                    description: typeof result.error === "string" ? result.error : "Error en la validación de datos. Revise los campos.",
                     duration: 5000,
                     position: "top-center"
                 })
