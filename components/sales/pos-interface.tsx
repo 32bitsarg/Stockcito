@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { POSProductList } from "./pos-product-list"
 import { POSCart } from "./pos-cart"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 // Helper type for Cart Item
 interface CartItem {
@@ -139,20 +140,29 @@ export function POSInterface() {
     }
 
     const calculations = cart.reduce((acc, item) => {
-        const lineBase = item.price * item.quantity
+        // En Argentina (y retail general), el precio de lista suele ser FINAL (IVA Incluido).
+        // Si el usuario cargó $500, quiere cobrar $500.
+        // Desglosamos el IVA hacia adentro.
+
+        const lineTotalFinal = item.price * item.quantity
+
         let discount = 0
         if (item.discountAmount && item.discountAmount > 0) discount = item.discountAmount
-        else if (item.discountRate && item.discountRate > 0) discount = lineBase * (item.discountRate / 100)
+        else if (item.discountRate && item.discountRate > 0) discount = lineTotalFinal * (item.discountRate / 100)
 
-        const taxable = lineBase - discount
+        const lineTotalAfterDiscount = lineTotalFinal - discount
+
+        // Calcular base imponible (Neto) e IVA desde el total
         const itemTaxRate = Number(item.taxRate || 0)
-        const itemTax = taxable * (itemTaxRate / 100)
-        const lineTotal = taxable + itemTax
+        // Fórmula: PrecioFinal = Neto * (1 + Tasa)
+        // Neto = PrecioFinal / (1 + Tasa)
+        const taxable = lineTotalAfterDiscount / (1 + (itemTaxRate / 100))
+        const itemTax = lineTotalAfterDiscount - taxable
 
         return {
             subtotal: acc.subtotal + taxable,
             tax: acc.tax + itemTax,
-            total: acc.total + lineTotal
+            total: acc.total + lineTotalAfterDiscount
         }
     }, { subtotal: 0, tax: 0, total: 0 })
 
@@ -179,11 +189,18 @@ export function POSInterface() {
             const result = await createSale(saleData)
             if (result.success) {
                 setCart([])
-                // Add better feedback or modal here later
-                alert("Venta realizada con éxito!")
+                toast.success("Venta realizada con éxito", {
+                    description: `Total: $${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
+                    duration: 4000,
+                    position: "top-center"
+                })
                 router.refresh()
             } else {
-                alert("Error al procesar la venta: " + (result.error || "Desconocido"))
+                toast.error("Error al procesar la venta", {
+                    description: result.error || "Ocurrió un error desconocido",
+                    duration: 5000,
+                    position: "top-center"
+                })
             }
         })
     }
@@ -262,7 +279,8 @@ export function POSInterface() {
 
                         <Button
                             size="lg"
-                            className="w-full h-12 text-lg font-bold shadow-md shadow-primary/20 hover:shadow-primary/40 transition-all"
+                            className="w-full h-12 text-lg font-bold shadow-md shadow-primary/20 hover:shadow-primary/40 transition-all hover:opacity-90"
+                            style={{ backgroundColor: 'var(--primary) !important', color: 'var(--primary-foreground)' }}
                             disabled={cart.length === 0 || isPending}
                             onClick={handleCheckout}
                         >

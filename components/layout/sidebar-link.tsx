@@ -3,20 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  FolderKanban, 
-  History, 
-  Building2, 
-  Percent, 
-  Shield, 
-  ClipboardList, 
-  BarChart3, 
-  Calculator, 
-  Clock, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  FolderKanban,
+  History,
+  Building2,
+  Percent,
+  Shield,
+  ClipboardList,
+  BarChart3,
+  Calculator,
+  Clock,
   User,
   LucideIcon
 } from 'lucide-react'
@@ -57,18 +57,20 @@ export function SidebarLink({ href, label, iconName, badge }: SidebarLinkProps) 
       href={href}
       prefetch={true}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary hover:bg-muted",
+        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary hover:bg-primary/5",
         isActive
-          ? "bg-muted text-primary font-medium"
+          ? "bg-primary/15 text-primary font-medium shadow-sm ring-1 ring-primary/10"
           : "text-muted-foreground"
       )}
     >
       <Icon className="h-4 w-4" />
       {label}
-      {badge !== undefined && badge > 0 && (
-        <Badge className="ml-auto">{badge}</Badge>
-      )}
-    </Link>
+      {
+        badge !== undefined && badge > 0 && (
+          <Badge className="ml-auto">{badge}</Badge>
+        )
+      }
+    </Link >
   )
 }
 

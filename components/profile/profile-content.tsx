@@ -3,13 +3,13 @@
 import { useState } from "react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { 
-    User, 
-    Mail, 
-    Calendar, 
-    ShoppingCart, 
-    Lock, 
-    KeyRound, 
+import {
+    User,
+    Mail,
+    Calendar,
+    ShoppingCart,
+    Lock,
+    KeyRound,
     Monitor,
     Shield,
     Crown,
@@ -26,6 +26,8 @@ import { PinSetupSection } from "./pin-setup-section"
 import { KioskConfigSection } from "./kiosk-config-section"
 import { BusinessCodeSection } from "./business-code-section"
 import { SYSTEM_ROLES, type SystemRole } from "@/lib/permissions"
+import { toast } from "sonner"
+import { useEffect } from "react"
 
 interface ProfileContentProps {
     user: {
@@ -44,6 +46,7 @@ interface ProfileContentProps {
     emailVerified: boolean
     isAdmin: boolean
     isOwner: boolean
+    showVerificationWarning?: boolean
 }
 
 const roleIcons: Record<string, typeof Shield> = {
@@ -64,9 +67,19 @@ const roleColors: Record<string, string> = {
     viewer: "bg-gray-500/10 text-gray-600 border-gray-500/20"
 }
 
-export function ProfileContent({ user, organization, emailVerified, isAdmin, isOwner }: ProfileContentProps) {
+export function ProfileContent({ user, organization, emailVerified, isAdmin, isOwner, showVerificationWarning }: ProfileContentProps) {
+    useEffect(() => {
+        if (showVerificationWarning) {
+            toast.error("Verificación requerida", {
+                description: "Necesitas verificar tu email para poder crear empleados y usuarios.",
+                position: "top-center",
+                duration: 6000,
+            })
+        }
+    }, [showVerificationWarning])
+
     const [showPasswordForm, setShowPasswordForm] = useState(false)
-    
+
     const roleInfo = SYSTEM_ROLES[user.role as SystemRole]
     const RoleIcon = roleIcons[user.role] || User
     const roleColor = roleColors[user.role] || "bg-gray-500/10 text-gray-600"
@@ -98,7 +111,7 @@ export function ProfileContent({ user, organization, emailVerified, isAdmin, isO
                             <RoleIcon className="w-3.5 h-3.5" />
                         </div>
                     </div>
-                    
+
                     {/* Info */}
                     <div className="flex-1 min-w-0 space-y-4">
                         <div>
@@ -197,7 +210,7 @@ export function ProfileContent({ user, organization, emailVerified, isAdmin, isO
                                 showPasswordForm && "rotate-90"
                             )} />
                         </button>
-                        
+
                         {showPasswordForm && (
                             <div className="px-4 pb-4 border-t">
                                 <div className="pt-4">
@@ -227,7 +240,7 @@ export function ProfileContent({ user, organization, emailVerified, isAdmin, isO
 
             {/* Business Code Section - Only for owners */}
             {isOwner && organization && (
-                <BusinessCodeSection 
+                <BusinessCodeSection
                     businessCode={organization.businessCode}
                     businessName={organization.name}
                     emailVerified={emailVerified}

@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { RegisterSW } from "@/components/pwa/register-sw";
 import { validateEnv } from "@/lib/env";
+import { Toaster } from "sonner";
 
 // Validate environment variables at startup
 if (typeof window === 'undefined') {
@@ -78,6 +79,7 @@ export default function RootLayout({
             {children}
           </main>
           <RegisterSW />
+          <Toaster richColors closeButton position="top-center" />
         </ThemeProvider>
       </body>
     </html>
