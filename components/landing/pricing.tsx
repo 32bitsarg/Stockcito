@@ -84,7 +84,7 @@ export function LandingPricing() {
                 plan.popular ? "border-primary shadow-md scale-100 md:scale-105 z-10" : "border-border"
               )}>
                 {plan.popular && (
-                  <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary to-blue-600" />
+                  <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary to-primary/60" />
                 )}
                 <CardHeader>
                   {plan.popular && (

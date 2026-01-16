@@ -109,7 +109,7 @@ export function LandingFeatures() {
             <Card className="h-full bg-background/60 backdrop-blur border-primary/10 hover:border-primary/30 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <BarChart3 className="w-5 h-5 text-blue-500" />
+                  <BarChart3 className="w-5 h-5 text-primary" />
                   Métricas Reales
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -118,11 +118,11 @@ export function LandingFeatures() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex items-end gap-1 h-16 w-full justify-around px-2">
-                  <div className="w-4 bg-blue-200 rounded-t h-[40%]" />
-                  <div className="w-4 bg-blue-300 rounded-t h-[70%]" />
+                  <div className="w-4 bg-primary/20 rounded-t h-[40%]" />
+                  <div className="w-4 bg-primary/40 rounded-t h-[70%]" />
                   <div className="w-4 bg-primary rounded-t h-[50%]" />
-                  <div className="w-4 bg-blue-400 rounded-t h-[90%]" />
-                  <div className="w-4 bg-blue-200 rounded-t h-[60%]" />
+                  <div className="w-4 bg-primary/80 rounded-t h-[90%]" />
+                  <div className="w-4 bg-primary/30 rounded-t h-[60%]" />
                 </div>
               </CardContent>
             </Card>

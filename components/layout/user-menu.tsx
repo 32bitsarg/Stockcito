@@ -26,11 +26,11 @@ interface UserMenuProps {
 function getRoleBadge(role: string) {
     switch (role) {
         case "admin":
-            return <Badge className="bg-purple-100 text-purple-700 text-xs">Admin</Badge>
+            return <Badge className="bg-primary/15 text-primary border-primary/20 text-xs">Admin</Badge>
         case "cashier":
-            return <Badge className="bg-blue-100 text-blue-700 text-xs">Cajero</Badge>
+            return <Badge variant="secondary" className="text-xs">Cajero</Badge>
         case "viewer":
-            return <Badge className="bg-gray-100 text-gray-700 text-xs">Visor</Badge>
+            return <Badge variant="outline" className="text-xs">Visor</Badge>
         default:
             return null
     }

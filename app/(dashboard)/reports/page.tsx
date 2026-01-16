@@ -48,7 +48,7 @@ export default async function ReportsPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                             <TrendingUp className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -72,7 +72,7 @@ export default async function ReportsPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-                            <ShoppingCart className="h-8 w-8 text-blue-600" />
+                            <ShoppingCart className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Ventas</p>
                                 <p className="text-2xl font-bold">{summary.sales.totalSales}</p>
@@ -98,7 +98,7 @@ export default async function ReportsPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-primary/80 flex items-center justify-center">
                             <BarChart3 className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -157,7 +157,7 @@ export default async function ReportsPage() {
                 <CardContent>
                     <div className="grid gap-4 md:grid-cols-4 mt-4">
                         <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-                            <Package className="h-8 w-8 text-blue-600" />
+                            <Package className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Productos</p>
                                 <p className="text-2xl font-bold">{summary.inventory.totalProducts}</p>
@@ -192,7 +192,7 @@ export default async function ReportsPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-primary/60 flex items-center justify-center">
                             <Users className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -210,7 +210,7 @@ export default async function ReportsPage() {
                     <div className="grid gap-4 md:grid-cols-2 mt-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-                                <Users className="h-8 w-8 text-blue-600" />
+                                <Users className="h-8 w-8 text-primary" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Total Clientes</p>
                                     <p className="text-2xl font-bold">{summary.clients.total}</p>
@@ -248,7 +248,7 @@ export default async function ReportsPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-primary/40 flex items-center justify-center">
                             <Users className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -265,7 +265,7 @@ export default async function ReportsPage() {
                 <CardContent>
                     <div className="grid gap-4 md:grid-cols-3 mt-4">
                         <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-                            <Users className="h-8 w-8 text-cyan-600" />
+                            <Users className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Empleados</p>
                                 <p className="text-2xl font-bold">Activos</p>
