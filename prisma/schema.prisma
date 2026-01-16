@@ -1,0 +1,717 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==========================================
+// ORGANIZATION & SUBSCRIPTION MODELS
+// ==========================================
+
+model Organization {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  slug                  String    @unique
+  email                 String    @unique
+  businessCode          String    @unique  // Código único para login de empleados (ej: KSC-4827-A3)
+  taxId                 String?   // CUIT/CUIL
+  phone                 String?
+  address               String?
+  logo                  String?   // URL o base64
+
+  // Subscription
+  plan                  String    @default("free") // free, premium
+  planStatus            String    @default("trial") // trial, active, cancelled, suspended, expired
+
+  // Trial tracking
+  trialStartedAt        DateTime?
+  trialEndsAt           DateTime?
+
+  // Payment tracking (MercadoPago)
+  mercadoPagoCustomerId String?   @unique
+  lastPaymentId         String?
+  lastPaymentDate       DateTime?
+  lastPaymentAmount     Decimal?
+
+  // Subscription dates
+  subscriptionStartedAt DateTime?
+  subscriptionEndsAt    DateTime?
+  lastVerifiedAt        DateTime? // Última verificación online (para Electron)
+
+  // Settings (JSON)
+  settings              String?   // JSON para configuración adicional
+  theme                 String    @default("default") // default, blue, green, orange, red
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  users                 User[]
+  products              Product[]
+  categories            Category[]
+  clients               Client[]
+  sales                 Sale[]
+  suppliers             Supplier[]
+  discounts             Discount[]
+  invoices              Invoice[]
+  creditNotes           CreditNote[]
+  auditLogs             AuditLog[]
+  usageMetrics          UsageMetric[]
+  subscriptionLogs      SubscriptionLog[]
+  
+  // Employee & Cash Management
+  roles                 Role[]
+  cashDrawers           CashDrawer[]
+  shifts                Shift[]
+  cashMovements         CashMovement[]
+  timeEntries           TimeEntry[]
+  managerOverrides      ManagerOverride[]
+  
+  // Restaurant features
+  tables                Table[]
+  
+  // Feature flags
+  features              OrganizationFeatures?
+}
+
+// ==========================================
+// TABLE MANAGEMENT (Restaurant Feature)
+// ==========================================
+
+model Table {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  number         Int           // Número de mesa (1, 2, 3...)
+  name           String?       // Nombre opcional ("Terraza 1", "VIP")
+  capacity       Int           @default(4)
+  status         String        @default("available") // available, occupied, reserved, cleaning
+  
+  // Posición en layout visual (grid)
+  positionX      Int           @default(0)
+  positionY      Int           @default(0)
+  shape          String        @default("square") // square, round, rectangle
+  
+  // Venta actual asignada
+  currentSaleId  Int?
+  
+  // Timestamps
+  occupiedAt     DateTime?     // Cuando se ocupó
+  reservedFor    DateTime?     // Si está reservada, para cuándo
+  reservedName   String?       // Nombre de la reserva
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  
+  @@unique([organizationId, number])
+  @@index([organizationId])
+  @@index([organizationId, status])
+}
+
+model UsageMetric {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Período de medición
+  periodStart    DateTime
+  periodEnd      DateTime
+
+  // Contadores
+  salesCount     Int      @default(0)
+  productsCount  Int      @default(0)
+  clientsCount   Int      @default(0)
+  usersCount     Int      @default(0)
+  invoicesCount  Int      @default(0)
+  creditNotesCount Int    @default(0)
+
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, periodStart])
+}
+
+model SubscriptionLog {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  event          String   // trial_started, trial_ended, subscription_created, upgraded, downgraded, cancelled, renewed, payment_received, payment_failed, expired
+  fromPlan       String?
+  toPlan         String?
+  amount         Decimal?
+  paymentMethod  String?  // mercadopago, manual
+  transactionId  String?
+  details        String?  // JSON con info adicional
+
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+}
+
+// ==========================================
+// CORE BUSINESS MODELS
+// ==========================================
+
+model Product {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  sku            String?
+  price          Decimal       // Precio neto (sin IVA)
+  cost           Decimal
+  stock          Int
+  minStock       Int           @default(0)
+  taxRate        Decimal       @default(21) // IVA % por defecto
+  categoryId     Int?
+  category       Category?     @relation(fields: [categoryId], references: [id])
+  supplierId     Int?
+  supplier       Supplier?     @relation(fields: [supplierId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  saleItems      SaleItem[]
+  discounts      Discount[]
+
+  @@index([organizationId])
+  @@index([sku])
+  @@index([organizationId, name])
+  @@index([organizationId, categoryId])
+  @@index([organizationId, stock])
+}
+
+model Category {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  products       Product[]
+  discounts      Discount[]
+
+  @@index([organizationId])
+}
+
+model Client {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  taxId          String?  
+  sales          Sale[]
+  createdAt      DateTime      @default(now())
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+}
+
+model Sale {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  date           DateTime      @default(now())
+  subtotal       Decimal       @default(0)
+  taxAmount      Decimal       @default(0)
+  discountAmount Decimal       @default(0)
+  total          Decimal
+  clientId       Int?
+  client         Client?       @relation(fields: [clientId], references: [id])
+  status         String        @default("completed") // completed, pending, cancelled, refunded
+  paymentMethod  String        @default("efectivo") // efectivo, tarjeta, transferencia, mercadopago
+  cancelReason   String?
+  refundedAt     DateTime?
+  items          SaleItem[]
+  userId         Int?
+  user           User?         @relation(fields: [userId], references: [id])
+  invoice        Invoice?
+  creditNotes    CreditNote[]
+  
+  // Kitchen Display fields
+  kitchenStatus    String?   @default("pending") // pending, preparing, ready, delivered
+  kitchenStartedAt DateTime?
+  kitchenReadyAt   DateTime?
+  
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId])
+  @@index([organizationId, date])
+  @@index([organizationId, status])
+  @@index([organizationId, clientId])
+  @@index([organizationId, paymentMethod])
+  @@index([organizationId, kitchenStatus])
+}
+
+model SaleItem {
+  id             Int      @id @default(autoincrement())
+  saleId         Int
+  sale           Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId      Int
+  product        Product  @relation(fields: [productId], references: [id])
+  quantity       Int
+  unitPrice      Decimal  // Precio neto por unidad (sin IVA)
+  taxRate        Decimal  @default(0)
+  taxAmount      Decimal  @default(0)
+  discountAmount Decimal  @default(0)
+  subtotal       Decimal
+
+  @@index([saleId])
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  email          String        @unique
+  password       String
+  role           String        @default("cashier") // owner, admin, manager, cashier, waiter, viewer
+  active         Boolean       @default(true)
+  
+  // PIN de acceso rápido (4-6 dígitos hasheados)
+  pin            String?
+  pinRequired    Boolean       @default(false)
+  
+  // Verificación de email
+  emailVerified           DateTime?   // Fecha de verificación (null = no verificado)
+  emailVerificationToken  String?     // Token para verificar email
+  emailVerificationExpires DateTime?  // Expiración del token
+  
+  // Bloqueo de cuenta por intentos fallidos
+  failedLoginAttempts Int?      @default(0)
+  lockedUntil         DateTime?
+  lastFailedLogin     DateTime?
+  
+  // Permisos editables (JSON con estructura de permisos)
+  permissions    String?       // JSON: ver modelo UserPermissions
+  
+  // Límites específicos del usuario
+  maxDiscountPct Decimal       @default(10)   // Máximo descuento permitido (%)
+  
+  // Comisiones (para vendedores retail)
+  commissionRate Decimal?      // Porcentaje de comisión
+  
+  // Relations
+  sales               Sale[]
+  auditLogs           AuditLog[]
+  timeEntries         TimeEntry[]
+  cashMovements       CashMovement[]
+  currentDrawer       CashDrawer?     @relation("CurrentCashier")
+  overridesRequested  ManagerOverride[] @relation("OverrideRequestedBy")
+  overridesApproved   ManagerOverride[] @relation("OverrideApprovedBy")
+  
+  // Notifications
+  notificationSettings NotificationSetting?
+  pushSubscriptions    PushSubscription[]
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId])
+}
+
+// ==========================================
+// ROLES & PERMISSIONS SYSTEM
+// ==========================================
+
+model Role {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String        // Nombre del rol personalizado
+  code           String        // Código único: owner, admin, manager, cashier, waiter, viewer, custom_*
+  description    String?
+  isSystem       Boolean       @default(false) // Roles predefinidos no editables
+  permissions    String        // JSON con permisos
+  color          String        @default("#6366f1") // Color para badges
+  icon           String        @default("user") // Icono del rol
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+// ==========================================
+// CASH DRAWER & SHIFT MANAGEMENT
+// ==========================================
+
+model CashDrawer {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  name           String        // "Caja 1", "Caja Principal"
+  terminalId     String?       // Identificador único del terminal/dispositivo
+  
+  // Estado actual
+  status         String        @default("closed") // closed, open, locked
+  currentUserId  Int?          @unique
+  currentUser    User?         @relation("CurrentCashier", fields: [currentUserId], references: [id])
+  
+  // Usuario asignado (restricción fija de quién puede usar esta caja)
+  assignedUserId Int?
+  
+  // Montos
+  openingAmount  Decimal?      // Monto inicial al abrir
+  currentAmount  Decimal?      // Monto actual calculado
+  expectedAmount Decimal?      // Monto esperado según ventas
+  
+  // Tracking
+  openedAt       DateTime?
+  lastActivityAt DateTime?
+  
+  // Relations
+  movements      CashMovement[]
+  shifts         Shift[]
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId])
+  @@index([terminalId])
+  @@index([assignedUserId])
+}
+
+model Shift {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  drawerId       Int
+  drawer         CashDrawer    @relation(fields: [drawerId], references: [id], onDelete: Cascade)
+  userId         Int
+  
+  // Tiempos
+  startedAt      DateTime      @default(now())
+  endedAt        DateTime?
+  
+  // Montos del turno
+  openingAmount  Decimal       // Monto inicial
+  closingAmount  Decimal?      // Monto al cerrar (contado)
+  expectedAmount Decimal?      // Monto esperado según sistema
+  difference     Decimal?      // Diferencia (+ sobrante, - faltante)
+  
+  // Totales del turno
+  totalSales     Decimal       @default(0)
+  totalCash      Decimal       @default(0)
+  totalCard      Decimal       @default(0)
+  totalOther     Decimal       @default(0)
+  totalRefunds   Decimal       @default(0)
+  salesCount     Int           @default(0)
+  refundCount    Int           @default(0)
+  
+  // Estado
+  status         String        @default("active") // active, closed, reviewed
+  notes          String?
+  reviewedById   Int?          // Gerente que revisó el cierre
+  
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, startedAt])
+  @@index([drawerId])
+  @@index([userId])
+}
+
+model CashMovement {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  drawerId       Int
+  drawer         CashDrawer    @relation(fields: [drawerId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id])
+  
+  // Tipo de movimiento
+  type           String        // open, close, sale_cash, sale_card, refund, cash_in, cash_out, count, adjustment
+  
+  // Montos
+  amount         Decimal
+  balanceBefore  Decimal?
+  balanceAfter   Decimal?
+  
+  // Referencia a venta si aplica
+  saleId         Int?
+  
+  // Para arqueos
+  expectedAmount Decimal?
+  actualAmount   Decimal?
+  difference     Decimal?
+  
+  // Detalles
+  paymentMethod  String?       // efectivo, tarjeta, transferencia, etc.
+  description    String?
+  
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([drawerId])
+  @@index([userId])
+}
+
+// ==========================================
+// TIME & ATTENDANCE (Clock In/Out)
+// ==========================================
+
+model TimeEntry {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id])
+  
+  // Tiempos
+  clockIn        DateTime      @default(now())
+  clockOut       DateTime?
+  
+  // Breaks/pausas
+  breakMinutes   Int           @default(0)
+  
+  // Cálculos
+  totalMinutes   Int?          // Calculado al hacer clock out
+  overtimeMinutes Int?         // Minutos extra si aplica
+  
+  // Estado
+  status         String        @default("active") // active, completed, edited, approved
+  
+  // Ubicación (opcional)
+  clockInLocation  String?     // JSON con lat/lng
+  clockOutLocation String?
+  
+  // Notas y ediciones
+  notes          String?
+  editedById     Int?          // Si fue editado por un gerente
+  editReason     String?
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId, clockIn])
+  @@index([userId])
+}
+
+// ==========================================
+// MANAGER OVERRIDE SYSTEM
+// ==========================================
+
+model ManagerOverride {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Quien solicitó
+  requestedById  Int
+  requestedBy    User          @relation("OverrideRequestedBy", fields: [requestedById], references: [id])
+  
+  // Quien autorizó
+  approvedById   Int
+  approvedBy     User          @relation("OverrideApprovedBy", fields: [approvedById], references: [id])
+  
+  // Qué acción se autorizó
+  action         String        // void_sale, refund, discount_override, price_override, open_drawer, delete_item, edit_closed_sale
+  
+  // Contexto
+  entityType     String?       // sale, product, cash_drawer
+  entityId       Int?
+  
+  // Detalles de la acción
+  details        String?       // JSON con información adicional
+  originalValue  String?       // Valor original (ej: precio anterior)
+  newValue       String?       // Nuevo valor (ej: precio con descuento)
+  
+  // Resultado
+  status         String        @default("approved") // approved, used, expired
+  usedAt         DateTime?
+  expiresAt      DateTime?     // Override expira si no se usa
+  
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([requestedById])
+  @@index([approvedById])
+}
+
+model Supplier {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  taxId          String?
+  website        String?
+  notes          String?
+  products       Product[]
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId])
+}
+
+model Discount {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  type           String        // percentage, fixed
+  value          Decimal
+  minPurchase    Decimal?
+  maxDiscount    Decimal?
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean       @default(true)
+  productId      Int?
+  product        Product?      @relation(fields: [productId], references: [id])
+  categoryId     Int?
+  category       Category?     @relation(fields: [categoryId], references: [id])
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId])
+}
+
+model Invoice {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  saleId         Int           @unique
+  sale           Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  type           String        // factura A, B, C, etc.
+  pointOfSale    Int?
+  number         Int?
+  cae            String?
+  caeExpiration  DateTime?
+  issuedAt       DateTime      @default(now())
+  total          Decimal
+
+  @@index([organizationId])
+}
+
+model CreditNote {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  saleId         Int
+  sale           Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  type           String        // partial, full
+  reason         String
+  amount         Decimal
+  items          String?       // Store refunded items as JSON string
+  issuedAt       DateTime      @default(now())
+
+  @@index([organizationId])
+}
+
+model AuditLog {
+  id             Int           @id @default(autoincrement())
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         Int?
+  user           User?         @relation(fields: [userId], references: [id])
+  action         String        // create, update, delete, login, logout, sale, refund
+  entity         String        // product, sale, client, user, etc.
+  entityId       Int?
+  details        String?
+  @@index([organizationId, action])
+  @@index([organizationId, entity])
+  @@index([userId, createdAt])
+  ip             String?
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+}
+
+// Temporary codes storage (verification codes, confirmation codes, etc.)
+model TemporaryCode {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  type           String        // business_code_regeneration, email_verification, password_reset
+  code           String
+  data           String?       // JSON for additional data (e.g., oldCode for regeneration)
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime      @default(now())
+
+  @@unique([organizationId, type])
+  @@index([expiresAt])
+}
+
+// ==========================================
+// NOTIFICATION SETTINGS
+// ==========================================
+
+model NotificationSetting {
+  id             Int    @id @default(autoincrement())
+  userId         Int    @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Global toggles
+  pushEnabled    Boolean @default(true)
+  emailEnabled   Boolean @default(true)
+  
+  // Alert types
+  lowStock           Boolean @default(true)
+  lowStockThreshold  Int     @default(5)  // Alert when stock <= this value
+  
+  dailySummary       Boolean @default(false)  // Daily sales summary email
+  dailySummaryTime   String  @default("20:00") // Time to send (HH:mm)
+  
+  newSale            Boolean @default(false)  // Notify on every sale
+  highValueSale      Boolean @default(true)   // Notify on high value sales
+  highValueThreshold Decimal @default(10000)  // Threshold for high value
+  
+  cashDrawerAlerts   Boolean @default(true)   // Cash drawer open/close
+  newEmployee        Boolean @default(true)   // New employee registered
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model PushSubscription {
+  id             Int    @id @default(autoincrement())
+  userId         Int
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  endpoint       String
+  p256dh         String  // Public key
+  auth           String  // Auth secret
+  
+  userAgent      String?
+  createdAt      DateTime @default(now())
+  
+  @@index([userId])
+}
+
+// ==========================================
+// ORGANIZATION FEATURE FLAGS
+// ==========================================
+
+model OrganizationFeatures {
+  id             Int           @id @default(autoincrement())
+  organizationId Int           @unique
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Restaurant features
+  kitchenDisplay   Boolean @default(false)
+  tableManagement  Boolean @default(false)
+  
+  // Retail features
+  barcodeScan      Boolean @default(true)
+  
+  // Common features
+  offlineMode      Boolean @default(true)
+  alertsEnabled    Boolean @default(true)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+

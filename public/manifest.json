@@ -1,0 +1,49 @@
+{
+    "name": "Stockcito - Gestión de Inventario y Ventas",
+    "short_name": "Stockcito",
+    "description": "Sistema de gestión de inventario y punto de venta para pequeños comercios",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#7c3aed",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "/icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": ["business", "productivity"],
+    "lang": "es-AR",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+    "shortcuts": [
+        {
+            "name": "Nueva Venta",
+            "short_name": "Venta",
+            "description": "Iniciar una nueva venta",
+            "url": "/sales/new"
+        },
+        {
+            "name": "Inventario",
+            "short_name": "Stock",
+            "description": "Ver inventario",
+            "url": "/inventory"
+        },
+        {
+            "name": "Reportes",
+            "short_name": "Reportes",
+            "description": "Ver reportes",
+            "url": "/reports"
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.stockcito.app",
+  "productName": "Stockcito",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    "electron/**/*",
+    "public/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": ".next/standalone/",
+      "to": "standalone/"
+    },
+    {
+      "from": ".next/static",
+      "to": "standalone/.next/static"
+    },
+    {
+      "from": "public",
+      "to": "standalone/public"
+    },
+    {
+      "from": "prisma",
+      "to": "standalone/prisma"
+    }
+  ],
+  "extraMetadata": {
+    "homepage": "https://stockcito.com",
+    "author": {
+      "name": "Stockcito Team",
+      "email": "contacto@stockcito.com"
+    }
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64"]
+      }
+    ],
+    "category": "Office",
+    "maintainer": "Stockcito Team <contacto@stockcito.com>",
+    "synopsis": "Sistema POS e Inventario",
+    "description": "Aplicación de punto de venta e inventario para pequeños negocios. Incluye gestión de productos, clientes, ventas y reportes."
+  }
+}
