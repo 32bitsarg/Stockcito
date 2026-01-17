@@ -112,7 +112,7 @@ export async function createSubscription(
   organizationName: string,
   email: string,
   planType: 'monthly' | 'yearly' = 'monthly'
-): Promise<{ id: string; init_point: string } | null> {
+): Promise<{ id: string; init_point: string; error?: string } | null> {
   if (!MERCADOPAGO_ACCESS_TOKEN) {
     paymentLogger.warn('MercadoPago access token not configured')
     return null
@@ -129,39 +129,66 @@ export async function createSubscription(
   const externalReference = `org_${organizationId}_${Date.now()}`
 
   try {
+    const requestBody = {
+      reason: description,
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: 'months',
+        transaction_amount: price,
+        currency_id: 'ARS',
+        ...(planType === 'yearly' && { frequency: 12 })
+      },
+      payer_email: email,
+      back_url: `${APP_URL}/subscription/success`,
+      external_reference: externalReference,
+      status: 'pending'
+    }
+
+    paymentLogger.info('Creating subscription with:', {
+      organizationId,
+      email,
+      price,
+      planType,
+      back_url: `${APP_URL}/subscription/success`
+    })
+
     const response = await fetch('https://api.mercadopago.com/preapproval', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        reason: description,
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: planType === 'yearly' ? 'months' : 'months', // Start with months for both, adjust logic if MP supports 'years'
-          transaction_amount: price,
-          currency_id: 'ARS',
-          ...(planType === 'yearly' && { frequency: 12 }) // Override for yearly
-        },
-        payer_email: email,
-        back_url: `${APP_URL}/subscription/success`,
-        auto_return: 'approved',
-        external_reference: externalReference,
-        status: 'pending'
-      })
+      body: JSON.stringify(requestBody)
     })
 
+    const responseText = await response.text()
+
     if (!response.ok) {
-      const errorData = await response.text()
-      paymentLogger.error('MercadoPago subscription error', new Error(errorData))
+      paymentLogger.error('MercadoPago subscription error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText
+      })
+      // Try to parse error message for better debugging
+      try {
+        const errorJson = JSON.parse(responseText)
+        console.error('[MercadoPago Error]', JSON.stringify(errorJson, null, 2))
+      } catch {
+        console.error('[MercadoPago Error]', responseText)
+      }
       return null
     }
 
-    const data = await response.json()
+    const data = JSON.parse(responseText)
+
+    if (!data.init_point) {
+      paymentLogger.error('MercadoPago subscription missing init_point:', data)
+      return null
+    }
+
     return {
       id: data.id,
-      init_point: data.init_point // Subscriptions usually return init_point
+      init_point: data.init_point
     }
   } catch (error) {
     paymentLogger.error('MercadoPago subscription creation error:', error)

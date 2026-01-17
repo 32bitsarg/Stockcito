@@ -58,7 +58,10 @@ export async function createCheckoutSession(
       )
 
       if (!subscription) {
-        return { success: false, error: 'Error al crear la suscripción' }
+        return {
+          success: false,
+          error: `Error al crear la suscripción. Verifica que el email (${org.email}) sea válido y que MercadoPago esté correctamente configurado.`
+        }
       }
       checkoutUrl = subscription.init_point
     } else {
