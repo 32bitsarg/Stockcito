@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { RegisterForm } from '@/components/auth/register-form'
 import { AuthHero } from '@/components/auth/auth-hero'
 
-export default function RegisterPage() {
+export default function RegisterPage({ searchParams }: { searchParams: { mode?: string } }) {
   return (
     <div className="h-screen w-full flex overflow-hidden">
       {/* Left side - Info with animations */}
@@ -23,7 +23,10 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             ¿Ya tenés cuenta?{' '}
-            <Link href="/login" className="font-medium text-primary hover:underline transition-colors">
+            <Link
+              href={`/login${searchParams.mode ? `?mode=${searchParams.mode}` : ''}`}
+              className="font-medium text-primary hover:underline transition-colors"
+            >
               Iniciar sesión
             </Link>
           </p>
