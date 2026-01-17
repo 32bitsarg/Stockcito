@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { requireAuth, requireRole } from './auth-actions'
 import {
   createPaymentPreference,
-  createSubscription,
+  createSubscriptionPlan,
   isMercadoPagoConfigured,
   parseExternalReference,
   getPaymentInfo
@@ -23,7 +23,7 @@ export interface CheckoutResult {
 // Create checkout session for subscription
 export async function createCheckoutSession(
   planType: 'monthly' | 'yearly' = 'monthly',
-  isSubscription: boolean = true
+  useSubscription: boolean = true
 ): Promise<CheckoutResult> {
   try {
     const session = await requireRole(['admin', 'owner'])
@@ -45,27 +45,34 @@ export async function createCheckoutSession(
     }
 
     const org = user.organization
-
     let checkoutUrl: string | undefined
 
-    if (isSubscription) {
-      // Create recurring subscription (preapproval)
-      const subscription = await createSubscription(
-        org.id,
-        org.name,
-        org.email,
-        planType
-      )
+    if (useSubscription) {
+      // Try subscription plan first (recurring payments)
+      paymentLogger.info('Attempting to create subscription plan...')
+      const subscriptionPlan = await createSubscriptionPlan(planType)
 
-      if (!subscription) {
-        return {
-          success: false,
-          error: `Error al crear la suscripción. Verifica que el email (${org.email}) sea válido y que MercadoPago esté correctamente configurado.`
+      if (subscriptionPlan?.init_point) {
+        checkoutUrl = subscriptionPlan.init_point
+        paymentLogger.info('Subscription plan created successfully')
+      } else {
+        // Fallback to one-time payment if subscription fails
+        paymentLogger.warn('Subscription plan failed, falling back to one-time payment')
+        const preference = await createPaymentPreference(
+          org.id,
+          org.name,
+          org.email,
+          planType
+        )
+
+        if (preference) {
+          checkoutUrl = process.env.NODE_ENV === 'production'
+            ? preference.init_point
+            : preference.sandbox_init_point
         }
       }
-      checkoutUrl = subscription.init_point
     } else {
-      // Create one-time payment preference
+      // Use one-time payment directly
       const preference = await createPaymentPreference(
         org.id,
         org.name,
@@ -73,14 +80,18 @@ export async function createCheckoutSession(
         planType
       )
 
-      if (!preference) {
-        return { success: false, error: 'Error al crear la preferencia de pago' }
+      if (preference) {
+        checkoutUrl = process.env.NODE_ENV === 'production'
+          ? preference.init_point
+          : preference.sandbox_init_point
       }
+    }
 
-      // Use sandbox URL in development, production URL otherwise
-      checkoutUrl = process.env.NODE_ENV === 'production'
-        ? preference.init_point
-        : preference.sandbox_init_point
+    if (!checkoutUrl) {
+      return {
+        success: false,
+        error: `Error al crear el pago. Verifica que el email (${org.email}) sea válido.`
+      }
     }
 
     return {

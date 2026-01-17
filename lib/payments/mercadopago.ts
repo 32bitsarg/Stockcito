@@ -104,6 +104,80 @@ export async function createPaymentPreference(
   }
 }
 
+// Create a subscription plan (preapproval_plan) - New MercadoPago flow
+export async function createSubscriptionPlan(
+  planType: 'monthly' | 'yearly' = 'monthly'
+): Promise<{ id: string; init_point: string } | null> {
+  if (!MERCADOPAGO_ACCESS_TOKEN) {
+    paymentLogger.warn('MercadoPago access token not configured')
+    return null
+  }
+
+  const price = planType === 'yearly'
+    ? PLAN_PRICES.premium.yearly
+    : PLAN_PRICES.premium.monthly
+
+  const description = planType === 'yearly'
+    ? 'Stockcito Premium - Suscripción Anual'
+    : 'Stockcito Premium - Suscripción Mensual'
+
+  try {
+    const requestBody = {
+      reason: description,
+      auto_recurring: {
+        frequency: planType === 'yearly' ? 12 : 1,
+        frequency_type: 'months',
+        billing_day: new Date().getDate(), // Billing on same day of month
+        billing_day_proportional: true,
+        transaction_amount: price,
+        currency_id: 'ARS'
+      },
+      back_url: `${APP_URL}/subscription/success`,
+      payment_methods_allowed: {
+        payment_types: [{ id: 'credit_card' }, { id: 'debit_card' }]
+      }
+    }
+
+    paymentLogger.info('Creating subscription plan with:', requestBody)
+
+    const response = await fetch('https://api.mercadopago.com/preapproval_plan', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    const responseText = await response.text()
+
+    if (!response.ok) {
+      paymentLogger.error('MercadoPago preapproval_plan error:', {
+        status: response.status,
+        body: responseText
+      })
+      console.error('[MercadoPago Plan Error]', responseText)
+      return null
+    }
+
+    const data = JSON.parse(responseText)
+
+    if (!data.init_point) {
+      paymentLogger.error('MercadoPago plan missing init_point:', data)
+      return null
+    }
+
+    paymentLogger.info('Subscription plan created:', { id: data.id, init_point: data.init_point })
+
+    return {
+      id: data.id,
+      init_point: data.init_point
+    }
+  } catch (error) {
+    paymentLogger.error('MercadoPago plan creation error:', error)
+    return null
+  }
+}
 
 
 // Create a subscription (preapproval)
