@@ -2,9 +2,9 @@
 
 export const PLAN_LIMITS = {
   free: {
-    maxProducts: 500,
+    maxProducts: 100,
     maxClients: 100,
-    maxUsers: 6, // 1 Owner + 5 Employees
+    maxUsers: 5, // Up to 5 employees
     maxInvoicesPerMonth: 50,
     maxCreditNotesPerMonth: 10,
     reportDaysLimit: 7,

@@ -44,7 +44,7 @@ export interface SubscriptionInfo {
 // Get current subscription info with usage
 export async function getSubscriptionInfo(): Promise<SubscriptionInfo | null> {
   const session = await requireAuth()
-  
+
   const user = await db.user.findUnique({
     where: { id: session.id },
     include: { organization: true }
@@ -120,7 +120,7 @@ export async function canPerformAction(
   limitType: 'products' | 'clients' | 'users' | 'invoices' | 'creditNotes'
 ): Promise<{ allowed: boolean; message?: string }> {
   const session = await requireAuth()
-  
+
   const user = await db.user.findUnique({
     where: { id: session.id },
     select: { organizationId: true }
@@ -137,7 +137,7 @@ export async function canPerformAction(
 // Check if user has access to a feature
 export async function hasFeatureAccess(feature: PlanFeature): Promise<boolean> {
   const session = await requireAuth()
-  
+
   const user = await db.user.findUnique({
     where: { id: session.id },
     select: { organizationId: true }
@@ -155,7 +155,7 @@ export async function hasFeatureAccess(feature: PlanFeature): Promise<boolean> {
 export async function cancelUserSubscription(): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireAuth()
-    
+
     const user = await db.user.findUnique({
       where: { id: session.id },
       include: { organization: true }
@@ -172,7 +172,7 @@ export async function cancelUserSubscription(): Promise<{ success: boolean; erro
 
     await cancelSubscription(user.organization.id)
     revalidatePath('/subscription')
-    
+
     return { success: true }
   } catch (error) {
     logError('Cancel subscription error:', error)
@@ -183,7 +183,7 @@ export async function cancelUserSubscription(): Promise<{ success: boolean; erro
 // Get subscription logs
 export async function getSubscriptionLogs(limit: number = 20) {
   const session = await requireAuth()
-  
+
   const user = await db.user.findUnique({
     where: { id: session.id },
     select: { organizationId: true, role: true }
@@ -204,7 +204,7 @@ export async function getSubscriptionLogs(limit: number = 20) {
 export async function startFreeTrial(): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireAuth()
-    
+
     const user = await db.user.findUnique({
       where: { id: session.id },
       include: { organization: true }
@@ -222,10 +222,45 @@ export async function startFreeTrial(): Promise<{ success: boolean; error?: stri
     await startTrial(user.organization.id)
     revalidatePath('/subscription')
     revalidatePath('/dashboard')
-    
+
     return { success: true }
   } catch (error) {
     logError('Start trial error:', error)
     return { success: false, error: 'Error al iniciar el período de prueba' }
+  }
+}
+
+// Get trial days remaining (for sidebar display)
+export async function getTrialDaysRemaining(): Promise<number | null> {
+  try {
+    const session = await requireAuth()
+
+    const user = await db.user.findUnique({
+      where: { id: session.id },
+      include: {
+        organization: {
+          select: {
+            planStatus: true,
+            trialEndsAt: true
+          }
+        }
+      }
+    })
+
+    if (!user?.organization) {
+      return null
+    }
+
+    const org = user.organization
+
+    if (org.planStatus !== 'trial' || !org.trialEndsAt) {
+      return null
+    }
+
+    const now = new Date()
+    const diff = new Date(org.trialEndsAt).getTime() - now.getTime()
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
+  } catch {
+    return null
   }
 }

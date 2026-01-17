@@ -3,6 +3,7 @@ import { Package, Crown, CreditCard } from 'lucide-react'
 import { getLowStockProducts } from '@/actions/dashboard-actions'
 import { getSession } from '@/actions/auth-actions'
 import { getOrganizationFeatures } from '@/actions/notification-actions'
+import { getTrialDaysRemaining } from '@/actions/subscription-actions'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { SidebarLinks, SidebarLink } from './sidebar-link'
@@ -35,17 +36,18 @@ const adminRoutes = [
 ]
 
 export async function Sidebar() {
-    const [lowStock, session, features] = await Promise.all([
+    const [lowStock, session, features, trialDays] = await Promise.all([
         getLowStockProducts(),
         getSession(),
-        getOrganizationFeatures()
+        getOrganizationFeatures(),
+        getTrialDaysRemaining()
     ])
     const lowCount = lowStock.length
     // Owner and admin have access to admin routes
     const isAdmin = session?.role === 'admin' || session?.role === 'owner'
     const plan = session?.plan || 'free'
     const isPremium = plan === 'premium'
-    const isTrialing = session?.planStatus === 'trialing'
+    const isTrialing = session?.planStatus === 'trial'
 
     // Filter restaurant routes based on enabled features
     const activeRestaurantRoutes = restaurantRoutes.filter(route => {
@@ -73,20 +75,28 @@ export async function Sidebar() {
                         href="/subscription"
                         className={cn(
                             "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                            isPremium
+                            isPremium && !isTrialing
                                 ? "bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-800 dark:text-amber-200 hover:from-amber-200 hover:to-orange-200 dark:hover:from-amber-900/50 dark:hover:to-orange-900/50"
-                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                : isTrialing
+                                    ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 text-violet-800 dark:text-violet-200 hover:from-violet-200 hover:to-purple-200"
+                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
                         )}
                     >
-                        {isPremium ? (
+                        {isPremium && !isTrialing ? (
                             <>
                                 <Crown className="h-4 w-4" />
                                 <span>Premium</span>
-                                {isTrialing && (
-                                    <Badge variant="secondary" className="text-[10px] ml-auto">
-                                        Trial
-                                    </Badge>
-                                )}
+                            </>
+                        ) : isTrialing ? (
+                            <>
+                                <Crown className="h-4 w-4" />
+                                <div className="flex flex-col">
+                                    <span>Prueba Gratis</span>
+                                    <span className="text-[10px] opacity-75">Premium activo</span>
+                                </div>
+                                <Badge variant="secondary" className="text-[10px] ml-auto bg-violet-200 dark:bg-violet-800 text-violet-800 dark:text-violet-200">
+                                    {trialDays !== null ? `${trialDays}d` : 'Trial'}
+                                </Badge>
                             </>
                         ) : (
                             <>

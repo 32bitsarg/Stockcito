@@ -26,7 +26,7 @@ export async function createCheckoutSession(
   isSubscription: boolean = true
 ): Promise<CheckoutResult> {
   try {
-    const session = await requireRole(['admin'])
+    const session = await requireRole(['admin', 'owner'])
 
     if (!isMercadoPagoConfigured()) {
       return {
@@ -87,6 +87,15 @@ export async function createCheckoutSession(
 
 
   } catch (error) {
+    // Check if it's an authorization error
+    if (error instanceof Error) {
+      if (error.message === 'No autenticado') {
+        return { success: false, error: 'Debes iniciar sesión para continuar' }
+      }
+      if (error.message === 'No autorizado') {
+        return { success: false, error: 'Solo el dueño o administrador pueden realizar esta acción' }
+      }
+    }
     paymentLogger.error('Create checkout session error', error)
     return { success: false, error: 'Error al iniciar el proceso de pago' }
   }

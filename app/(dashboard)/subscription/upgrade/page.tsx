@@ -34,17 +34,13 @@ const PREMIUM_FEATURES = [
 ]
 
 const FREE_LIMITS = [
-  { name: "Productos", value: "500" },
-  { name: "Clientes", value: "100" },
-  { name: "Usuarios", value: "2" },
-  { name: "Facturas/mes", value: "50" },
+  { name: "Productos", value: "100" },
+  { name: "Empleados", value: "5" },
 ]
 
 const PREMIUM_LIMITS = [
   { name: "Productos", value: "Ilimitados" },
-  { name: "Clientes", value: "Ilimitados" },
-  { name: "Usuarios", value: "10" },
-  { name: "Facturas/mes", value: "Ilimitadas" },
+  { name: "Usuarios", value: "Ilimitados" },
 ]
 
 export default function UpgradePage() {
@@ -59,15 +55,20 @@ export default function UpgradePage() {
   const handleUpgrade = async () => {
     try {
       setLoading(true)
+      console.log('Starting checkout session...')
       const result = await createCheckoutSession("monthly")
+      console.log('Checkout result:', result)
 
       if (result.success && result.checkoutUrl) {
         // Redirect to MercadoPago checkout
+        console.log('Redirecting to:', result.checkoutUrl)
         window.location.href = result.checkoutUrl
       } else {
+        console.error('Checkout error:', result.error)
         toast.error(result.error || "Error al iniciar el pago")
       }
-    } catch {
+    } catch (error) {
+      console.error('Checkout exception:', error)
       toast.error("Error al procesar la solicitud")
     } finally {
       setLoading(false)
@@ -147,8 +148,8 @@ export default function UpgradePage() {
         <PlanCard
           name="Premium"
           description="Para negocios en crecimiento"
-          price="$4.999"
-          priceYearly="$49.990"
+          price="$10.000"
+          priceYearly="$100.000"
           features={PREMIUM_FEATURES}
           limits={PREMIUM_LIMITS}
           popular
