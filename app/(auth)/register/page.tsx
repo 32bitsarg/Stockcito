@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { RegisterForm } from '@/components/auth/register-form'
 import { AuthHero } from '@/components/auth/auth-hero'
+import { Loader2 } from 'lucide-react'
 
 export default function RegisterPage({ searchParams }: { searchParams: { mode?: string } }) {
   return (
@@ -19,7 +21,9 @@ export default function RegisterPage({ searchParams }: { searchParams: { mode?: 
             <p className="text-muted-foreground text-sm">Registrate para usar Stockcito gratis</p>
           </div>
 
-          <RegisterForm />
+          <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+            <RegisterForm />
+          </Suspense>
 
           <p className="text-center text-sm text-muted-foreground">
             ¿Ya tenés cuenta?{' '}

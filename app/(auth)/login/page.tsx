@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { LoginForm } from '@/components/auth/login-form'
 import { AuthHero } from '@/components/auth/auth-hero'
 import { getCSRFToken } from '@/lib/security/csrf'
+import { Loader2 } from 'lucide-react'
 
 export default async function LoginPage() {
   const csrfToken = await getCSRFToken()
@@ -16,7 +18,9 @@ export default async function LoginPage() {
             <p className="text-muted-foreground text-sm">Ingresá tus datos para acceder</p>
           </div>
 
-          <LoginForm csrfToken={csrfToken} />
+          <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+            <LoginForm csrfToken={csrfToken} />
+          </Suspense>
 
           <p className="text-center text-sm text-muted-foreground">
             ¿No tenés cuenta?{' '}
