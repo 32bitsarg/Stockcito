@@ -20,7 +20,7 @@ export type OrganizationData = z.infer<typeof organizationSchema>
 // Get current user's organization
 export async function getCurrentOrganization() {
   const session = await requireAuth()
-  
+
   const user = await db.user.findUnique({
     where: { id: session.id },
     include: {
@@ -39,6 +39,7 @@ export async function getCurrentOrganization() {
           theme: true,
           trialEndsAt: true,
           subscriptionEndsAt: true,
+          mercadoPagoCustomerId: true,
           createdAt: true,
           _count: {
             select: {
@@ -60,7 +61,7 @@ export async function getCurrentOrganization() {
 export async function updateOrganization(data: OrganizationData): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireRole(['admin'])
-    
+
     const user = await db.user.findUnique({
       where: { id: session.id },
       select: { organizationId: true }
@@ -103,7 +104,7 @@ export async function updateOrganization(data: OrganizationData): Promise<{ succ
 
     revalidatePath('/organization')
     revalidatePath('/profile')
-    
+
     return { success: true }
   } catch (error) {
     logError('Update organization error:', error)
@@ -115,7 +116,7 @@ export async function updateOrganization(data: OrganizationData): Promise<{ succ
 export async function updateOrganizationTheme(theme: string): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireAuth()
-    
+
     const user = await db.user.findUnique({
       where: { id: session.id },
       include: { organization: true }
@@ -142,7 +143,7 @@ export async function updateOrganizationTheme(theme: string): Promise<{ success:
     })
 
     revalidatePath('/')
-    
+
     return { success: true }
   } catch (error) {
     logError('Update theme error:', error)
@@ -153,7 +154,7 @@ export async function updateOrganizationTheme(theme: string): Promise<{ success:
 // Get organization stats
 export async function getOrganizationStats() {
   const session = await requireAuth()
-  
+
   const user = await db.user.findUnique({
     where: { id: session.id },
     select: { organizationId: true }
@@ -220,7 +221,7 @@ export async function getOrganizationStats() {
     salesLastMonth,
     revenueThisMonth: Number(revenueThisMonth._sum.total || 0),
     revenueLastMonth: Number(revenueLastMonth._sum.total || 0),
-    salesGrowth: salesLastMonth > 0 
+    salesGrowth: salesLastMonth > 0
       ? Math.round(((salesThisMonth - salesLastMonth) / salesLastMonth) * 100)
       : 0,
     revenueGrowth: Number(revenueLastMonth._sum.total || 0) > 0

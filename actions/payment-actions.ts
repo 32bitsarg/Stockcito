@@ -3,8 +3,9 @@
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { requireAuth, requireRole } from './auth-actions'
-import { 
-  createPaymentPreference, 
+import {
+  createPaymentPreference,
+  createSubscription,
   isMercadoPagoConfigured,
   parseExternalReference,
   getPaymentInfo
@@ -21,15 +22,16 @@ export interface CheckoutResult {
 
 // Create checkout session for subscription
 export async function createCheckoutSession(
-  planType: 'monthly' | 'yearly' = 'monthly'
+  planType: 'monthly' | 'yearly' = 'monthly',
+  isSubscription: boolean = true
 ): Promise<CheckoutResult> {
   try {
     const session = await requireRole(['admin'])
 
     if (!isMercadoPagoConfigured()) {
-      return { 
-        success: false, 
-        error: 'El sistema de pagos no está configurado. Contacta al soporte.' 
+      return {
+        success: false,
+        error: 'El sistema de pagos no está configurado. Contacta al soporte.'
       }
     }
 
@@ -44,27 +46,46 @@ export async function createCheckoutSession(
 
     const org = user.organization
 
-    // Create payment preference
-    const preference = await createPaymentPreference(
-      org.id,
-      org.name,
-      org.email,
-      planType
-    )
+    let checkoutUrl: string | undefined
 
-    if (!preference) {
-      return { success: false, error: 'Error al crear la preferencia de pago' }
+    if (isSubscription) {
+      // Create recurring subscription (preapproval)
+      const subscription = await createSubscription(
+        org.id,
+        org.name,
+        org.email,
+        planType
+      )
+
+      if (!subscription) {
+        return { success: false, error: 'Error al crear la suscripción' }
+      }
+      checkoutUrl = subscription.init_point
+    } else {
+      // Create one-time payment preference
+      const preference = await createPaymentPreference(
+        org.id,
+        org.name,
+        org.email,
+        planType
+      )
+
+      if (!preference) {
+        return { success: false, error: 'Error al crear la preferencia de pago' }
+      }
+
+      // Use sandbox URL in development, production URL otherwise
+      checkoutUrl = process.env.NODE_ENV === 'production'
+        ? preference.init_point
+        : preference.sandbox_init_point
     }
-
-    // Use sandbox URL in development, production URL otherwise
-    const checkoutUrl = process.env.NODE_ENV === 'production'
-      ? preference.init_point
-      : preference.sandbox_init_point
 
     return {
       success: true,
       checkoutUrl
     }
+
+
   } catch (error) {
     paymentLogger.error('Create checkout session error', error)
     return { success: false, error: 'Error al iniciar el proceso de pago' }

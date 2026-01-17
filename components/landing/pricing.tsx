@@ -122,9 +122,16 @@ export function LandingPricing() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full h-11" variant={plan.variant} asChild>
-                    <Link href={plan.href}>{plan.cta}</Link>
-                  </Button>
+                  <div className="flex flex-col gap-3 w-full">
+                    <Button className="w-full h-11 text-base font-medium shadow-sm transition-all hover:scale-[1.02]" variant={plan.variant} asChild>
+                      <Link href={plan.href}>{plan.cta}</Link>
+                    </Button>
+                    {plan.name === 'Pro' && (
+                      <Button className="w-full h-11 border-primary text-primary hover:bg-primary/5 text-base font-medium" variant="outline" asChild>
+                        <Link href="/register?mode=subscription">Suscribirse ahora</Link>
+                      </Button>
+                    )}
+                  </div>
                 </CardFooter>
               </Card>
             </motion.div>

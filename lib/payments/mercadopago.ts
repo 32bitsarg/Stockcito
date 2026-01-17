@@ -39,8 +39,8 @@ export async function createPaymentPreference(
     return null
   }
 
-  const price = planType === 'yearly' 
-    ? PLAN_PRICES.premium.yearly 
+  const price = planType === 'yearly'
+    ? PLAN_PRICES.premium.yearly
     : PLAN_PRICES.premium.monthly
 
   const description = planType === 'yearly'
@@ -103,6 +103,71 @@ export async function createPaymentPreference(
   }
 }
 
+
+
+// Create a subscription (preapproval)
+export async function createSubscription(
+  organizationId: number,
+  organizationName: string,
+  email: string,
+  planType: 'monthly' | 'yearly' = 'monthly'
+): Promise<{ id: string; init_point: string } | null> {
+  if (!MERCADOPAGO_ACCESS_TOKEN) {
+    paymentLogger.warn('MercadoPago access token not configured')
+    return null
+  }
+
+  const price = planType === 'yearly'
+    ? PLAN_PRICES.premium.yearly
+    : PLAN_PRICES.premium.monthly
+
+  const description = planType === 'yearly'
+    ? 'Stockcito Premium - Suscripción Anual'
+    : 'Stockcito Premium - Suscripción Mensual'
+
+  const externalReference = `org_${organizationId}_${Date.now()}`
+
+  try {
+    const response = await fetch('https://api.mercadopago.com/preapproval', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        reason: description,
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: planType === 'yearly' ? 'months' : 'months', // Start with months for both, adjust logic if MP supports 'years'
+          transaction_amount: price,
+          currency_id: 'ARS',
+          ...(planType === 'yearly' && { frequency: 12 }) // Override for yearly
+        },
+        payer_email: email,
+        back_url: `${APP_URL}/subscription/success`,
+        auto_return: 'approved',
+        external_reference: externalReference,
+        status: 'pending'
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.text()
+      paymentLogger.error('MercadoPago subscription error', new Error(errorData))
+      return null
+    }
+
+    const data = await response.json()
+    return {
+      id: data.id,
+      init_point: data.init_point // Subscriptions usually return init_point
+    }
+  } catch (error) {
+    paymentLogger.error('MercadoPago subscription creation error:', error)
+    return null
+  }
+}
+
 // Get payment info by ID
 export async function getPaymentInfo(paymentId: string): Promise<PaymentInfo | null> {
   if (!MERCADOPAGO_ACCESS_TOKEN) {
@@ -142,7 +207,7 @@ export function parseExternalReference(reference: string): { organizationId: num
   // Format: org_123_1703704800000
   const match = reference.match(/^org_(\d+)_(\d+)$/)
   if (!match) return null
-  
+
   return {
     organizationId: parseInt(match[1], 10),
     timestamp: parseInt(match[2], 10)

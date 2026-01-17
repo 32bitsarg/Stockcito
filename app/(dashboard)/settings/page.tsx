@@ -5,7 +5,7 @@ import { NotificationSettingsForm } from "@/components/settings/notification-set
 import { FeatureToggles } from "@/components/settings/feature-toggles"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bell, Settings2, Smartphone, Paintbrush } from "lucide-react"
+import { Bell, Settings2, Smartphone, Paintbrush, CreditCard } from "lucide-react"
 import { AppearanceSettingsForm } from "@/components/settings/appearance-settings-form"
 
 export default async function SettingsNotificationsPage() {
@@ -17,15 +17,26 @@ export default async function SettingsNotificationsPage() {
 
     // Load all necessary data including full organization object
     const { getCurrentOrganization } = await import("@/actions/organization-actions")
+    const { getPaymentStatus, getPaymentHistory } = await import("@/actions/payment-actions")
+    const { BillingSettings } = await import("@/components/settings/billing-settings") // Dynamic import to avoid circular deps if any
 
-    const [notificationSettings, organizationFeatures, organization] = await Promise.all([
+    const [notificationSettings, organizationFeatures, organization, paymentStatus, paymentHistory] = await Promise.all([
         getNotificationSettings(),
         getOrganizationFeatures(),
-        getCurrentOrganization()
+        getCurrentOrganization(),
+        getPaymentStatus(),
+        getPaymentHistory()
     ])
 
     const isAdmin = session.role === 'owner' || session.role === 'admin'
     const isPremium = organization?.plan === 'premium' || organization?.planStatus === 'trial'
+
+    // Mock payment method based on organization data (in a real app, fetch from MP)
+    const paymentMethod = organization?.mercadoPagoCustomerId ? {
+        type: 'credit_card',
+        lastFourDigits: '****',
+        brand: 'MercadoPago'
+    } : null
 
     return (
         <div className="flex flex-col gap-6">
@@ -49,10 +60,16 @@ export default async function SettingsNotificationsPage() {
                     </TabsTrigger>
 
                     {isAdmin && (
-                        <TabsTrigger value="features" className="gap-2">
-                            <Settings2 className="h-4 w-4" />
-                            Funciones
-                        </TabsTrigger>
+                        <>
+                            <TabsTrigger value="billing" className="gap-2">
+                                <CreditCard className="h-4 w-4" />
+                                Pagos
+                            </TabsTrigger>
+                            <TabsTrigger value="features" className="gap-2">
+                                <Settings2 className="h-4 w-4" />
+                                Funciones
+                            </TabsTrigger>
+                        </>
                     )}
                     <TabsTrigger value="pwa" className="gap-2">
                         <Smartphone className="h-4 w-4" />
@@ -94,21 +111,35 @@ export default async function SettingsNotificationsPage() {
                 </TabsContent>
 
                 {isAdmin && (
-                    <TabsContent value="features">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Funciones del Negocio</CardTitle>
-                                <CardDescription>
-                                    Activa o desactiva funciones según el tipo de negocio
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <FeatureToggles
-                                    initialFeatures={organizationFeatures}
-                                />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                    <>
+                        <TabsContent value="billing">
+                            <BillingSettings
+                                currentPlan={organization?.plan || 'free'}
+                                status={organization?.planStatus || 'unknown'}
+                                nextPaymentDue={paymentStatus.nextPaymentDue}
+                                lastPaymentDate={paymentStatus.lastPayment}
+                                amount={paymentStatus.amount}
+                                paymentMethod={paymentMethod}
+                                history={paymentHistory}
+                            />
+                        </TabsContent>
+
+                        <TabsContent value="features">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Funciones del Negocio</CardTitle>
+                                    <CardDescription>
+                                        Activa o desactiva funciones según el tipo de negocio
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <FeatureToggles
+                                        initialFeatures={organizationFeatures}
+                                    />
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </>
                 )}
 
                 <TabsContent value="pwa">
