@@ -1,10 +1,18 @@
 import { z } from "zod"
 
 // Auth schemas
+// Password must have: 8+ chars, uppercase, lowercase, number, special character
+const passwordSchema = z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .regex(/[A-Z]/, "La contraseña debe tener al menos una mayúscula")
+    .regex(/[a-z]/, "La contraseña debe tener al menos una minúscula")
+    .regex(/[0-9]/, "La contraseña debe tener al menos un número")
+    .regex(/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;'/`~]/, "La contraseña debe tener al menos un caracter especial")
+
 export const registerSchema = z.object({
     name: z.string().min(1, "El nombre es obligatorio"),
     email: z.string().email("Email inválido"),
-    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+    password: passwordSchema,
     businessName: z.string().min(1, "El nombre del negocio es requerido")
 })
 

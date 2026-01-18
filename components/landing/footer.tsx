@@ -34,6 +34,7 @@ export function LandingFooter() {
               <Link href="/login">Ingresar</Link>
               <Link href="/register">Registrarse</Link>
               <Link href="/docs">Documentación</Link>
+              <Link href="/changelog">Changelog</Link>
             </nav>
           </div>
         </div>

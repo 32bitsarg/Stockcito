@@ -4,7 +4,13 @@ import { RegisterForm } from '@/components/auth/register-form'
 import { AuthHero } from '@/components/auth/auth-hero'
 import { Loader2 } from 'lucide-react'
 
-export default function RegisterPage({ searchParams }: { searchParams: { mode?: string } }) {
+interface PageProps {
+  searchParams: Promise<{ mode?: string }>
+}
+
+export default async function RegisterPage({ searchParams }: PageProps) {
+  const params = await searchParams
+
   return (
     <div className="h-screen w-full flex overflow-hidden">
       {/* Left side - Info with animations */}
@@ -28,7 +34,7 @@ export default function RegisterPage({ searchParams }: { searchParams: { mode?: 
           <p className="text-center text-sm text-muted-foreground">
             ¿Ya tenés cuenta?{' '}
             <Link
-              href={`/login${searchParams.mode ? `?mode=${searchParams.mode}` : ''}`}
+              href={`/login${params.mode ? `?mode=${params.mode}` : ''}`}
               className="font-medium text-primary hover:underline transition-colors"
             >
               Iniciar sesión

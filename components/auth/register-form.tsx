@@ -1,12 +1,22 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { registerUser } from '@/actions/auth-actions'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { User, Mail, Lock, Loader2, Building2, AlertCircle, Check } from 'lucide-react'
+import { User, Mail, Lock, Loader2, Building2, AlertCircle, Check, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+// Password validation rules
+const passwordRules = [
+  { id: 'length', label: 'Mínimo 8 caracteres', test: (p: string) => p.length >= 8 },
+  { id: 'uppercase', label: 'Al menos 1 mayúscula', test: (p: string) => /[A-Z]/.test(p) },
+  { id: 'lowercase', label: 'Al menos 1 minúscula', test: (p: string) => /[a-z]/.test(p) },
+  { id: 'number', label: 'Al menos 1 número', test: (p: string) => /[0-9]/.test(p) },
+  { id: 'special', label: 'Al menos 1 caracter especial (!@#$%^&*)', test: (p: string) => /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;'/`~]/.test(p) },
+]
 
 export function RegisterForm() {
   const router = useRouter()
@@ -18,16 +28,35 @@ export function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPasswordRules, setShowPasswordRules] = useState(false)
 
+  // Validate password against all rules
+  const passwordValidation = useMemo(() => {
+    return passwordRules.map(rule => ({
+      ...rule,
+      passed: rule.test(password)
+    }))
+  }, [password])
+
+  const allRulesPassed = passwordValidation.every(r => r.passed)
+  const passedCount = passwordValidation.filter(r => r.passed).length
   const passwordsMatch = password === confirmPassword && password.length > 0
-  const passwordValid = password.length >= 8
+
+  // Password strength indicator
+  const strengthLevel = useMemo(() => {
+    if (passedCount <= 1) return { label: 'Muy débil', color: 'bg-red-500', width: '20%' }
+    if (passedCount === 2) return { label: 'Débil', color: 'bg-orange-500', width: '40%' }
+    if (passedCount === 3) return { label: 'Regular', color: 'bg-yellow-500', width: '60%' }
+    if (passedCount === 4) return { label: 'Buena', color: 'bg-lime-500', width: '80%' }
+    return { label: 'Excelente', color: 'bg-green-500', width: '100%' }
+  }, [passedCount])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    if (!passwordValid) {
-      setError('La contraseña debe tener al menos 8 caracteres')
+    if (!allRulesPassed) {
+      setError('La contraseña no cumple con todos los requisitos de seguridad')
       return
     }
 
@@ -77,7 +106,7 @@ export function RegisterForm() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-2"
+          className="p-3 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 text-sm flex items-start gap-2"
         >
           <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           {error}
@@ -157,20 +186,62 @@ export function RegisterForm() {
           <Input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setShowPasswordRules(true)}
             type="password"
             aria-label="password"
             placeholder="••••••••"
             className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
             required
-            minLength={8}
           />
         </div>
-        <div className="flex items-center gap-2 text-xs">
-          <div className={`w-1.5 h-1.5 rounded-full ${passwordValid ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
-          <span className={passwordValid ? 'text-green-600' : 'text-muted-foreground'}>
-            Mínimo 8 caracteres
-          </span>
-        </div>
+
+        {/* Password Strength Indicator */}
+        {password.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Seguridad:</span>
+              <span className={cn(
+                "font-medium",
+                passedCount <= 2 ? "text-red-500" : passedCount <= 3 ? "text-yellow-500" : "text-green-500"
+              )}>
+                {strengthLevel.label}
+              </span>
+            </div>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <motion.div
+                className={cn("h-full rounded-full", strengthLevel.color)}
+                initial={{ width: 0 }}
+                animate={{ width: strengthLevel.width }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Password Requirements Checklist */}
+        {showPasswordRules && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="p-3 rounded-lg bg-muted/50 border space-y-1.5"
+          >
+            <p className="text-xs font-medium text-muted-foreground mb-2">Requisitos de seguridad:</p>
+            {passwordValidation.map((rule) => (
+              <div key={rule.id} className="flex items-center gap-2 text-xs">
+                {rule.passed ? (
+                  <Check className="w-3.5 h-3.5 text-green-500" />
+                ) : (
+                  <X className="w-3.5 h-3.5 text-muted-foreground/50" />
+                )}
+                <span className={cn(
+                  rule.passed ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+                )}>
+                  {rule.label}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        )}
       </motion.div>
 
       <motion.div
@@ -214,7 +285,7 @@ export function RegisterForm() {
         <Button
           type="submit"
           className="w-full h-12 text-base font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-          disabled={loading || !passwordsMatch || !passwordValid}
+          disabled={loading || !passwordsMatch || !allRulesPassed}
         >
           {loading ? (
             <>

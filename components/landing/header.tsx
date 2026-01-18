@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Menu, LogIn, BookOpen, X, Package } from 'lucide-react'
+import { Menu, LogIn, BookOpen, X, Package, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -38,6 +38,10 @@ export function LandingHeader() {
             <BookOpen className="w-4 h-4" />
             Documentación
           </Link>
+          <Link href="/changelog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+            <ScrollText className="w-4 h-4" />
+            Changelog
+          </Link>
           <div className="flex items-center gap-4 border-l pl-4 ml-2 h-6">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Ingresar</Link>
@@ -64,6 +68,13 @@ export function LandingHeader() {
               onClick={() => setOpen(false)}
             >
               <BookOpen className="w-4 h-4" /> Documentación
+            </Link>
+            <Link
+              href="/changelog"
+              className="text-sm font-medium p-2 hover:bg-muted rounded-md flex items-center gap-2"
+              onClick={() => setOpen(false)}
+            >
+              <ScrollText className="w-4 h-4" /> Changelog
             </Link>
             <div className="h-px bg-border my-1" />
             <Button variant="outline" asChild className="w-full justify-start">
