@@ -115,6 +115,9 @@ export const APP_VERSION = changelogEntries[0]?.version || '0.0.0'
 // Helper to get version with 'v' prefix
 export const APP_VERSION_DISPLAY = `v${APP_VERSION}`
 
+// Feedback email for bug reports and suggestions
+export const FEEDBACK_EMAIL = 'noreply@stockcito.com'
+
 // App info for consistency across the app
 export const APP_INFO = {
     name: 'Stockcito',
@@ -122,4 +125,5 @@ export const APP_INFO = {
     versionDisplay: APP_VERSION_DISPLAY,
     tagline: 'POS · Inventario · Facturación',
     description: 'Sistema de punto de venta para PyMEs argentinas',
+    feedbackEmail: FEEDBACK_EMAIL,
 } as const

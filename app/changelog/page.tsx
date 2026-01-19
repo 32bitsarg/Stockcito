@@ -7,7 +7,7 @@ import { ScrollText, Sparkles, Bug, Rocket, Zap, ArrowLeft, ChevronDown, Chevron
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { changelogEntries, ChangelogChange } from '@/lib/changelog'
+import { changelogEntries, ChangelogChange, FEEDBACK_EMAIL } from '@/lib/changelog'
 
 const typeConfig = {
     new: {
@@ -286,7 +286,7 @@ export default function ChangelogPage() {
                     <p className="text-muted-foreground text-sm">¿Tenés sugerencias o encontraste un bug?</p>
                     <div className="flex flex-wrap justify-center gap-3">
                         <Button size="sm" asChild>
-                            <a href="mailto:noreply@stockcito.com?subject=Feedback%20-%20Stockcito">
+                            <a href={`mailto:${FEEDBACK_EMAIL}?subject=Feedback%20-%20Stockcito`}>
                                 ✉️ Escribinos
                             </a>
                         </Button>
@@ -298,8 +298,8 @@ export default function ChangelogPage() {
                         </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        <a href="mailto:noreply@stockcito.com" className="hover:text-foreground transition-colors">
-                            noreply@stockcito.com
+                        <a href={`mailto:${FEEDBACK_EMAIL}`} className="hover:text-foreground transition-colors">
+                            {FEEDBACK_EMAIL}
                         </a>
                     </p>
                 </div>

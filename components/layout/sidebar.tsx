@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Package, Crown, CreditCard } from 'lucide-react'
+import { Package, Crown, CreditCard, Mail } from 'lucide-react'
 import { getLowStockProducts } from '@/actions/dashboard-actions'
 import { getSession } from '@/actions/auth-actions'
 import { getOrganizationFeatures } from '@/actions/notification-actions'
@@ -7,7 +7,7 @@ import { getTrialDaysRemaining } from '@/actions/subscription-actions'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { SidebarLinks, SidebarLink } from './sidebar-link'
-import { APP_VERSION_DISPLAY } from '@/lib/changelog'
+import { APP_VERSION_DISPLAY, FEEDBACK_EMAIL } from '@/lib/changelog'
 
 const baseRoutes = [
     { href: '/dashboard', label: 'Dashboard', iconName: 'LayoutDashboard' },
@@ -155,11 +155,18 @@ export async function Sidebar() {
 
 
 
-            {/* Footer with version */}
+            {/* Footer with version and feedback */}
             <div className="p-4 border-t mt-auto">
                 <div className="text-center text-xs text-muted-foreground">
                     <p>Stockcito POS</p>
                     <p className="text-[10px]">{APP_VERSION_DISPLAY} · {new Date().getFullYear()}</p>
+                    <a
+                        href={`mailto:${FEEDBACK_EMAIL}?subject=Feedback%20-%20Stockcito`}
+                        className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                        <Mail className="w-3 h-3" />
+                        💬 Sugerencias?
+                    </a>
                 </div>
             </div>
         </div>
