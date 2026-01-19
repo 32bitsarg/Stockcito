@@ -7,6 +7,7 @@ import { getTrialDaysRemaining } from '@/actions/subscription-actions'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { SidebarLinks, SidebarLink } from './sidebar-link'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 const baseRoutes = [
     { href: '/dashboard', label: 'Dashboard', iconName: 'LayoutDashboard' },
@@ -63,7 +64,7 @@ export async function Sidebar() {
                     <Package className="h-6 w-6" />
                     <span>Stockcito</span>
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                        v0.1
+                        {APP_VERSION_DISPLAY}
                     </Badge>
                 </Link>
             </div>
@@ -158,7 +159,7 @@ export async function Sidebar() {
             <div className="p-4 border-t mt-auto">
                 <div className="text-center text-xs text-muted-foreground">
                     <p>Stockcito POS</p>
-                    <p className="text-[10px]">v0.1 · {new Date().getFullYear()}</p>
+                    <p className="text-[10px]">{APP_VERSION_DISPLAY} · {new Date().getFullYear()}</p>
                 </div>
             </div>
         </div>

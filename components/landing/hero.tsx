@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, Package, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingHero() {
   return (
@@ -23,7 +24,7 @@ export function LandingHero() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/80 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
                 </span>
-                v0.1 Early Access
+                {APP_VERSION_DISPLAY} Early Access
               </span>
             </Badge>
           </motion.div>

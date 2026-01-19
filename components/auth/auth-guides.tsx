@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, LifeBuoy, FileText, Clock } from 'lucide-react'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 const GUIDES = [
   {
@@ -56,21 +57,21 @@ export function AuthGuides({ mode = 'login' }: { mode?: 'login' | 'register' }) 
 
           <div className="grid gap-3">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><Zap className="w-5 h-5 text-white"/></div>
+              <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><Zap className="w-5 h-5 text-white" /></div>
               <div>
                 <div className="text-sm font-semibold">Atajos eficientes</div>
                 <div className="text-xs text-white/80">Usá teclas para acelerar la caja.</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><FileText className="w-5 h-5 text-white"/></div>
+              <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><FileText className="w-5 h-5 text-white" /></div>
               <div>
                 <div className="text-sm font-semibold">Facturación simplificada</div>
                 <div className="text-xs text-white/80">Precios netos y IVA desglosado por alícuota.</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><Clock className="w-5 h-5 text-white"/></div>
+              <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><Clock className="w-5 h-5 text-white" /></div>
               <div>
                 <div className="text-sm font-semibold">Reportes rápidos</div>
                 <div className="text-xs text-white/80">CSV/Excel listos para tu contador.</div>
@@ -80,21 +81,21 @@ export function AuthGuides({ mode = 'login' }: { mode?: 'login' | 'register' }) 
 
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="p-3 rounded bg-white/10">
-              <div className="text-lg font-bold">120+</div>
-              <div className="text-xs text-white/80">Comercios</div>
+              <div className="text-lg font-bold">Beta</div>
+              <div className="text-xs text-white/80">Early Access</div>
             </div>
             <div className="p-3 rounded bg-white/10">
-              <div className="text-lg font-bold">1.2k</div>
-              <div className="text-xs text-white/80">Ventas / día</div>
+              <div className="text-lg font-bold">{APP_VERSION_DISPLAY}</div>
+              <div className="text-xs text-white/80">Versión actual</div>
             </div>
             <div className="p-3 rounded bg-white/10">
-              <div className="text-lg font-bold">420</div>
-              <div className="text-xs text-white/80">Reportes / mes</div>
+              <div className="text-lg font-bold">100%</div>
+              <div className="text-xs text-white/80">Gratis x 7 días</div>
             </div>
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="text-sm text-white/90">"Stockcito agilizó nuestras ventas del local" — Laura, kiosco</div>
+            <div className="text-sm text-white/90">"Sé de los primeros en probar Stockcito" — El equipo</div>
             <div className="flex items-center gap-2">
               <button aria-label="Anterior" className="rounded px-2 py-1 bg-white/10 text-white text-sm" onClick={() => setIndex((i) => (i - 1 + GUIDES.length) % GUIDES.length)}>⟵</button>
               <button aria-label="Siguiente" className="rounded px-2 py-1 bg-white/10 text-white text-sm" onClick={() => setIndex((i) => (i + 1) % GUIDES.length)}>⟶</button>

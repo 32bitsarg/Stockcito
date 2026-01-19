@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 const sections = [
   { id: 'intro', title: 'Introducción' },
@@ -79,7 +80,7 @@ export default function DocsPage() {
             <Zap className="w-5 h-5 text-primary fill-current" />
             Stockcito
           </Link>
-          <Badge variant="secondary" className="hidden sm:flex text-[10px] h-5 px-1.5">v0.1</Badge>
+          <Badge variant="secondary" className="hidden sm:flex text-[10px] h-5 px-1.5">{APP_VERSION_DISPLAY}</Badge>
         </div>
 
         <div className="flex items-center gap-3">

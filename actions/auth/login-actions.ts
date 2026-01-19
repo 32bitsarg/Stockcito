@@ -21,13 +21,15 @@ import { validateCSRFToken } from '@/lib/security/csrf'
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  csrfToken: z.string().optional()
+  csrfToken: z.string().optional(),
+  rememberMe: z.boolean().optional().default(false)
 })
 
 const loginPinSchema = z.object({
   email: z.string().email(),
   pin: z.string().min(4).max(6),
-  csrfToken: z.string().optional()
+  csrfToken: z.string().optional(),
+  rememberMe: z.boolean().optional().default(false)
 })
 
 // Rate limiting for business code attempts (10 per hour per code)
@@ -126,6 +128,12 @@ export async function loginUser(data: z.infer<typeof loginSchema>) {
       role: user.role,
       organizationId: user.organizationId || undefined
     })
+
+    // Session duration: 30 days if "Remember Me", otherwise 1 day
+    const sessionDuration = result.data.rememberMe
+      ? 60 * 60 * 24 * 30  // 30 days
+      : 60 * 60 * 24       // 1 day
+
     const cookieStore = await cookies()
     cookieStore.set({
       name: 'session',
@@ -134,7 +142,7 @@ export async function loginUser(data: z.infer<typeof loginSchema>) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: sessionDuration
     })
 
     // Log successful login
@@ -218,6 +226,12 @@ export async function loginWithPin(data: z.infer<typeof loginPinSchema>) {
       role: user.role,
       organizationId: user.organizationId || undefined
     })
+
+    // Session duration: 30 days if "Remember Me", otherwise 1 day
+    const sessionDuration = result.data.rememberMe
+      ? 60 * 60 * 24 * 30  // 30 days
+      : 60 * 60 * 24       // 1 day
+
     const cookieStore = await cookies()
     cookieStore.set({
       name: 'session',
@@ -226,7 +240,7 @@ export async function loginWithPin(data: z.infer<typeof loginPinSchema>) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: sessionDuration
     })
 
     // Log successful login

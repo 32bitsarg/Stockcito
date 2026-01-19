@@ -7,6 +7,7 @@ import autotable from 'jspdf-autotable'
 import { getSession } from "@/actions/auth-actions"
 import { UsageTracker } from "@/lib/subscription/usage-tracker"
 import { PLAN_LIMITS } from "@/lib/subscription/plans"
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export async function checkInvoiceLimit(): Promise<{ canCreate: boolean; remaining: number; limit: number }> {
   const session = await getSession()
@@ -113,7 +114,7 @@ export async function generateInvoicePdf(saleId: number) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
   doc.text(`Método de pago: ${sale.paymentMethod}`, 14, finalY + 45)
-  doc.text('Documento no válido como factura fiscal - Generado por Stockcito v0.1', 14, 285)
+  doc.text(`Documento no válido como factura fiscal - Generado por Stockcito ${APP_VERSION_DISPLAY}`, 14, 285)
 
   const pdfBase64 = doc.output('datauristring')
   return { pdf: pdfBase64 }

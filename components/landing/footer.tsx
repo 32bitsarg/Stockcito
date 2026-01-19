@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingFooter() {
   return (
@@ -10,7 +11,7 @@ export function LandingFooter() {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-lg">Stockcito</span>
-            <Badge variant="outline" className="text-[10px]">v0.1</Badge>
+            <Badge variant="outline" className="text-[10px]">{APP_VERSION_DISPLAY}</Badge>
           </div>
           <div className="text-sm text-muted-foreground mt-2">POS · Inventario · Facturación</div>
           <div className="text-xs text-muted-foreground mt-2">Sistema de punto de venta para PyMEs argentinas</div>

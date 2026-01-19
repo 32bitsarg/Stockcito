@@ -38,6 +38,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
   const [password, setPassword] = useState('')
   const [pin, setPin] = useState('')
   const [ownerMethod, setOwnerMethod] = useState<OwnerMethod>('password')
+  const [rememberMe, setRememberMe] = useState(false)
 
   // Employee login state
   const [businessCode, setBusinessCode] = useState('')
@@ -69,8 +70,8 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
 
     try {
       const result = ownerMethod === 'password'
-        ? await loginUser({ email, password, csrfToken })
-        : await loginWithPin({ email, pin, csrfToken })
+        ? await loginUser({ email, password, csrfToken, rememberMe })
+        : await loginWithPin({ email, pin, csrfToken, rememberMe })
 
       if (result.success) {
         router.push(callbackUrl)
@@ -277,6 +278,20 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
                 </div>
               </div>
             )}
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer select-none">
+                Recordarme por 30 días
+              </label>
+            </div>
 
             <div className="space-y-3">
               <Button type="submit" className="w-full h-12" disabled={loading}>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Sparkles } from 'lucide-react'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingCTA() {
   return (
@@ -25,7 +26,7 @@ export function LandingCTA() {
           <div className="relative z-10 py-16 px-6 md:px-12 md:py-24 text-center space-y-8 flex flex-col items-center">
             <div className="inline-flex items-center rounded-full bg-primary-foreground/10 border border-primary-foreground/20 px-3 py-1 text-sm font-medium backdrop-blur-sm">
               <Sparkles className="mr-2 h-4 w-4" />
-              Early Access v0.1
+              Early Access {APP_VERSION_DISPLAY}
             </div>
 
             <h3 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-2xl">

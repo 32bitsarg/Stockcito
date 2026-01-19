@@ -7,63 +7,7 @@ import { ScrollText, Sparkles, Bug, Rocket, Zap, ArrowLeft, ChevronDown, Chevron
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-// Changelog entries - Add new entries at the top
-const changelogEntries = [
-    {
-        version: '0.1.0',
-        date: '2026-01-17',
-        title: 'Lanzamiento Inicial 🎉',
-        description: 'Primera versión pública de Stockcito',
-        changes: [
-            {
-                type: 'new',
-                title: 'Sistema POS completo',
-                description: 'Punto de venta con soporte para productos, clientes y múltiples métodos de pago'
-            },
-            {
-                type: 'new',
-                title: 'Gestión de inventario',
-                description: 'Control de stock con alertas de bajo inventario y categorización de productos'
-            },
-            {
-                type: 'new',
-                title: 'Módulo de clientes',
-                description: 'Registro y seguimiento de clientes con historial de compras'
-            },
-            {
-                type: 'new',
-                title: 'Reportes y analytics',
-                description: 'Dashboard con métricas de ventas, productos más vendidos y tendencias'
-            },
-            {
-                type: 'new',
-                title: 'Sistema de suscripciones',
-                description: 'Planes Free y Premium con integración de MercadoPago'
-            },
-            {
-                type: 'new',
-                title: 'Modo restaurante',
-                description: 'Funcionalidades específicas para restaurantes: cocina y gestión de mesas'
-            },
-            {
-                type: 'new',
-                title: 'Control de usuarios',
-                description: 'Roles (owner, admin, manager, cashier) con permisos diferenciados'
-            },
-            {
-                type: 'improvement',
-                title: 'Diseño responsive',
-                description: 'Interfaz adaptada para desktop, tablet y móvil'
-            },
-            {
-                type: 'improvement',
-                title: 'Tema oscuro/claro',
-                description: 'Soporte completo para modo oscuro con cambio automático'
-            },
-        ]
-    },
-]
+import { changelogEntries, ChangelogChange } from '@/lib/changelog'
 
 const typeConfig = {
     new: {

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Zap, FileText, BarChart3 } from 'lucide-react'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 interface AuthHeroProps {
     title?: string
@@ -67,22 +68,22 @@ export function AuthHero({
 
                 <div className="grid grid-cols-3 gap-3">
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center transition-all hover:bg-white/15">
-                        <div className="text-xl font-bold">120+</div>
-                        <div className="text-[10px] text-white/70">Comercios</div>
+                        <div className="text-xl font-bold">Beta</div>
+                        <div className="text-[10px] text-white/70">Early Access</div>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center transition-all hover:bg-white/15">
-                        <div className="text-xl font-bold">1.2k</div>
-                        <div className="text-[10px] text-white/70">Ventas / día</div>
+                        <div className="text-xl font-bold">{APP_VERSION_DISPLAY}</div>
+                        <div className="text-[10px] text-white/70">Versión actual</div>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center transition-all hover:bg-white/15">
-                        <div className="text-xl font-bold">420</div>
-                        <div className="text-[10px] text-white/70">Reportes / mes</div>
+                        <div className="text-xl font-bold">100%</div>
+                        <div className="text-[10px] text-white/70">Gratis x 7 días</div>
                     </div>
                 </div>
 
                 <div className="pt-3 border-t border-white/20 flex items-center justify-between">
                     <p className="text-white/60 text-xs italic">
-                        "Stockcito agilizó nuestras ventas"
+                        "Probá Stockcito antes que nadie"
                     </p>
                     <Link
                         href="/docs"

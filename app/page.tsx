@@ -5,8 +5,18 @@ import { LandingPricing } from '@/components/landing/pricing'
 import { LandingTestimonials } from '@/components/landing/testimonials'
 import { LandingCTA } from '@/components/landing/cta'
 import { LandingFooter } from '@/components/landing/footer'
+import { getSession } from '@/actions/auth-actions'
+import { redirect } from 'next/navigation'
 
-export default function Landing() {
+export default async function Landing() {
+  // Check if user is already logged in
+  const session = await getSession()
+
+  if (session) {
+    // User is logged in, redirect to dashboard
+    redirect('/dashboard')
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <LandingHeader />

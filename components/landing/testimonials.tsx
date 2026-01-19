@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 const testimonials = [
   {
@@ -38,7 +39,7 @@ export function LandingTestimonials() {
             Lo que dicen nuestros <span className="text-primary">Early Adopters</span>
           </h2>
           <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
-            Comercios reales que ya están optimizando su día a día con Stockcito v0.1.
+            Comercios reales que ya están optimizando su día a día con Stockcito {APP_VERSION_DISPLAY}.
           </p>
         </div>
 
