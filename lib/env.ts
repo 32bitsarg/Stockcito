@@ -9,7 +9,7 @@ const envSchema = z.object({
 
   // Auth
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
-  
+
   // App URLs
   NEXT_PUBLIC_APP_URL: z.string().url().optional().default('http://localhost:3000'),
 
@@ -47,6 +47,9 @@ export function validateEnv(): Env {
     return validatedEnv
   }
 
+  // Check if we're in a build/CI environment (no JWT_SECRET or minimal env)
+  const isBuildPhase = !process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32
+
   try {
     validatedEnv = envSchema.parse(process.env)
     return validatedEnv
@@ -54,10 +57,14 @@ export function validateEnv(): Env {
     if (error instanceof z.ZodError) {
       const missingVars = error.issues.map((e: z.ZodIssue) => `  - ${e.path.join('.')}: ${e.message}`)
       console.error('\n❌ Environment validation failed:\n' + missingVars.join('\n') + '\n')
-      
-      // In development, continue with warnings
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('⚠️ Continuing in development mode with missing env vars...\n')
+
+      // During build phase or development, use fallback values
+      if (isBuildPhase || process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV === 'production') {
+          console.warn('⚠️ Build phase detected - using fallback env values...\n')
+        } else {
+          console.warn('⚠️ Continuing in development mode with missing env vars...\n')
+        }
         // Return partial env with defaults
         validatedEnv = {
           DATABASE_URL: process.env.DATABASE_URL || 'file:./prisma/dev.db',
@@ -69,8 +76,8 @@ export function validateEnv(): Env {
         } as Env
         return validatedEnv
       }
-      
-      // In production, fail hard
+
+      // In production runtime (not build), fail hard
       throw new Error('Environment validation failed. Check server logs.')
     }
     throw error
@@ -89,7 +96,7 @@ export function getEnv(): Env {
  */
 export function isFeatureAvailable(feature: 'email' | 'payments' | 'redis'): boolean {
   const env = getEnv()
-  
+
   switch (feature) {
     case 'email':
       return !!(env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY)

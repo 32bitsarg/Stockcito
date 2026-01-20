@@ -101,6 +101,9 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
         return { error: "No autorizado" }
     }
 
+    // Extract organizationId for TypeScript narrowing within transaction
+    const organizationId = session.organizationId
+
     const result = saleSchema.safeParse(data);
     if (!result.success) return { error: result.error.flatten().fieldErrors }
 
@@ -120,7 +123,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
     let drawer: Awaited<ReturnType<typeof getUserOpenDrawer>> = null
 
     if (requireOpenDrawer) {
-        drawer = await getUserOpenDrawer(session.id, session.organizationId)
+        drawer = await getUserOpenDrawer(session.id, organizationId)
         if (!drawer) {
             return {
                 error: "Debes abrir una caja antes de realizar ventas",
@@ -131,7 +134,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
 
     // Check invoice limit only if issuing invoice
     if (result.data.issueInvoice) {
-        const tracker = new UsageTracker(session.organizationId)
+        const tracker = new UsageTracker(organizationId)
         const canCreate = await tracker.canCreate("invoices")
         if (!canCreate) {
             return {
@@ -157,7 +160,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                 const product = await tx.product.findFirst({
                     where: {
                         id: item.productId,
-                        organizationId: session.organizationId
+                        organizationId: organizationId
                     }
                 })
                 if (!product) throw new Error(`Producto ${item.productId} no encontrado`)
@@ -232,7 +235,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
 
             // 0. Sequence Generation
             const organization = await tx.organization.update({
-                where: { id: session.organizationId },
+                where: { id: organizationId },
                 data: { lastTicketNumber: { increment: 1 } },
                 select: { lastTicketNumber: true }
             })
@@ -245,7 +248,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                 data: {
                     clientId,
                     userId: session.id, // Always use session user ID
-                    organizationId: session.organizationId,
+                    organizationId: organizationId,
                     subtotal: calculatedSubtotal.toString(),
                     taxAmount: calculatedTax.toString(),
                     discountAmount: calculatedDiscountTotal.toString(),
@@ -262,11 +265,11 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
             })
 
             // 1.5. If table assigned, mark it as occupied
-            if (tableId && session.organizationId) {
+            if (tableId) {
                 await tx.table.updateMany({
                     where: {
                         id: tableId,
-                        organizationId: session.organizationId
+                        organizationId: organizationId
                     },
                     data: {
                         status: 'occupied',
@@ -281,7 +284,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                 await tx.invoice.create({
                     data: {
                         saleId: sale.id,
-                        organizationId: session.organizationId,
+                        organizationId: organizationId,
                         type: result.data.invoiceType || 'B',
                         pointOfSale: result.data.pointOfSale,
                         total: calculatedTotal.toString()
@@ -290,13 +293,13 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
             }
 
             // 3. Record sale in cash drawer if open
-            if (drawer && drawer.shifts[0] && session.organizationId) {
+            if (drawer && drawer.shifts[0]) {
                 await recordSaleInDrawer(
                     tx,
                     drawer.id,
                     drawer.shifts[0].id,
                     session.id,
-                    session.organizationId,
+                    organizationId,
                     paymentMethod,
                     calculatedTotal.toNumber()
                 )
