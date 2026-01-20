@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useEffect, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { getProducts } from "@/actions/product-actions"
 import { getClientsAll } from "@/actions/client-actions"
@@ -80,6 +80,9 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         product: null
     })
 
+    // Flag to prevent double processing of initialSku
+    const initialSkuProcessed = useRef(false)
+
     // Load initial data
     useEffect(() => {
         const load = async () => {
@@ -94,7 +97,8 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
     // Process initialSku from scanner
     useEffect(() => {
         const processInitialSku = async () => {
-            if (!initialSku) return
+            if (!initialSku || initialSkuProcessed.current) return
+            initialSkuProcessed.current = true
 
             // Try to find in loaded products first
             let product = products.find(p => p.sku === initialSku)
@@ -136,6 +140,40 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
 
         processInitialSku()
     }, [initialSku, products.length])
+
+    // Listen for internal barcode events (Direct Scan in POS)
+    useEffect(() => {
+        const handleInternalScan = (e: CustomEvent) => {
+            const { product: serverProduct } = e.detail
+            if (serverProduct) {
+                const product = {
+                    id: serverProduct.id,
+                    name: serverProduct.name,
+                    sku: serverProduct.sku,
+                    price: serverProduct.price,
+                    stock: serverProduct.stock,
+                    taxRate: serverProduct.taxRate,
+                    category: serverProduct.category ? { name: serverProduct.category } : null
+                }
+
+                // Add to cart directly
+                addToCart(product)
+
+                // Also add to local products if not present (for list view consistency)
+                setProducts(prev => {
+                    if (!prev.find(p => p.id === product.id)) {
+                        return [...prev, product]
+                    }
+                    return prev
+                })
+
+                toast.success(`Agregado: ${product.name}`)
+            }
+        }
+
+        window.addEventListener('barcode-scanned' as any, handleInternalScan)
+        return () => window.removeEventListener('barcode-scanned' as any, handleInternalScan)
+    }, [])
 
     // Escuchar eventos de teclado globales
     useEffect(() => {

@@ -60,13 +60,11 @@ export function BarcodeProvider({ children }: { children: ReactNode }) {
                 // Si ya estamos en el POS, el POS debería manejarlo (si implementamos un listener local también)
                 // Pero si queremos un comportamiento unificado:
                 if (pathname === '/sales/new') {
-                    // Si estamos en POS, disparamos un evento custom o modificamos la URL sin recargar
-                    // Una forma simple es usar un evento de window que el POS escuche, o query params
-                    // Vamos a inyectar el SKU en la URL para que el POS reaccione
-                    const url = new URL(window.location.href)
-                    url.searchParams.set('addSku', code)
-                    url.searchParams.set('t', Date.now().toString()) // Timestamp para forzar efecto
-                    router.replace(url.toString())
+                    // Si estamos en POS, disparamos un evento custom para evitar recargas de URL
+                    // que pueden causar duplicados o problemas de estado
+                    window.dispatchEvent(new CustomEvent('barcode-scanned', {
+                        detail: { code, product: result.product }
+                    }))
                 } else {
                     // Redirigir al POS
                     router.push(`/sales/new?addSku=${encodeURIComponent(code)}`)
