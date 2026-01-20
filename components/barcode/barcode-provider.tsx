@@ -39,7 +39,7 @@ export function BarcodeProvider({ children }: { children: ReactNode }) {
         if (isScanning) return
 
         // Si ya estamos en el modal de creación de producto con este SKU, ignorar
-        if (pathname.includes('/inventory/products/new') && window.location.search.includes(code)) {
+        if (pathname.includes('/inventory/new') && window.location.search.includes(code)) {
             return
         }
 

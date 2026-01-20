@@ -30,7 +30,7 @@ export function BarcodeResultModal({
     const handleCreate = () => {
         onClose()
         // Redirigir al formulario de creación con el SKU prellenado
-        router.push(`/inventory/products/new?sku=${encodeURIComponent(scannedCode)}`)
+        router.push(`/inventory/new?sku=${encodeURIComponent(scannedCode)}`)
     }
 
     return (

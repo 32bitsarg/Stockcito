@@ -17,6 +17,39 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.1.3',
+        date: '2026-01-20',
+        title: 'Integración Lector Código de Barras 🛒',
+        description: 'Soporte completo para lectores de código de barras en POS e Inventario.',
+        changes: [
+            {
+                type: 'new',
+                title: 'Escaneo Global',
+                description: 'Escanea productos desde cualquier pantalla para ir directo a la venta o crear el producto.'
+            },
+            {
+                type: 'new',
+                title: 'Búsqueda Inteligente en POS',
+                description: 'El POS ahora busca productos en el servidor si no están cargados localmente al escanear.'
+            },
+            {
+                type: 'new',
+                title: 'Creación Rápida de Productos',
+                description: 'Al escanear un código nuevo, se abre el formulario de creación con el SKU pre-cargado.'
+            },
+            {
+                type: 'new',
+                title: 'Ajuste Rápido de Stock',
+                description: 'Haz clic en el indicador de stock en el POS para ajustar cantidades rápidamente (solo Admin/Manager).'
+            },
+            {
+                type: 'fix',
+                title: 'Corrección Rutas Inventario',
+                description: 'Corregida la redirección al crear productos nuevos desde el escáner.'
+            }
+        ]
+    },
+    {
         version: '0.1.2',
         date: '2026-01-20',
         title: 'Integración Restaurante + Logging 🍽️',
