@@ -85,12 +85,32 @@ export async function getKitchenOrders(
             take: 50
         })
 
+        // Get table information for sales that have tableId
+        const tableIds = sales.filter(s => s.tableId).map(s => s.tableId as number)
+        const tables = tableIds.length > 0
+            ? await db.table.findMany({
+                where: { id: { in: tableIds } },
+                select: { id: true, number: true, name: true }
+            })
+            : []
+
+        const tableMap = new Map(tables.map(t => [t.id, t]))
+
         const now = new Date()
 
         return sales.map(sale => {
             const referenceTime = sale.kitchenStartedAt || sale.createdAt
             const elapsedMs = now.getTime() - referenceTime.getTime()
             const elapsedMinutes = Math.floor(elapsedMs / 60000)
+
+            // Build table name from table data
+            let tableName: string | undefined = undefined
+            if (sale.tableId) {
+                const table = tableMap.get(sale.tableId)
+                if (table) {
+                    tableName = table.name || `Mesa ${table.number}`
+                }
+            }
 
             return {
                 id: sale.id,
@@ -103,7 +123,7 @@ export async function getKitchenOrders(
                     notes: undefined
                 })),
                 clientName: sale.client?.name,
-                tableName: undefined, // TODO: Add when tables are implemented
+                tableName,
                 createdAt: sale.createdAt,
                 startedAt: sale.kitchenStartedAt || undefined,
                 readyAt: sale.kitchenReadyAt || undefined,

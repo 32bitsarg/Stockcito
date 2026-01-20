@@ -17,25 +17,28 @@ export default async function SettingsNotificationsPage() {
 
     // Load all necessary data including full organization object
     const { getCurrentOrganization } = await import("@/actions/organization-actions")
-    const { getPaymentStatus, getPaymentHistory } = await import("@/actions/payment-actions")
+    const { getPaymentStatus, getPaymentHistory, getPaymentMethod } = await import("@/actions/payment-actions")
     const { BillingSettings } = await import("@/components/settings/billing-settings") // Dynamic import to avoid circular deps if any
 
-    const [notificationSettings, organizationFeatures, organization, paymentStatus, paymentHistory] = await Promise.all([
+    const [notificationSettings, organizationFeatures, organization, paymentStatus, paymentHistory, paymentMethod] = await Promise.all([
         getNotificationSettings(),
         getOrganizationFeatures(),
         getCurrentOrganization(),
         getPaymentStatus(),
-        getPaymentHistory()
+        getPaymentHistory(),
+        getPaymentMethod()
     ])
 
     const isAdmin = session.role === 'owner' || session.role === 'admin'
     const isPremium = organization?.plan === 'premium' || organization?.planStatus === 'trial'
 
-    // Mock payment method based on organization data (in a real app, fetch from MP)
-    const paymentMethod = organization?.mercadoPagoCustomerId ? {
-        type: 'credit_card',
-        lastFourDigits: '****',
-        brand: 'MercadoPago'
+    // Transform paymentMethod to match BillingSettings expected format
+    const billingPaymentMethod = paymentMethod ? {
+        type: paymentMethod.type,
+        lastFourDigits: paymentMethod.lastFourDigits,
+        brand: paymentMethod.brand,
+        expirationMonth: paymentMethod.expirationMonth,
+        expirationYear: paymentMethod.expirationYear
     } : null
 
     return (
@@ -119,7 +122,7 @@ export default async function SettingsNotificationsPage() {
                                 nextPaymentDue={paymentStatus.nextPaymentDue}
                                 lastPaymentDate={paymentStatus.lastPayment}
                                 amount={paymentStatus.amount}
-                                paymentMethod={paymentMethod}
+                                paymentMethod={billingPaymentMethod}
                                 history={paymentHistory}
                             />
                         </TabsContent>

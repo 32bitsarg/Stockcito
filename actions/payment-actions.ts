@@ -8,7 +8,10 @@ import {
   createSubscriptionPlan,
   isMercadoPagoConfigured,
   parseExternalReference,
-  getPaymentInfo
+  getPaymentInfo,
+  searchSubscriptionByEmail,
+  getLastPaymentDetails,
+  getSubscriptionInfo
 } from '@/lib/payments/mercadopago'
 import { upgradeToPremium, renewSubscription } from '@/lib/subscription/subscription-service'
 import { PLAN_PRICES } from '@/lib/subscription/plans'
@@ -246,3 +249,206 @@ export async function getPaymentStatus(): Promise<{
     amount: org.lastPaymentAmount ? Number(org.lastPaymentAmount) : PLAN_PRICES.premium.monthly
   }
 }
+
+// Get payment method info from MercadoPago subscription
+export interface PaymentMethod {
+  type: 'credit_card' | 'debit_card' | 'mercadopago' | 'unknown'
+  brand: string | null
+  lastFourDigits: string | null
+  expirationMonth: number | null
+  expirationYear: number | null
+  hasActiveSubscription: boolean
+  subscriptionStatus: string | null
+  nextPaymentDate: Date | null
+}
+
+export async function getPaymentMethod(): Promise<PaymentMethod | null> {
+  try {
+    const session = await requireAuth()
+
+    const user = await db.user.findUnique({
+      where: { id: session.id },
+      include: { organization: true }
+    })
+
+    if (!user?.organization) {
+      return null
+    }
+
+    const org = user.organization
+
+    // If not premium or no payment history, return null
+    if (org.plan !== 'premium' && org.planStatus !== 'trial') {
+      return null
+    }
+
+    // Try to get card details from recent payments first (has most complete data)
+    const cardDetails = await getLastPaymentDetails(org.email)
+
+    // Also try to get subscription info for status
+    const subscription = await searchSubscriptionByEmail(org.email)
+
+    if (cardDetails) {
+      return {
+        type: cardDetails.paymentType === 'account_money' ? 'mercadopago' :
+          cardDetails.paymentType === 'unknown' ? 'unknown' : cardDetails.paymentType,
+        brand: cardDetails.brand,
+        lastFourDigits: cardDetails.lastFourDigits,
+        expirationMonth: cardDetails.expirationMonth,
+        expirationYear: cardDetails.expirationYear,
+        hasActiveSubscription: subscription?.status === 'authorized' || org.planStatus === 'active',
+        subscriptionStatus: subscription?.status || org.planStatus,
+        nextPaymentDate: subscription?.next_payment_date
+          ? new Date(subscription.next_payment_date)
+          : org.subscriptionEndsAt
+      }
+    }
+
+    // Fallback: subscription info without card details
+    if (subscription) {
+      return {
+        type: subscription.payment_method_id?.includes('debit') ? 'debit_card' : 'credit_card',
+        brand: subscription.payment_method_id || 'MercadoPago',
+        lastFourDigits: null,
+        expirationMonth: null,
+        expirationYear: null,
+        hasActiveSubscription: subscription.status === 'authorized',
+        subscriptionStatus: subscription.status,
+        nextPaymentDate: subscription.next_payment_date ? new Date(subscription.next_payment_date) : null
+      }
+    }
+
+    // Fallback: Check if we have local payment data
+    if (org.mercadoPagoCustomerId || org.lastPaymentId) {
+      return {
+        type: 'mercadopago',
+        brand: 'MercadoPago',
+        lastFourDigits: null,
+        expirationMonth: null,
+        expirationYear: null,
+        hasActiveSubscription: org.planStatus === 'active',
+        subscriptionStatus: org.planStatus,
+        nextPaymentDate: org.subscriptionEndsAt
+      }
+    }
+
+    return null
+  } catch (error) {
+    paymentLogger.error('Get payment method error', error)
+    return null
+  }
+}
+
+// Verify subscription payment - used on success page
+export interface VerificationResult {
+  success: boolean
+  status: 'approved' | 'pending' | 'rejected' | 'error'
+  message: string
+  planActive: boolean
+}
+
+export async function verifySubscriptionPayment(
+  paymentId: string | null,
+  externalReference: string | null
+): Promise<VerificationResult> {
+  try {
+    const session = await requireAuth()
+
+    const user = await db.user.findUnique({
+      where: { id: session.id },
+      include: { organization: true }
+    })
+
+    if (!user?.organization) {
+      return {
+        success: false,
+        status: 'error',
+        message: 'No se encontró la organización',
+        planActive: false
+      }
+    }
+
+    const org = user.organization
+
+    // First check: Is the organization already premium?
+    if (org.plan === 'premium' && org.planStatus === 'active') {
+      return {
+        success: true,
+        status: 'approved',
+        message: 'Tu suscripción Premium está activa',
+        planActive: true
+      }
+    }
+
+    // If we have a payment ID, verify with MercadoPago
+    if (paymentId) {
+      const paymentInfo = await getPaymentInfo(paymentId)
+
+      if (paymentInfo) {
+        if (paymentInfo.status === 'approved') {
+          // Payment approved - check if org needs to be updated
+          if (org.plan !== 'premium') {
+            // This might happen if webhook hasn't processed yet
+            // The webhook should handle the actual upgrade
+            return {
+              success: true,
+              status: 'approved',
+              message: 'Pago aprobado. Tu cuenta Premium se activará en breve.',
+              planActive: false
+            }
+          }
+          return {
+            success: true,
+            status: 'approved',
+            message: '¡Bienvenido a Premium!',
+            planActive: true
+          }
+        } else if (paymentInfo.status === 'pending') {
+          return {
+            success: false,
+            status: 'pending',
+            message: 'Tu pago está pendiente de confirmación',
+            planActive: false
+          }
+        } else {
+          return {
+            success: false,
+            status: 'rejected',
+            message: 'El pago no fue aprobado',
+            planActive: false
+          }
+        }
+      }
+    }
+
+    // Check subscription status via email
+    const subscription = await searchSubscriptionByEmail(org.email)
+
+    if (subscription?.status === 'authorized') {
+      return {
+        success: true,
+        status: 'approved',
+        message: 'Suscripción activa',
+        planActive: org.plan === 'premium'
+      }
+    }
+
+    // No definitive status found
+    return {
+      success: false,
+      status: 'pending',
+      message: 'Verificando estado de la suscripción...',
+      planActive: org.plan === 'premium'
+    }
+
+  } catch (error) {
+    paymentLogger.error('Verify subscription payment error', error)
+    return {
+      success: false,
+      status: 'error',
+      message: 'Error al verificar el pago',
+      planActive: false
+    }
+  }
+}
+

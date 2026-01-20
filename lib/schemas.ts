@@ -97,7 +97,8 @@ export const saleSchema = z.object({
     invoiceType: z.string().optional(),
     pointOfSale: z.number().optional(),
     paymentMethod: z.enum(["efectivo", "tarjeta", "transferencia", "mercadopago"]).default("efectivo"),
-    requireOpenDrawer: z.boolean().optional().default(true) // Si false, permite vender sin caja abierta
+    requireOpenDrawer: z.boolean().optional().default(true), // Si false, permite vender sin caja abierta
+    tableId: z.number().optional() // Mesa asignada (para restaurantes)
 })
 
 export type SaleFormValues = z.infer<typeof saleSchema>

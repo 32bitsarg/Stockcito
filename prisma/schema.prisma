@@ -238,6 +238,9 @@ model Sale {
   kitchenStartedAt DateTime?
   kitchenReadyAt   DateTime?
   
+  // Table assignment (Restaurant feature)
+  tableId        Int?
+  
   createdAt      DateTime      @default(now())
 
   @@index([organizationId])
@@ -246,6 +249,7 @@ model Sale {
   @@index([organizationId, clientId])
   @@index([organizationId, paymentMethod])
   @@index([organizationId, kitchenStatus])
+  @@index([organizationId, tableId])
 }
 
 model SaleItem {
