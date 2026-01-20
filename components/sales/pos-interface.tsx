@@ -16,6 +16,7 @@ import { QuickStockModal } from "@/components/inventory/quick-stock-modal"
 import { TableSelector } from "./table-selector"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { SaleSuccessModal } from "./sale-success-modal"
 
 // Helper type for Cart Item
 interface CartItem {
@@ -302,29 +303,27 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             }
 
             const result = await createSale(saleData)
-            if (result.success) {
+            if (result.success && result.sale) {
                 setCart([])
-                setSelectedTableId(null) // Reset table selection
-                const tableInfo = selectedTableId
-                    ? tables.find(t => t.id === selectedTableId)
-                    : null
-                toast.success("Venta realizada con éxito", {
-                    description: tableInfo
-                        ? `Total: $${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })} - ${tableInfo.name || `Mesa ${tableInfo.number}`}`
-                        : `Total: $${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
-                    duration: 4000,
-                    position: "top-center"
+                setSelectedTableId(null)
+                // Set success state instead of toast
+                setLastSale({
+                    sale: result.sale,
+                    organization: result.organization
                 })
                 router.refresh()
             } else {
                 toast.error("Error al procesar la venta", {
-                    description: typeof result.error === "string" ? result.error : "Error en la validación de datos. Revise los campos.",
+                    description: typeof result.error === "string" ? result.error : "Error en la validación de datos.",
                     duration: 5000,
                     position: "top-center"
                 })
             }
         })
     }
+
+    // Success Modal State
+    const [lastSale, setLastSale] = useState<{ sale: any, organization: any } | null>(null)
 
     return (
         <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-50px)] min-h-[600px] pb-0">
@@ -337,7 +336,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                 />
             </div>
 
-            {/* Right: Cart & Checkout (Fixed width on large screens) */}
+            {/* Right: Cart & Checkout */}
             <div className="w-full lg:w-[420px] flex flex-col gap-4 h-full">
                 <Card className="flex-1 flex flex-col border-primary/10 shadow-lg overflow-hidden glass-card">
                     {/* Header: Client Selection */}
@@ -370,7 +369,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                             </Select>
                         </div>
 
-                        {/* Table Selector - Only shown if table management is enabled */}
+                        {/* Table Selector */}
                         {tableManagementEnabled && (
                             <TableSelector
                                 tables={tables}
@@ -436,6 +435,13 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     onSuccess={(newStock) => handleStockUpdate(stockModal.product.id, newStock)}
                 />
             )}
+
+            <SaleSuccessModal
+                isOpen={!!lastSale}
+                onClose={() => setLastSale(null)}
+                sale={lastSale?.sale}
+                organization={lastSale?.organization}
+            />
         </div>
     )
 }

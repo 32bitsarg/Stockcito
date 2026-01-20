@@ -76,6 +76,9 @@ model Organization {
   
   // Feature flags
   features              OrganizationFeatures?
+
+  // Receipt sequencing
+  lastTicketNumber      Int       @default(0)
 }
 
 // ==========================================
@@ -238,6 +241,10 @@ model Sale {
   kitchenStartedAt DateTime?
   kitchenReadyAt   DateTime?
   
+  // Receipt info
+  ticketNumber     String?       // Formatted unique ID for display (e.g. 0001-00002301)
+  ticketSequence   Int?          // Sequential number per organization
+
   // Table assignment (Restaurant feature)
   tableId        Int?
   
@@ -258,6 +265,7 @@ model SaleItem {
   sale           Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   productId      Int
   product        Product  @relation(fields: [productId], references: [id])
+  productName    String?  // Snapshot of product name at time of sale
   quantity       Int
   unitPrice      Decimal  // Precio neto por unidad (sin IVA)
   taxRate        Decimal  @default(0)
