@@ -142,7 +142,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
     }
 
     try {
-        await db.$transaction(async (tx) => {
+        const transactionResult = await db.$transaction(async (tx) => {
             let calculatedSubtotal = new Decimal(0)
             let calculatedTax = new Decimal(0)
             let calculatedTotal = new Decimal(0)
@@ -179,6 +179,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
 
                 saleItemsData.push({
                     productId: product.id,
+                    productName: product.name, // Snapshot
                     quantity: item.quantity,
                     unitPrice: product.price, // Precio neto
                     taxRate: product.taxRate ?? 0,
@@ -229,6 +230,16 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                 calculatedDiscountTotal = calculatedDiscountTotal.plus(saleLevelDiscount)
             }
 
+            // 0. Sequence Generation
+            const organization = await tx.organization.update({
+                where: { id: session.organizationId },
+                data: { lastTicketNumber: { increment: 1 } },
+                select: { lastTicketNumber: true }
+            })
+            const ticketSequence = organization.lastTicketNumber
+            // Default format: POS 0001 - Sequence 8 digits
+            const ticketNumber = `0001-${ticketSequence.toString().padStart(8, '0')}`
+
             // 1. Create Sale
             const sale = await tx.sale.create({
                 data: {
@@ -241,6 +252,8 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                     total: calculatedTotal.toString(),
                     paymentMethod,
                     status: 'completed',
+                    ticketNumber,
+                    ticketSequence,
                     tableId, // Assign table if specified (restaurant feature)
                     items: {
                         create: saleItemsData
@@ -288,6 +301,8 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                     calculatedTotal.toNumber()
                 )
             }
+
+            return { sale, organization }
         })
 
         revalidatePath("/sales")
@@ -295,7 +310,8 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
         revalidatePath("/") // dashboard
         revalidatePath("/kitchen") // refresh kitchen display
         if (tableId) revalidatePath("/tables") // refresh tables if assigned
-        return { success: true }
+
+        return { success: true, sale: transactionResult.sale, organization: transactionResult.organization }
 
     } catch (error) {
         saleLogger.error('Error al procesar la venta', error)
