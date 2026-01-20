@@ -29,8 +29,10 @@ interface BillingSettingsProps {
     amount: number
     paymentMethod?: {
         type: string
-        lastFourDigits?: string
-        brand?: string
+        lastFourDigits?: string | null
+        brand?: string | null
+        expirationMonth?: number | null
+        expirationYear?: number | null
     } | null
     history: Array<{
         id: number
@@ -116,16 +118,22 @@ export function BillingSettings({
                             <div className="flex items-center justify-between p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
                                 <div className="flex items-center gap-4">
                                     <div className="p-2 bg-muted rounded-md">
-                                        {/* Simple placeholder icon logic */}
                                         <CreditCard className="w-6 h-6 text-muted-foreground" />
                                     </div>
                                     <div>
                                         <p className="font-medium">
-                                            {paymentMethod.brand ? paymentMethod.brand.toUpperCase() : 'Tarjeta'} •••• {paymentMethod.lastFourDigits || '****'}
+                                            {paymentMethod.brand ? paymentMethod.brand.toUpperCase() : 'Tarjeta'}
+                                            {paymentMethod.lastFourDigits ? ` •••• ${paymentMethod.lastFourDigits}` : ''}
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Vence el 12/2028 {/* Placeholder expiration */}
-                                        </p>
+                                        {paymentMethod.expirationMonth && paymentMethod.expirationYear ? (
+                                            <p className="text-sm text-muted-foreground">
+                                                Vence {String(paymentMethod.expirationMonth).padStart(2, '0')}/{paymentMethod.expirationYear}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">
+                                                Método de pago activo
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">

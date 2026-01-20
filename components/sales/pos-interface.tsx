@@ -11,6 +11,7 @@ import { User, Calculator, ArrowRight, CreditCard } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { POSProductList } from "./pos-product-list"
 import { POSCart } from "./pos-cart"
+import { TableSelector } from "./table-selector"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -44,7 +45,20 @@ interface Client {
     name: string
 }
 
-export function POSInterface() {
+interface Table {
+    id: number
+    number: number
+    name: string | null
+    capacity: number
+    status: 'available' | 'occupied' | 'reserved' | 'cleaning'
+}
+
+interface POSInterfaceProps {
+    tableManagementEnabled?: boolean
+    tables?: Table[]
+}
+
+export function POSInterface({ tableManagementEnabled = false, tables = [] }: POSInterfaceProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
@@ -55,6 +69,7 @@ export function POSInterface() {
     // Cart State
     const [cart, setCart] = useState<CartItem[]>([])
     const [selectedClientId, setSelectedClientId] = useState<string>("")
+    const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
 
     // Load initial data
     useEffect(() => {
@@ -183,14 +198,21 @@ export function POSInterface() {
                 })),
                 userId: undefined,
                 paymentMethod: "efectivo" as const,
-                requireOpenDrawer: false
+                requireOpenDrawer: false,
+                tableId: selectedTableId ?? undefined
             }
 
             const result = await createSale(saleData)
             if (result.success) {
                 setCart([])
+                setSelectedTableId(null) // Reset table selection
+                const tableInfo = selectedTableId
+                    ? tables.find(t => t.id === selectedTableId)
+                    : null
                 toast.success("Venta realizada con éxito", {
-                    description: `Total: $${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
+                    description: tableInfo
+                        ? `Total: $${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })} - ${tableInfo.name || `Mesa ${tableInfo.number}`}`
+                        : `Total: $${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
                     duration: 4000,
                     position: "top-center"
                 })
@@ -247,6 +269,15 @@ export function POSInterface() {
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Table Selector - Only shown if table management is enabled */}
+                        {tableManagementEnabled && (
+                            <TableSelector
+                                tables={tables}
+                                selectedTableId={selectedTableId}
+                                onSelectTable={setSelectedTableId}
+                            />
+                        )}
                     </div>
 
                     {/* Body: Cart List */}

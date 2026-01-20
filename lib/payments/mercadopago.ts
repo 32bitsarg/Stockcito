@@ -389,3 +389,224 @@ export function getMercadoPagoPublicKey(): string {
 export function isMercadoPagoConfigured(): boolean {
   return !!(MERCADOPAGO_ACCESS_TOKEN && MERCADOPAGO_PUBLIC_KEY)
 }
+
+// Subscription info interface
+export interface SubscriptionInfo {
+  id: string
+  status: 'pending' | 'authorized' | 'paused' | 'cancelled'
+  reason: string
+  payer_email: string
+  next_payment_date: string | null
+  transaction_amount: number
+  currency_id: string
+  payment_method_id: string | null
+  card_id: string | null
+  date_created: string
+  last_modified: string
+}
+
+// Get subscription info by ID
+export async function getSubscriptionInfo(subscriptionId: string): Promise<SubscriptionInfo | null> {
+  if (!MERCADOPAGO_ACCESS_TOKEN) {
+    paymentLogger.warn('MercadoPago access token not configured')
+    return null
+  }
+
+  try {
+    const response = await fetch(`https://api.mercadopago.com/preapproval/${subscriptionId}`, {
+      headers: {
+        'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+      }
+    })
+
+    if (!response.ok) {
+      paymentLogger.error('MercadoPago get subscription error', {
+        status: response.status,
+        subscriptionId
+      })
+      return null
+    }
+
+    const data = await response.json()
+
+    return {
+      id: data.id,
+      status: data.status,
+      reason: data.reason || '',
+      payer_email: data.payer_email || '',
+      next_payment_date: data.next_payment_date || null,
+      transaction_amount: data.auto_recurring?.transaction_amount || 0,
+      currency_id: data.auto_recurring?.currency_id || 'ARS',
+      payment_method_id: data.payment_method_id || null,
+      card_id: data.card_id || null,
+      date_created: data.date_created,
+      last_modified: data.last_modified
+    }
+  } catch (error) {
+    paymentLogger.error('MercadoPago get subscription error:', error)
+    return null
+  }
+}
+
+// Search subscription by payer email
+export async function searchSubscriptionByEmail(email: string): Promise<SubscriptionInfo | null> {
+  if (!MERCADOPAGO_ACCESS_TOKEN) {
+    paymentLogger.warn('MercadoPago access token not configured')
+    return null
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.mercadopago.com/preapproval/search?payer_email=${encodeURIComponent(email)}&status=authorized`,
+      {
+        headers: {
+          'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+        }
+      }
+    )
+
+    if (!response.ok) {
+      paymentLogger.error('MercadoPago search subscription error', {
+        status: response.status,
+        email
+      })
+      return null
+    }
+
+    const data = await response.json()
+
+    // Return the most recent active subscription
+    if (data.results && data.results.length > 0) {
+      const subscription = data.results[0]
+      return {
+        id: subscription.id,
+        status: subscription.status,
+        reason: subscription.reason || '',
+        payer_email: subscription.payer_email || '',
+        next_payment_date: subscription.next_payment_date || null,
+        transaction_amount: subscription.auto_recurring?.transaction_amount || 0,
+        currency_id: subscription.auto_recurring?.currency_id || 'ARS',
+        payment_method_id: subscription.payment_method_id || null,
+        card_id: subscription.card_id || null,
+        date_created: subscription.date_created,
+        last_modified: subscription.last_modified
+      }
+    }
+
+    return null
+  } catch (error) {
+    paymentLogger.error('MercadoPago search subscription error:', error)
+    return null
+  }
+}
+
+// Get payment method info (card details)
+export interface PaymentMethodInfo {
+  type: 'credit_card' | 'debit_card' | 'mercadopago' | 'unknown'
+  lastFourDigits: string | null
+  brand: string | null
+  expirationMonth: number | null
+  expirationYear: number | null
+}
+
+// Card details from a payment
+export interface CardDetails {
+  lastFourDigits: string | null
+  expirationMonth: number | null
+  expirationYear: number | null
+  cardholderName: string | null
+  brand: string | null
+  paymentMethodId: string | null
+  paymentType: 'credit_card' | 'debit_card' | 'account_money' | 'unknown'
+}
+
+// Search for payments by payer email to get card details
+export async function getLastPaymentDetails(email: string): Promise<CardDetails | null> {
+  if (!MERCADOPAGO_ACCESS_TOKEN) {
+    paymentLogger.warn('MercadoPago access token not configured')
+    return null
+  }
+
+  try {
+    // Search for approved payments from this payer
+    const response = await fetch(
+      `https://api.mercadopago.com/v1/payments/search?payer.email=${encodeURIComponent(email)}&status=approved&sort=date_created&criteria=desc&limit=1`,
+      {
+        headers: {
+          'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+        }
+      }
+    )
+
+    if (!response.ok) {
+      paymentLogger.error('MercadoPago search payments error', {
+        status: response.status,
+        email
+      })
+      return null
+    }
+
+    const data = await response.json()
+
+    if (data.results && data.results.length > 0) {
+      const payment = data.results[0]
+      const card = payment.card || {}
+
+      // Determine payment type
+      let paymentType: CardDetails['paymentType'] = 'unknown'
+      if (payment.payment_type_id === 'credit_card') {
+        paymentType = 'credit_card'
+      } else if (payment.payment_type_id === 'debit_card') {
+        paymentType = 'debit_card'
+      } else if (payment.payment_type_id === 'account_money') {
+        paymentType = 'account_money'
+      }
+
+      return {
+        lastFourDigits: card.last_four_digits || null,
+        expirationMonth: card.expiration_month || null,
+        expirationYear: card.expiration_year || null,
+        cardholderName: card.cardholder?.name || null,
+        brand: payment.payment_method_id || null,
+        paymentMethodId: payment.payment_method_id || null,
+        paymentType
+      }
+    }
+
+    return null
+  } catch (error) {
+    paymentLogger.error('MercadoPago get last payment details error:', error)
+    return null
+  }
+}
+
+export async function getPaymentMethodFromSubscription(email: string): Promise<PaymentMethodInfo | null> {
+  // First try to get card details from the last payment
+  const cardDetails = await getLastPaymentDetails(email)
+
+  if (cardDetails) {
+    return {
+      type: cardDetails.paymentType === 'account_money' ? 'mercadopago' :
+        cardDetails.paymentType === 'unknown' ? 'unknown' : cardDetails.paymentType,
+      lastFourDigits: cardDetails.lastFourDigits,
+      brand: cardDetails.brand,
+      expirationMonth: cardDetails.expirationMonth,
+      expirationYear: cardDetails.expirationYear
+    }
+  }
+
+  // Fallback: try to find an active subscription (less detailed)
+  const subscription = await searchSubscriptionByEmail(email)
+
+  if (!subscription) {
+    return null
+  }
+
+  return {
+    type: subscription.payment_method_id?.includes('debit') ? 'debit_card' : 'credit_card',
+    lastFourDigits: null,
+    brand: subscription.payment_method_id || 'MercadoPago',
+    expirationMonth: null,
+    expirationYear: null
+  }
+}

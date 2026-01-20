@@ -112,7 +112,8 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
         discountAmount: saleDiscountAmount,
         discountRate: saleDiscountRate,
         paymentMethod = 'efectivo',
-        requireOpenDrawer = true
+        requireOpenDrawer = true,
+        tableId
     } = result.data
 
     // Verificar si requiere caja abierta
@@ -240,11 +241,27 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                     total: calculatedTotal.toString(),
                     paymentMethod,
                     status: 'completed',
+                    tableId, // Assign table if specified (restaurant feature)
                     items: {
                         create: saleItemsData
                     }
                 }
             })
+
+            // 1.5. If table assigned, mark it as occupied
+            if (tableId && session.organizationId) {
+                await tx.table.updateMany({
+                    where: {
+                        id: tableId,
+                        organizationId: session.organizationId
+                    },
+                    data: {
+                        status: 'occupied',
+                        currentSaleId: sale.id,
+                        occupiedAt: new Date()
+                    }
+                })
+            }
 
             // 2. Create invoice record if requested (CAE issuance handled separately)
             if (sale && result.data.issueInvoice) {
@@ -276,6 +293,8 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
         revalidatePath("/sales")
         revalidatePath("/inventory")
         revalidatePath("/") // dashboard
+        revalidatePath("/kitchen") // refresh kitchen display
+        if (tableId) revalidatePath("/tables") // refresh tables if assigned
         return { success: true }
 
     } catch (error) {
