@@ -68,7 +68,16 @@ export async function createUser(data: {
     password?: string
     pin?: string
     role: UserRole
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{
+    success: boolean;
+    error?: string;
+    credentials?: {
+        email: string;
+        businessCode?: string;
+        pin?: string;
+        password?: string;
+    }
+}> {
     try {
         const { session, organizationId } = await requireOrganization()
 
@@ -89,11 +98,6 @@ export async function createUser(data: {
 
         if (newRoleIndex > myRoleIndex) {
             return { success: false, error: "No puedes crear usuarios con rol superior al tuyo" }
-        }
-
-        // Either password or PIN is required
-        if (!data.password && !data.pin) {
-            return { success: false, error: "Debes proporcionar contraseña o PIN" }
         }
 
         // Check if email exists in this organization
@@ -123,6 +127,11 @@ export async function createUser(data: {
 
         if (data.password) {
             passwordToSend = data.password
+        }
+
+        // Either password or PIN is required (now we check AFTER generation)
+        if (!passwordToSend && !pinToSend) {
+            return { success: false, error: "Debes proporcionar contraseña o PIN" }
         }
 
         // Generate random password for DB if not provided
@@ -165,7 +174,15 @@ export async function createUser(data: {
         await logAudit(session.id, "create", "user", user.id, `Usuario creado: ${user.name}`)
         revalidatePath("/users")
 
-        return { success: true }
+        return {
+            success: true,
+            credentials: {
+                email: user.email,
+                businessCode: organization?.businessCode,
+                pin: pinToSend || undefined,
+                password: passwordToSend || undefined
+            }
+        }
     } catch (error) {
         authLogger.error('Create user error:', error)
         return { success: false, error: "Error al crear usuario" }

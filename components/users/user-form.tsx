@@ -22,8 +22,18 @@ import {
     Info,
     Check,
     ArrowLeft,
-    Sparkles
+    Sparkles,
+    Copy,
+    CheckCircle2
 } from "lucide-react"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { SYSTEM_ROLES, DEFAULT_PERMISSIONS, type SystemRole } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 
@@ -73,6 +83,15 @@ export function UserForm({ user }: UserFormProps) {
     const [pin, setPin] = useState("")
     const [password, setPassword] = useState("")
 
+    // Credentials Modal
+    const [showCredentials, setShowCredentials] = useState(false)
+    const [createdCredentials, setCreatedCredentials] = useState<{
+        email: string
+        businessCode?: string
+        pin?: string
+        password?: string
+    } | null>(null)
+
     const isEditing = !!user
     const roleInfo = SYSTEM_ROLES[role as SystemRole]
 
@@ -110,36 +129,58 @@ export function UserForm({ user }: UserFormProps) {
 
         startTransition(async () => {
             try {
-                let result
-
                 if (isEditing) {
-                    result = await updateUser(user.id, {
+                    const result = await updateUser(user.id, {
                         name,
                         email,
                         role: role as UserRole,
                         active,
                         ...(password ? { password } : {})
                     })
+
+                    if (result.success) {
+                        router.push("/users")
+                        router.refresh()
+                    } else {
+                        setError(result.error || "Error al guardar")
+                    }
                 } else {
-                    result = await createUser({
+                    const result = await createUser({
                         name,
                         email,
                         password: credentialMode === 'password' ? password : undefined,
                         pin: credentialMode === 'pin' ? pin : undefined,
                         role: role as UserRole
                     })
-                }
 
-                if (result.success) {
-                    router.push("/users")
-                    router.refresh()
-                } else {
-                    setError(result.error || "Error al guardar")
+                    if (result.success) {
+                        // Cast to any to access credentials which might not be inferred correctly yet through re-exports
+                        const responseWithCreds = result as any
+                        if (responseWithCreds.credentials) {
+                            setCreatedCredentials(responseWithCreds.credentials)
+                            setShowCredentials(true)
+                        } else {
+                            router.push("/users")
+                            router.refresh()
+                        }
+                    } else {
+                        setError(result.error || "Error al guardar")
+                    }
                 }
             } catch {
                 setError("Error al guardar el usuario")
             }
         })
+    }
+
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text)
+    }
+
+    const handleCloseCredentials = () => {
+        setShowCredentials(false)
+        router.push("/users")
+        router.refresh()
     }
 
     return (
@@ -428,6 +469,76 @@ export function UserForm({ user }: UserFormProps) {
                     )}
                 </Button>
             </div>
+            {/* Credentials Modal */}
+            <Dialog open={showCredentials} onOpenChange={(open) => !open && handleCloseCredentials()}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-green-600">
+                            <CheckCircle2 className="w-6 h-6" />
+                            Usuario creado exitosamente
+                        </DialogTitle>
+                        <DialogDescription>
+                            El usuario ha sido creado correctamente. Copia estas credenciales para compartirlas con el empleado.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {createdCredentials && (
+                        <div className="space-y-4 py-4">
+                            <div className="rounded-lg bg-muted p-4 space-y-3">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Código de Negocio</label>
+                                    <div className="flex items-center gap-2">
+                                        <code className="flex-1 bg-background p-2 rounded border font-mono font-bold text-lg text-center">
+                                            {createdCredentials.businessCode}
+                                        </code>
+                                        <Button size="icon" variant="outline" onClick={() => handleCopy(createdCredentials.businessCode || "")}>
+                                            <Copy className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {createdCredentials.pin && (
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">PIN de Acceso</label>
+                                        <div className="flex items-center gap-2">
+                                            <code className="flex-1 bg-background p-2 rounded border font-mono font-bold text-lg text-center tracking-widest text-primary">
+                                                {createdCredentials.pin}
+                                            </code>
+                                            <Button size="icon" variant="outline" onClick={() => handleCopy(createdCredentials.pin || "")}>
+                                                <Copy className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {createdCredentials.password && (
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Contraseña</label>
+                                        <div className="flex items-center gap-2">
+                                            <code className="flex-1 bg-background p-2 rounded border font-mono text-lg truncate px-3">
+                                                {createdCredentials.password}
+                                            </code>
+                                            <Button size="icon" variant="outline" onClick={() => handleCopy(createdCredentials.password || "")}>
+                                                <Copy className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-lg border border-yellow-200 dark:border-yellow-900/30 text-xs text-yellow-800 dark:text-yellow-200">
+                                <strong>Nota:</strong> Estas credenciales también han sido enviadas a {createdCredentials.email}. Guárdalas por si el correo no llega.
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter>
+                        <Button onClick={handleCloseCredentials} className="w-full">
+                            Entendido, cerrar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </form>
     )
 }

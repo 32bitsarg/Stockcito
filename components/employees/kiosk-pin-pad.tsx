@@ -8,10 +8,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { kioskLoginWithPin, disableKioskMode } from "@/actions/kiosk-actions"
 import { cn } from "@/lib/utils"
-import { 
-    Lock, 
-    Delete, 
-    LogOut, 
+import {
+    Lock,
+    Delete,
+    LogOut,
     User,
     Store,
     Shield
@@ -23,6 +23,7 @@ interface Employee {
     name: string
     role: string
     initials: string
+    hasPin: boolean
 }
 
 interface KioskPinPadProps {
@@ -33,7 +34,7 @@ interface KioskPinPadProps {
 
 const ROLE_LABELS: Record<string, string> = {
     owner: "Dueño",
-    admin: "Administrador", 
+    admin: "Administrador",
     manager: "Encargado",
     cashier: "Cajero",
     waiter: "Mozo",
@@ -221,7 +222,7 @@ export function KioskPinPad({ employees, organizationName, autoLockMinutes }: Ki
                 </CardHeader>
                 <CardContent>
                     {renderPinPad(exitPin, setExitPin, handleExitKiosk)}
-                    
+
                     <Button
                         variant="ghost"
                         className="w-full mt-4"
@@ -309,8 +310,14 @@ export function KioskPinPad({ employees, organizationName, autoLockMinutes }: Ki
                             <Button
                                 key={employee.id}
                                 variant="outline"
-                                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary"
-                                onClick={() => handleSelectEmployee(employee)}
+                                className={cn(
+                                    "h-auto py-4 flex flex-col items-center gap-2 relative",
+                                    !employee.hasPin
+                                        ? "opacity-50 cursor-not-allowed bg-muted"
+                                        : "hover:bg-primary/5 hover:border-primary"
+                                )}
+                                onClick={() => employee.hasPin && handleSelectEmployee(employee)}
+                                disabled={!employee.hasPin}
                             >
                                 <Avatar className="h-12 w-12">
                                     <AvatarFallback className="bg-primary/10">
@@ -321,6 +328,11 @@ export function KioskPinPad({ employees, organizationName, autoLockMinutes }: Ki
                                 <Badge variant="secondary" className={cn("text-xs", ROLE_COLORS[employee.role] || "")}>
                                     {ROLE_LABELS[employee.role] || employee.role}
                                 </Badge>
+                                {!employee.hasPin && (
+                                    <div className="absolute top-2 right-2 text-muted-foreground" title="Sin PIN configurado">
+                                        <Lock className="h-4 w-4" />
+                                    </div>
+                                )}
                             </Button>
                         ))}
                     </div>

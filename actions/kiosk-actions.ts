@@ -25,12 +25,12 @@ export interface KioskSession {
     deviceUserName: string
     organizationId: number
     organizationName: string
-    
+
     // Active employee (who's currently using)
     activeEmployeeId: number | null
     activeEmployeeName: string | null
     activeEmployeeRole: string | null
-    
+
     // Kiosk settings
     kioskMode: boolean
     lastActivity: number  // timestamp
@@ -247,7 +247,7 @@ export async function getKioskSession(): Promise<KioskSession | null> {
 /**
  * Switch active employee in kiosk mode (PIN login)
  */
-export async function kioskLoginWithPin(pin: string): Promise<{ 
+export async function kioskLoginWithPin(pin: string): Promise<{
     success: boolean
     error?: string
     employee?: {
@@ -305,7 +305,7 @@ export async function kioskLoginWithPin(pin: string): Promise<{
 
         // Also update the main session cookie to reflect active employee
         const permissions = getUserPermissions(employee.role as SystemRole, employee.permissions)
-        
+
         const sessionToken = signToken({
             userId: employee.id,
             role: employee.role,
@@ -320,9 +320,9 @@ export async function kioskLoginWithPin(pin: string): Promise<{
         })
 
         revalidatePath('/')
-        
-        return { 
-            success: true, 
+
+        return {
+            success: true,
             employee: {
                 id: employee.id,
                 name: employee.name,
@@ -430,7 +430,7 @@ export async function shouldAutoLock(): Promise<boolean> {
 /**
  * Get list of employees for kiosk PIN selection
  */
-export async function getKioskEmployees(): Promise<Array<{ id: number; name: string; role: string; initials: string }>> {
+export async function getKioskEmployees(): Promise<Array<{ id: number; name: string; role: string; initials: string; hasPin: boolean }>> {
     const kioskSession = await getKioskSession()
     if (!kioskSession) {
         return []
@@ -439,13 +439,14 @@ export async function getKioskEmployees(): Promise<Array<{ id: number; name: str
     const employees = await db.user.findMany({
         where: {
             organizationId: kioskSession.organizationId,
-            active: true,
-            pin: { not: null }
+            active: true
+            // Removed pin: { not: null } filter to show all employees
         },
         select: {
             id: true,
             name: true,
-            role: true
+            role: true,
+            pin: true
         },
         orderBy: { name: 'asc' }
     })
@@ -454,6 +455,7 @@ export async function getKioskEmployees(): Promise<Array<{ id: number; name: str
         id: e.id,
         name: e.name,
         role: e.role,
-        initials: e.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        initials: e.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+        hasPin: !!e.pin
     }))
 }
