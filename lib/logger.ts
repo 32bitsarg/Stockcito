@@ -1,6 +1,8 @@
 // Centralized logger for production-safe error handling
 // Prevents sensitive information leakage in production
 
+import { sendLogToAppwrite, createLogEntry, isAppwriteConfigured } from './appwrite'
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 interface LogContext {
@@ -9,17 +11,18 @@ interface LogContext {
   action?: string
   entity?: string
   entityId?: number | string | null
+  module?: string
   [key: string]: unknown
 }
 
 const isProd = process.env.NODE_ENV === 'production'
 
-// In production, you could send to external services like:
-// - Sentry (sentry.io)
-// - LogRocket
-// - Datadog
-// - AWS CloudWatch
-// - Custom logging endpoint
+// In production, logs are sent to Appwrite Database
+// This provides:
+// - Centralized logging dashboard
+// - Search and filtering capabilities
+// - Long-term log retention
+// - Analytics and monitoring
 
 async function sendToExternalService(
   level: LogLevel,
@@ -27,14 +30,45 @@ async function sendToExternalService(
   context?: LogContext,
   error?: unknown
 ): Promise<void> {
-  // TODO: Implement external logging service integration
-  // Example with Sentry:
-  // if (level === 'error' && error instanceof Error) {
-  //   Sentry.captureException(error, { extra: context })
-  // }
-  
-  // For now, we just suppress in production
-  // The error is still captured, just not exposed to console
+  // Only send to external service if Appwrite is configured
+  if (!isAppwriteConfigured()) {
+    return
+  }
+
+  try {
+    // Extract error details
+    let errorMessage: string | undefined
+    let errorStack: string | undefined
+
+    if (error instanceof Error) {
+      errorMessage = error.message
+      errorStack = error.stack
+    } else if (typeof error === 'string') {
+      errorMessage = error
+    } else if (error) {
+      errorMessage = String(error)
+    }
+
+    // Create log entry with all available context
+    const entry = createLogEntry(level, message, {
+      module: context?.module,
+      userId: context?.userId,
+      organizationId: context?.organizationId,
+      action: context?.action,
+      entity: context?.entity,
+      entityId: context?.entityId?.toString(),
+      errorMessage,
+      errorStack,
+      metadata: context ? { ...context } : undefined
+    })
+
+    // Send asynchronously (don't await to avoid blocking)
+    sendLogToAppwrite(entry).catch(() => {
+      // Silently fail - the logging service handles retries
+    })
+  } catch {
+    // Never let logging errors affect the application
+  }
 }
 
 function formatError(error: unknown): string {
@@ -49,7 +83,7 @@ function formatError(error: unknown): string {
 
 function sanitizeContext(context?: LogContext): LogContext | undefined {
   if (!context) return undefined
-  
+
   // Remove potentially sensitive fields in production
   if (isProd) {
     const sanitized = { ...context }
@@ -61,7 +95,7 @@ function sanitizeContext(context?: LogContext): LogContext | undefined {
     delete sanitized.cardNumber
     return sanitized
   }
-  
+
   return context
 }
 
@@ -107,7 +141,7 @@ export function logError(message: string, error?: unknown, context?: LogContext)
   } else {
     // In production, log a sanitized version
     sendToExternalService('error', message, sanitizeContext(context), error)
-    
+
     // Optionally log a sanitized message to console for server logs
     // This helps with debugging without exposing sensitive data
     console.error(`[ERROR] ${message}: ${formatError(error)}`)
@@ -129,7 +163,7 @@ export function logAction(
     entityId,
     ...context
   }
-  
+
   if (!isProd) {
     console.log(`[ACTION] ${action} on ${entity}${entityId ? ` #${entityId}` : ''}`, sanitizeContext(fullContext))
   } else {
@@ -142,13 +176,13 @@ export function logAction(
  */
 export function createLogger(moduleName: string) {
   return {
-    debug: (message: string, context?: LogContext) => 
+    debug: (message: string, context?: LogContext) =>
       logDebug(`[${moduleName}] ${message}`, context),
-    info: (message: string, context?: LogContext) => 
+    info: (message: string, context?: LogContext) =>
       logInfo(`[${moduleName}] ${message}`, context),
-    warn: (message: string, context?: LogContext) => 
+    warn: (message: string, context?: LogContext) =>
       logWarn(`[${moduleName}] ${message}`, context),
-    error: (message: string, error?: unknown, context?: LogContext) => 
+    error: (message: string, error?: unknown, context?: LogContext) =>
       logError(`[${moduleName}] ${message}`, error, context),
   }
 }
