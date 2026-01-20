@@ -31,26 +31,18 @@ interface Product {
 interface POSProductListProps {
     products: Product[]
     onAddToCart: (product: Product) => void
+    onEditStock?: (product: Product) => void
 }
 
-export function POSProductList({ products, onAddToCart }: POSProductListProps) {
+export function POSProductList({ products, onAddToCart, onEditStock }: POSProductListProps) {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const [searchQuery, setSearchQuery] = useState("")
 
-    // We can filter here if we want instant client-side search, 
-    // but the ProductSearch component often handles its own filtering via command dialog.
-    // However, for the grid/list view below the search bar, we might want to filter too.
-    // Let's assume the passed 'products' are all available products and we filter them visually.
-
-    // Note: The previous POSInterface didn't filter the list visually based on the ProductSearch input,
-    // because ProductSearch is a Command palette.
-    // To make this better, we'll keep showing the "Top" or "All" products in the grid,
-    // but we can add a simple quick filter input if needed.
-    // For now, let's stick to displaying the list/grid.
+    // ... (rest of search/viewMode logic) ...
 
     return (
         <div className="flex flex-col h-full bg-background rounded-xl border shadow-sm overflow-hidden">
-            {/* Header / Search Area */}
+            {/* ... (Header) ... */}
             <div className="p-4 border-b flex flex-col gap-4 bg-muted/10">
                 <div className="flex items-center gap-4">
                     <div className="flex-1">
@@ -87,6 +79,7 @@ export function POSProductList({ products, onAddToCart }: POSProductListProps) {
                                         key={product.id}
                                         product={product as any}
                                         onAddToCart={onAddToCart}
+                                        onEditStock={onEditStock}
                                     />
                                 ))}
                             </div>
@@ -117,9 +110,9 @@ export function POSProductList({ products, onAddToCart }: POSProductListProps) {
                                                 <TableCell className="text-right font-medium">
                                                     ${Number(product.price).toLocaleString('es-AR')}
                                                 </TableCell>
-                                                <TableCell className="text-center">
+                                                <TableCell className="text-center group cursor-pointer relative" onClick={() => onEditStock?.(product)}>
                                                     <span className={cn(
-                                                        "text-xs font-bold px-2 py-0.5 rounded-full",
+                                                        "text-xs font-bold px-2 py-0.5 rounded-full transition-all group-hover:scale-110",
                                                         product.stock <= 5 && product.stock > 0 ? "bg-yellow-100 text-yellow-700" :
                                                             product.stock === 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
                                                     )}>

@@ -10,7 +10,9 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { User, Calculator, ArrowRight, CreditCard } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { POSProductList } from "./pos-product-list"
+import { searchByBarcode } from "@/actions/barcode-actions"
 import { POSCart } from "./pos-cart"
+import { QuickStockModal } from "@/components/inventory/quick-stock-modal"
 import { TableSelector } from "./table-selector"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -56,9 +58,10 @@ interface Table {
 interface POSInterfaceProps {
     tableManagementEnabled?: boolean
     tables?: Table[]
+    initialSku?: string
 }
 
-export function POSInterface({ tableManagementEnabled = false, tables = [] }: POSInterfaceProps) {
+export function POSInterface({ tableManagementEnabled = false, tables = [], initialSku }: POSInterfaceProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
@@ -71,6 +74,12 @@ export function POSInterface({ tableManagementEnabled = false, tables = [] }: PO
     const [selectedClientId, setSelectedClientId] = useState<string>("")
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
 
+    // Quick Stock Edit State
+    const [stockModal, setStockModal] = useState<{ isOpen: boolean, product: any | null }>({
+        isOpen: false,
+        product: null
+    })
+
     // Load initial data
     useEffect(() => {
         const load = async () => {
@@ -81,6 +90,52 @@ export function POSInterface({ tableManagementEnabled = false, tables = [] }: PO
         }
         load()
     }, [])
+
+    // Process initialSku from scanner
+    useEffect(() => {
+        const processInitialSku = async () => {
+            if (!initialSku) return
+
+            // Try to find in loaded products first
+            let product = products.find(p => p.sku === initialSku)
+
+            // Not found locally? Try server search (maybe pagination hid it)
+            if (!product) {
+                try {
+                    const result = await searchByBarcode(initialSku)
+                    if (result.found && result.product) {
+                        // Adapt server result to Product interface
+                        product = {
+                            id: result.product.id,
+                            name: result.product.name,
+                            sku: result.product.sku,
+                            price: result.product.price,
+                            stock: result.product.stock,
+                            taxRate: result.product.taxRate,
+                            category: result.product.category ? { name: result.product.category } : null
+                        }
+                        // Add to local products list to avoid re-fetching
+                        setProducts(prev => [...prev, product!])
+                    }
+                } catch (e) {
+                    console.error("Error fetching initial SKU product", e)
+                }
+            }
+
+            if (product) {
+                addToCart(product)
+                setTimeout(() => toast.success(`Agregado: ${product!.name}`), 100)
+
+                // Cleanup URL
+                const url = new URL(window.location.href)
+                url.searchParams.delete('addSku')
+                url.searchParams.delete('t')
+                window.history.replaceState({}, '', url.toString())
+            }
+        }
+
+        processInitialSku()
+    }, [initialSku, products.length])
 
     // Escuchar eventos de teclado globales
     useEffect(() => {
@@ -152,6 +207,12 @@ export function POSInterface({ tableManagementEnabled = false, tables = [] }: PO
 
     const handleDiscountChange = (cartItemId: string, discountRate: number) => {
         setCart(prev => prev.map(item => item.id === cartItemId ? { ...item, discountRate } : item))
+    }
+
+    const handleStockUpdate = (productId: number, newStock: number) => {
+        setProducts(prev => prev.map(p =>
+            p.id === productId ? { ...p, stock: newStock } : p
+        ))
     }
 
     const calculations = cart.reduce((acc, item) => {
@@ -234,6 +295,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [] }: PO
                 <POSProductList
                     products={products}
                     onAddToCart={addToCart}
+                    onEditStock={(product) => setStockModal({ isOpen: true, product })}
                 />
             </div>
 
@@ -327,6 +389,15 @@ export function POSInterface({ tableManagementEnabled = false, tables = [] }: PO
                     </div>
                 </Card>
             </div>
+
+            {stockModal.product && (
+                <QuickStockModal
+                    isOpen={stockModal.isOpen}
+                    onClose={() => setStockModal({ isOpen: false, product: null })}
+                    product={stockModal.product}
+                    onSuccess={(newStock) => handleStockUpdate(stockModal.product.id, newStock)}
+                />
+            )}
         </div>
     )
 }

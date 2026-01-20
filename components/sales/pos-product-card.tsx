@@ -8,10 +8,11 @@ import { cn } from "@/lib/utils"
 interface POSProductCardProps {
     product: Product & { category?: { name: string } | null }
     onAddToCart: (product: any) => void
+    onEditStock?: (product: any) => void
     compact?: boolean
 }
 
-export function POSProductCard({ product, onAddToCart, compact = false }: POSProductCardProps) {
+export function POSProductCard({ product, onAddToCart, onEditStock, compact = false }: POSProductCardProps) {
     const hasStock = product.stock > 0
     const isLowStock = product.stock <= 5 && hasStock
 
@@ -33,9 +34,23 @@ export function POSProductCard({ product, onAddToCart, compact = false }: POSPro
                         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider line-clamp-1">
                             {product.category?.name || "Sin Categ."}
                         </span>
-                        {isLowStock && (
-                            <span className="text-[10px] font-bold text-red-500 bg-red-100 dark:bg-red-950/50 px-1.5 py-0.5 rounded-full">
-                                Bajo: {product.stock}
+                        {(isLowStock || onEditStock) && (
+                            <span
+                                onClick={(e) => {
+                                    if (onEditStock) {
+                                        e.stopPropagation()
+                                        onEditStock(product)
+                                    }
+                                }}
+                                className={cn(
+                                    "text-[10px] font-bold px-1.5 py-0.5 rounded-full z-20 transition-transform",
+                                    onEditStock && "cursor-pointer hover:scale-110 hover:ring-2 ring-primary/20",
+                                    !hasStock ? "text-red-500 bg-red-100" :
+                                        isLowStock ? "text-orange-500 bg-orange-100" :
+                                            "text-green-600 bg-green-100"
+                                )}
+                            >
+                                {product.stock}
                             </span>
                         )}
                     </div>

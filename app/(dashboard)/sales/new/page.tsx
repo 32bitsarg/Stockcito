@@ -6,11 +6,20 @@ import { getTables } from "@/actions/table-actions"
 
 export const dynamic = 'force-dynamic'
 
-export default async function POSPage() {
+// Define props type for Page component
+interface POSPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function POSPage({ searchParams }: POSPageProps) {
     const session = await getSession()
     if (!session) {
         redirect("/login")
     }
+
+    // Resolve search params
+    const resolvedParams = await searchParams
+    const addSku = typeof resolvedParams.addSku === 'string' ? resolvedParams.addSku : undefined
 
     // Get feature flags and tables if enabled
     const features = await getOrganizationFeatures()
@@ -24,6 +33,7 @@ export default async function POSPage() {
             <POSInterface
                 tableManagementEnabled={features?.tableManagement ?? false}
                 tables={tables}
+                initialSku={addSku}
             />
         </div>
     )

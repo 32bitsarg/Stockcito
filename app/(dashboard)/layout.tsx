@@ -6,6 +6,7 @@ import { getSession } from '@/actions/auth-actions'
 import { getKioskSession, getKioskSettings } from '@/actions/kiosk-actions'
 import { KioskAutoLock } from '@/components/employees/kiosk-auto-lock'
 import { ThemeSetter } from '@/components/theme-setter'
+import { BarcodeProvider } from '@/components/barcode/barcode-provider'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
@@ -41,7 +42,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <KioskAutoLock isKioskMode={true} autoLockMinutes={autoLockMinutes} />
         )}
         <ThemeSetter theme={organization?.theme || 'default'} />
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">{children}</main>
+        <BarcodeProvider>
+          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">{children}</main>
+        </BarcodeProvider>
       </div>
     </div>
   )

@@ -3,15 +3,23 @@ import { getCategories } from "@/actions/category-actions"
 import Link from "next/link"
 import { ArrowLeft, Package } from "lucide-react"
 
-export default async function NewProductPage() {
+interface NewProductPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function NewProductPage({ searchParams }: NewProductPageProps) {
     const categories = await getCategories()
+
+    // Resolve search params
+    const resolvedParams = await searchParams
+    const sku = typeof resolvedParams.sku === 'string' ? resolvedParams.sku : undefined
 
     return (
         <div className="flex flex-col gap-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Link 
-                    href="/inventory" 
+                <Link
+                    href="/inventory"
                     className="inline-flex items-center justify-center w-10 h-10 rounded-lg border bg-card hover:bg-accent transition-colors"
                 >
                     <ArrowLeft className="w-5 h-5" />
@@ -29,7 +37,7 @@ export default async function NewProductPage() {
 
             {/* Form */}
             <div className="max-w-2xl">
-                <ProductForm categories={categories} />
+                <ProductForm categories={categories} initialSku={sku} />
             </div>
         </div>
     )

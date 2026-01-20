@@ -18,9 +18,10 @@ import Link from "next/link"
 interface ProductFormProps {
     initialData?: any
     categories?: Array<{ id: number; name: string }>
+    initialSku?: string
 }
 
-export function ProductForm({ initialData, categories = [] }: ProductFormProps) {
+export function ProductForm({ initialData, categories = [], initialSku }: ProductFormProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
@@ -29,7 +30,7 @@ export function ProductForm({ initialData, categories = [] }: ProductFormProps) 
         resolver: zodResolver(productSchema) as any,
         defaultValues: {
             name: initialData?.name || "",
-            sku: initialData?.sku || "",
+            sku: initialData?.sku || initialSku || "",
             description: initialData?.description || "",
             price: initialData?.price || 0,
             cost: initialData?.cost || 0,
