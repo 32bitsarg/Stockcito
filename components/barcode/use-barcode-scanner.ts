@@ -40,6 +40,10 @@ export function useBarcodeScanner({
 
             if (e.key === 'Enter') {
                 if (buffer.current.length >= minLength) {
+                    // Prevent default behavior to avoid submitting forms or clicking focused buttons
+                    e.preventDefault()
+                    e.stopPropagation()
+
                     onScan(buffer.current)
                     buffer.current = ''
                 }

@@ -46,6 +46,11 @@ export const changelogEntries: ChangelogEntry[] = [
                 type: 'fix',
                 title: 'Corrección Rutas Inventario',
                 description: 'Corregida la redirección al crear productos nuevos desde el escáner.'
+            },
+            {
+                type: 'fix',
+                title: 'Navegación Fantasma Scanner',
+                description: 'Corregido comportamiento donde el "Enter" del scanner activaba botones enfocados.'
             }
         ]
     },
