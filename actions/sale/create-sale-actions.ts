@@ -261,6 +261,10 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                     items: {
                         create: saleItemsData
                     }
+                },
+                include: {
+                    items: true,
+                    client: true
                 }
             })
 

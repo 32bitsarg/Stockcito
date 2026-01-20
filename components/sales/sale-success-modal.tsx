@@ -16,7 +16,7 @@ import type { Sale, Organization, SaleItem } from "@prisma/client"
 
 // Helper types since we might not have the full Prisma types in the client
 type ExtendedSaleItem = SaleItem & { productName?: string | null; product?: { name: string } }
-type ExtendedSale = Sale & { items: ExtendedSaleItem[]; client?: { name: string; taxId?: string } | null }
+type ExtendedSale = Sale & { items?: ExtendedSaleItem[]; client?: { name: string; taxId?: string } | null; ticketNumber?: string | null }
 
 interface SaleSuccessModalProps {
     isOpen: boolean
@@ -68,7 +68,7 @@ export function SaleSuccessModal({ isOpen, onClose, sale, organization }: SaleSu
                 <div className="bg-muted/40 p-4 rounded-lg border text-sm space-y-2">
                     <div className="flex justify-between font-medium">
                         <span>Items:</span>
-                        <span>{sale.items.reduce((acc, i) => acc + i.quantity, 0)}</span>
+                        <span>{sale.items?.reduce((acc, i) => acc + i.quantity, 0) ?? 0}</span>
                     </div>
                     <div className="flex justify-between font-medium">
                         <span>Método Pago:</span>

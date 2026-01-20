@@ -8,7 +8,7 @@ import { formatCurrency } from "@/lib/utils"
 type ExtendedSaleItem = SaleItem & { productName?: string | null; product?: { name: string } }
 
 interface TicketReceiptProps {
-    sale: Sale & { items: ExtendedSaleItem[]; client?: { name: string; taxId?: string } | null }
+    sale: Sale & { items?: ExtendedSaleItem[]; client?: { name: string; taxId?: string } | null; ticketNumber?: string | null }
     organization: Organization | null
 }
 
@@ -85,7 +85,7 @@ export function TicketReceipt({ sale, organization }: TicketReceiptProps) {
                     </tr>
                 </thead>
                 <tbody>
-                    {sale.items.map((item) => (
+                    {(sale.items ?? []).map((item) => (
                         <tr key={item.id} className="align-top">
                             <td className="pr-1 py-1">
                                 {item.productName || item.product?.name || "Item"}
