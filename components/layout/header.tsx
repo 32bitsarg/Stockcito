@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import { CircleUser, Menu, Home, Search, Users, RefreshCw, Lock } from "lucide-react"
+import { CircleUser, Menu, Home, Search, Users, RefreshCw, Lock, Sparkles } from "lucide-react"
 import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -124,6 +124,14 @@ export function Header() {
                 <Link href="/">
                     <Home className="h-5 w-5" />
                     <span className="sr-only">Página principal</span>
+                </Link>
+            </Button>
+
+            {/* Botón para ver novedades/changelog */}
+            <Button variant="ghost" size="icon" asChild title="Ver novedades">
+                <Link href="/changelog">
+                    <Sparkles className="h-5 w-5" />
+                    <span className="sr-only">Novedades</span>
                 </Link>
             </Button>
 

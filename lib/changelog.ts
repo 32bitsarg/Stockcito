@@ -17,6 +17,49 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.1.2',
+        date: '2026-01-20',
+        title: 'Integración Restaurante + Logging 🍽️',
+        description: 'Mejoras importantes en el sistema de restaurantes y monitoreo de la aplicación',
+        changes: [
+            {
+                type: 'new',
+                title: 'Integración Mesas + Cocina',
+                description: 'Ahora puedes asignar mesas a las ventas y el display de cocina muestra el número de mesa para cada pedido'
+            },
+            {
+                type: 'new',
+                title: 'Selector de Mesa en POS',
+                description: 'Nuevo componente visual para seleccionar mesa al crear una venta (solo si gestión de mesas está activada)'
+            },
+            {
+                type: 'new',
+                title: 'Sistema de Logging con Appwrite',
+                description: 'Los errores y eventos se registran en Appwrite para monitoreo centralizado en producción'
+            },
+            {
+                type: 'improvement',
+                title: 'Método de pago real desde MercadoPago',
+                description: 'La página de configuración ahora muestra los datos reales del método de pago (últimos 4 dígitos, vencimiento)'
+            },
+            {
+                type: 'improvement',
+                title: 'Verificación real de suscripción',
+                description: 'La página de éxito de suscripción ahora verifica el pago en tiempo real con MercadoPago'
+            },
+            {
+                type: 'improvement',
+                title: 'Mesa se marca ocupada automáticamente',
+                description: 'Al crear una venta con mesa asignada, la mesa cambia automáticamente a estado "ocupada"'
+            },
+            {
+                type: 'fix',
+                title: 'Kitchen Display - tableName',
+                description: 'Corregido el TODO pendiente que mostraba undefined en lugar del nombre de mesa'
+            },
+        ]
+    },
+    {
         version: '0.1.1',
         date: '2026-01-19',
         title: 'Mejoras de Seguridad y UX 🔐',
