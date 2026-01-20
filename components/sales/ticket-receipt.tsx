@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import type { Sale, Organization, SaleItem } from "@prisma/client"
 import { formatCurrency } from "@/lib/utils"
 
@@ -13,38 +12,10 @@ interface TicketReceiptProps {
 }
 
 export function TicketReceipt({ sale, organization }: TicketReceiptProps) {
-    // We need to fetch/ensure hydration for printing
-    // This component is intended to be rendered in a hidden iframe or separate window
-    // But for simple "POS" style, we can render it hidden and use @media print
-
     if (!sale || !organization) return null
 
     return (
-        <div className="ticket-print-container hidden print:block print:w-[80mm] print:p-2 print:font-mono print:text-xs text-black">
-            <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .ticket-print-container, .ticket-print-container * {
-            visibility: visible;
-          }
-          .ticket-print-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 80mm;
-            margin: 0;
-            padding: 10px;
-          }
-           /* Hide headers/footers in browser print preview if possible */
-          @page {
-            size: auto;
-            margin: 0mm;
-          }
-        }
-      `}</style>
-
+        <div className="ticket-content text-black">
             {/* Header */}
             <div className="text-center mb-4">
                 {organization.logo && (

@@ -205,3 +205,61 @@
 .dark * {
   scrollbar-color: #606060 transparent;
 }
+
+/* ===============================
+   Print Styles
+   =============================== */
+
+/* Portal container for printable content - hidden by default */
+.print-portal {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Print media query */
+@media print {
+  /* Hide everything except the print portal */
+  body > *:not(.print-portal) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Show and position the print portal */
+  .print-portal {
+    display: block !important;
+    visibility: visible !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    min-height: 100vh !important;
+    z-index: 99999 !important;
+    background: white !important;
+    color: black !important;
+    padding: 10px !important;
+    margin: 0 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Ensure all children are visible */
+  .print-portal * {
+    visibility: visible !important;
+    color: black !important;
+  }
+
+  /* Clean page margins */
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  /* Reset any dark mode styles */
+  .print-portal,
+  .print-portal * {
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
