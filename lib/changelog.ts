@@ -51,6 +51,21 @@ export const changelogEntries: ChangelogEntry[] = [
                 type: 'fix',
                 title: 'Navegación Fantasma Scanner',
                 description: 'Corregido comportamiento donde el "Enter" del scanner activaba botones enfocados.'
+            },
+            {
+                type: 'fix',
+                title: 'Creación de Usuario en Modo Automático',
+                description: 'Solucionado bug que impedía crear usuarios con PIN automático.'
+            },
+            {
+                type: 'improvement',
+                title: 'Visualización de Credenciales',
+                description: 'Nueva ventana emergente muestra el PIN y contraseña generados al crear un empleado, como respaldo al email.'
+            },
+            {
+                type: 'fix',
+                title: 'Visibilidad de Usuarios en Kiosco',
+                description: 'El modo kiosco ahora muestra a todos los empleados, indicando cuáles tienen PIN pendiente de configurar.'
             }
         ]
     },
