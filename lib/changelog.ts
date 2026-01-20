@@ -24,6 +24,21 @@ export const changelogEntries: ChangelogEntry[] = [
         changes: [
             {
                 type: 'new',
+                title: 'Tickets Profesionales',
+                description: 'Numeración secuencial y formato optimizado para impresoras térmicas de 80mm.'
+            },
+            {
+                type: 'improvement',
+                title: 'Snapshot de Productos',
+                description: 'Los tickets guardan el nombre del producto al momento de la venta, preservando el historial.'
+            },
+            {
+                type: 'new',
+                title: 'Impresión Directa',
+                description: 'Botón para imprimir ticket inmediatamente después de la venta.'
+            },
+            {
+                type: 'new',
                 title: 'Escaneo Global',
                 description: 'Escanea productos desde cualquier pantalla para ir directo a la venta o crear el producto.'
             },
