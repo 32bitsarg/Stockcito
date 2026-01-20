@@ -91,9 +91,24 @@
 
 ---
 
+### 9. ✅ Integración Lector Código de Barras (POS y Global)
+- [x] **Archivo:** Nuevos archivos y updates en POS
+- [x] **Problema:** Solicitud de feature: Escaneo agnóstico y directo a POS
+- [x] **Solución:** Implementar listener global, búsqueda inteligente y acciones rápidas
+- **Estado:** ✅ Completado (Feature nueva)
+- **Cambios realizados:**
+  - `components/barcode/use-barcode-scanner.ts`: Hook para detectar entrada de scanner (KB simulation)
+  - `components/barcode/barcode-provider.tsx`: Listener global que redirige a POS o muestra modal de creación
+  - `actions/barcode-actions.ts`: Server actions para búsqueda segura y ajuste de stock
+  - `components/sales/pos-interface.tsx`: Soporte para cargar SKU desde URL y búsqueda fallback en servidor
+  - `components/inventory/quick-stock-modal.tsx`: Edición rápida de stock desde POS
+  - `app/(dashboard)/layout.tsx`: Provider global integrado
+
+---
+
 ## 📚 Documentación
 
-### 8. Actualizar DOCUMENTATION.md
+### 10. Actualizar DOCUMENTATION.md
 - [ ] Sincronizar versión (v0.1 vs 2.0.0)
 - [ ] Actualizar fechas
 - [ ] Corregir estado de sincronización offline
@@ -105,7 +120,7 @@
 
 | Total | Completados | En Progreso | Pendientes |
 |-------|-------------|-------------|------------|
-| 8     | 5           | 0           | 3          |
+| 10    | 6           | 0           | 4          |
 
 ---
 
