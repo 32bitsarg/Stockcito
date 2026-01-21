@@ -311,6 +311,11 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     sale: result.sale,
                     organization: result.organization
                 })
+
+                // Reload products to update stock
+                const updatedProducts = await getProducts()
+                setProducts(updatedProducts as any)
+
                 router.refresh()
             } else {
                 toast.error("Error al procesar la venta", {
