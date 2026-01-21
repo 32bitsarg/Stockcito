@@ -60,9 +60,12 @@ interface POSInterfaceProps {
     tableManagementEnabled?: boolean
     tables?: Table[]
     initialSku?: string
+    userRole?: string
 }
 
-export function POSInterface({ tableManagementEnabled = false, tables = [], initialSku }: POSInterfaceProps) {
+export function POSInterface({ tableManagementEnabled = false, tables = [], initialSku, userRole = 'cashier' }: POSInterfaceProps) {
+    // Check if user can edit stock (admin or owner)
+    const canEditStock = userRole === 'admin' || userRole === 'owner'
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
@@ -128,8 +131,27 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             }
 
             if (product) {
-                addToCart(product)
-                setTimeout(() => toast.success(`Agregado: ${product!.name}`), 100)
+                // Check if product has no stock
+                if (product.stock <= 0) {
+                    if (canEditStock) {
+                        toast.error(`Sin stock: ${product.name}`, {
+                            description: '¿Deseas actualizar el stock?',
+                            duration: 8000,
+                            action: {
+                                label: 'Editar Stock',
+                                onClick: () => setStockModal({ isOpen: true, product: product! })
+                            }
+                        })
+                    } else {
+                        toast.error(`Sin stock: ${product.name}`, {
+                            description: 'No hay unidades disponibles',
+                            duration: 5000
+                        })
+                    }
+                } else {
+                    addToCart(product)
+                    setTimeout(() => toast.success(`Agregado: ${product!.name}`), 100)
+                }
 
                 // Cleanup URL
                 const url = new URL(window.location.href)
@@ -140,7 +162,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         }
 
         processInitialSku()
-    }, [initialSku, products.length])
+    }, [initialSku, products.length, canEditStock])
 
     // Listen for internal barcode events (Direct Scan in POS)
     useEffect(() => {
@@ -155,6 +177,36 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     stock: serverProduct.stock,
                     taxRate: serverProduct.taxRate,
                     category: serverProduct.category ? { name: serverProduct.category } : null
+                }
+
+                // Check if product has no stock
+                if (product.stock <= 0) {
+                    if (canEditStock) {
+                        // Show toast with action to edit stock
+                        toast.error(`Sin stock: ${product.name}`, {
+                            description: '¿Deseas actualizar el stock?',
+                            duration: 8000,
+                            action: {
+                                label: 'Editar Stock',
+                                onClick: () => setStockModal({ isOpen: true, product })
+                            }
+                        })
+                    } else {
+                        // User can't edit stock, just show warning
+                        toast.error(`Sin stock: ${product.name}`, {
+                            description: 'No hay unidades disponibles',
+                            duration: 5000
+                        })
+                    }
+
+                    // Add to products list anyway for reference
+                    setProducts(prev => {
+                        if (!prev.find(p => p.id === product.id)) {
+                            return [...prev, product]
+                        }
+                        return prev
+                    })
+                    return // Don't add to cart
                 }
 
                 // Add to cart directly
@@ -174,7 +226,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
 
         window.addEventListener('barcode-scanned' as any, handleInternalScan)
         return () => window.removeEventListener('barcode-scanned' as any, handleInternalScan)
-    }, [])
+    }, [canEditStock])
 
     // Escuchar eventos de teclado globales
     useEffect(() => {

@@ -34,6 +34,7 @@ export default async function POSPage({ searchParams }: POSPageProps) {
                 tableManagementEnabled={features?.tableManagement ?? false}
                 tables={tables}
                 initialSku={addSku}
+                userRole={session.role}
             />
         </div>
     )

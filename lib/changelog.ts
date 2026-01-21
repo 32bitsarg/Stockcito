@@ -58,6 +58,21 @@ export const changelogEntries: ChangelogEntry[] = [
                 description: 'Haz clic en el indicador de stock en el POS para ajustar cantidades rápidamente (solo Admin/Manager).'
             },
             {
+                type: 'new',
+                title: 'Alerta Stock Agotado al Escanear',
+                description: 'Al escanear un producto sin stock, se muestra alerta con opción de editar stock (según permisos).'
+            },
+            {
+                type: 'improvement',
+                title: 'Actualización Automática de Stock',
+                description: 'El inventario se actualiza automáticamente después de cada venta sin necesidad de recargar.'
+            },
+            {
+                type: 'improvement',
+                title: 'Impresión con Portal React',
+                description: 'Sistema de impresión de tickets robusto usando portales para evitar conflictos con modales.'
+            },
+            {
                 type: 'fix',
                 title: 'Corrección Rutas Inventario',
                 description: 'Corregida la redirección al crear productos nuevos desde el escáner.'
@@ -71,6 +86,16 @@ export const changelogEntries: ChangelogEntry[] = [
                 type: 'fix',
                 title: 'Creación de Usuario en Modo Automático',
                 description: 'Solucionado bug que impedía crear usuarios con PIN automático.'
+            },
+            {
+                type: 'fix',
+                title: 'Error Venta Modal Éxito',
+                description: 'Corregido error "Cannot read reduce" al mostrar el modal de venta exitosa.'
+            },
+            {
+                type: 'fix',
+                title: 'Sincronización Base de Datos',
+                description: 'Corregidos campos faltantes (ticketNumber, ticketSequence) en base de datos local.'
             },
             {
                 type: 'improvement',
