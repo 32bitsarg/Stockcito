@@ -1,13 +1,15 @@
 // Plan definitions for Stockcito v2.0.0
+// 3-Tier System: Free, Emprendedor, Pyme
 
 export const PLAN_LIMITS = {
   free: {
-    maxProducts: 100,
-    maxClients: 100,
-    maxUsers: 5, // Up to 5 employees
-    maxInvoicesPerMonth: 50,
-    maxCreditNotesPerMonth: 10,
-    reportDaysLimit: 7,
+    maxProducts: 25,
+    maxClients: 10,
+    maxUsers: 1, // Solo el dueño
+    maxInvoicesPerMonth: 20,
+    maxCreditNotesPerMonth: 5,
+    maxSuppliers: 0,
+    reportDaysLimit: 1, // Solo el día actual (24hs)
     features: {
       suppliers: false,
       advancedReports: false,
@@ -21,13 +23,35 @@ export const PLAN_LIMITS = {
       api: false,
     }
   },
+  entrepreneur: {
+    maxProducts: 300,
+    maxClients: 200,
+    maxUsers: 2, // Dueño + 1 empleado/socio
+    maxInvoicesPerMonth: 200,
+    maxCreditNotesPerMonth: 50,
+    maxSuppliers: 10,
+    reportDaysLimit: 30, // 30 días de historial
+    features: {
+      suppliers: true,
+      advancedReports: false,
+      pdfExport: true,
+      excelExport: true,
+      bulkOperations: false,
+      auditFull: false,
+      alerts: false,
+      customTheme: false,
+      prioritySupport: false,
+      api: false,
+    }
+  },
   premium: {
-    maxProducts: -1, // unlimited
+    maxProducts: -1, // Ilimitado
     maxClients: -1,
-    maxUsers: -1, // Landing says unlimited
+    maxUsers: -1,
     maxInvoicesPerMonth: -1,
     maxCreditNotesPerMonth: -1,
-    reportDaysLimit: -1, // unlimited history
+    maxSuppliers: -1,
+    reportDaysLimit: -1, // Historial completo
     features: {
       suppliers: true,
       advancedReports: true,
@@ -52,9 +76,14 @@ export const PLAN_PRICES = {
     yearly: 0,
     currency: 'ARS'
   },
+  entrepreneur: {
+    monthly: 15000,
+    yearly: 150000, // 2 meses gratis
+    currency: 'ARS'
+  },
   premium: {
-    monthly: 10000,
-    yearly: 100000, // 2 months free
+    monthly: 30000,
+    yearly: 300000, // 2 meses gratis
     currency: 'ARS'
   }
 } as const
@@ -77,16 +106,25 @@ export const PLANS: PlanInfo[] = [
   {
     id: 'free',
     name: 'Free',
-    description: 'Ideal para comenzar tu negocio',
+    description: 'Para probar el sistema',
     price: PLAN_PRICES.free.monthly,
     priceYearly: PLAN_PRICES.free.yearly,
     currency: 'ARS',
     limits: PLAN_LIMITS.free,
   },
   {
+    id: 'entrepreneur',
+    name: 'Emprendedor',
+    description: 'Para negocios unipersonales',
+    price: PLAN_PRICES.entrepreneur.monthly,
+    priceYearly: PLAN_PRICES.entrepreneur.yearly,
+    currency: 'ARS',
+    limits: PLAN_LIMITS.entrepreneur,
+  },
+  {
     id: 'premium',
-    name: 'Premium',
-    description: 'Para negocios en crecimiento',
+    name: 'Pyme',
+    description: 'Para negocios establecidos',
     price: PLAN_PRICES.premium.monthly,
     priceYearly: PLAN_PRICES.premium.yearly,
     currency: 'ARS',

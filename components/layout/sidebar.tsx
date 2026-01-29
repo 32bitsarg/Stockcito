@@ -78,22 +78,29 @@ export async function Sidebar() {
                             "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                             isPremium && !isTrialing
                                 ? "bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-800 dark:text-amber-200 hover:from-amber-200 hover:to-orange-200 dark:hover:from-amber-900/50 dark:hover:to-orange-900/50"
-                                : isTrialing
-                                    ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 text-violet-800 dark:text-violet-200 hover:from-violet-200 hover:to-purple-200"
-                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                : plan === 'entrepreneur' && !isTrialing
+                                    ? "bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 text-blue-800 dark:text-blue-200 hover:from-blue-200 hover:to-cyan-200"
+                                    : isTrialing
+                                        ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 text-violet-800 dark:text-violet-200 hover:from-violet-200 hover:to-purple-200"
+                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
                         )}
                     >
                         {isPremium && !isTrialing ? (
                             <>
                                 <Crown className="h-4 w-4" />
-                                <span>Premium</span>
+                                <span>Plan Pyme</span>
+                            </>
+                        ) : plan === 'entrepreneur' && !isTrialing ? (
+                            <>
+                                <Crown className="h-4 w-4" />
+                                <span>Emprendedor</span>
                             </>
                         ) : isTrialing ? (
                             <>
                                 <Crown className="h-4 w-4" />
                                 <div className="flex flex-col">
                                     <span>Prueba Gratis</span>
-                                    <span className="text-[10px] opacity-75">Premium activo</span>
+                                    <span className="text-[10px] opacity-75">Pyme activo</span>
                                 </div>
                                 <Badge variant="secondary" className="text-[10px] ml-auto bg-violet-200 dark:bg-violet-800 text-violet-800 dark:text-violet-200">
                                     {trialDays !== null ? `${trialDays}d` : 'Trial'}

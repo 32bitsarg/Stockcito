@@ -5,6 +5,7 @@ export interface UsageData {
   productsCount: number
   clientsCount: number
   usersCount: number
+  suppliersCount: number
   invoicesThisMonth: number
   creditNotesThisMonth: number
   salesThisMonth: number
@@ -24,10 +25,11 @@ export async function getCurrentUsage(organizationId: number): Promise<UsageData
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-  const [productsCount, clientsCount, usersCount, invoicesThisMonth, creditNotesThisMonth, salesThisMonth] = await Promise.all([
+  const [productsCount, clientsCount, usersCount, suppliersCount, invoicesThisMonth, creditNotesThisMonth, salesThisMonth] = await Promise.all([
     db.product.count({ where: { organizationId } }),
     db.client.count({ where: { organizationId } }),
     db.user.count({ where: { organizationId, active: true } }),
+    db.supplier.count({ where: { organizationId } }),
     db.invoice.count({
       where: {
         organizationId,
@@ -53,6 +55,7 @@ export async function getCurrentUsage(organizationId: number): Promise<UsageData
     productsCount,
     clientsCount,
     usersCount,
+    suppliersCount,
     invoicesThisMonth,
     creditNotesThisMonth,
     salesThisMonth
@@ -62,7 +65,7 @@ export async function getCurrentUsage(organizationId: number): Promise<UsageData
 // Check if a specific limit allows a new item
 export async function checkLimit(
   organizationId: number,
-  limitType: 'products' | 'clients' | 'users' | 'invoices' | 'creditNotes'
+  limitType: 'products' | 'clients' | 'users' | 'suppliers' | 'invoices' | 'creditNotes'
 ): Promise<LimitCheckResult> {
   const org = await db.organization.findUnique({
     where: { id: organizationId },
@@ -107,6 +110,11 @@ export async function checkLimit(
       limit = limits.maxCreditNotesPerMonth
       entityName = 'notas de crédito este mes'
       break
+    case 'suppliers':
+      current = usage.suppliersCount
+      limit = limits.maxSuppliers
+      entityName = 'proveedores'
+      break
     default:
       return { allowed: true, current: 0, limit: -1, limitReached: false }
   }
@@ -124,8 +132,8 @@ export async function checkLimit(
     current,
     limit,
     limitReached,
-    message: limitReached 
-      ? `Has alcanzado el límite de ${limit} ${entityName}. Mejora a Premium para desbloquear más.`
+    message: limitReached
+      ? `Has alcanzado el límite de ${limit} ${entityName}. Mejora tu plan para desbloquear más.`
       : undefined
   }
 }
@@ -145,7 +153,7 @@ export async function checkFeatureAccess(
   }
 
   const plan = org.plan as PlanType
-  
+
   // Trial users get premium features
   if (org.planStatus === 'trial') {
     return { allowed: true, plan: 'premium' }
@@ -200,12 +208,12 @@ export class UsageTracker {
     return getCurrentUsage(this.organizationId)
   }
 
-  async canCreate(type: 'products' | 'clients' | 'users' | 'invoices' | 'creditNotes'): Promise<boolean> {
+  async canCreate(type: 'products' | 'clients' | 'users' | 'suppliers' | 'invoices' | 'creditNotes'): Promise<boolean> {
     const result = await checkLimit(this.organizationId, type)
     return result.allowed
   }
 
-  async checkLimit(type: 'products' | 'clients' | 'users' | 'invoices' | 'creditNotes'): Promise<LimitCheckResult> {
+  async checkLimit(type: 'products' | 'clients' | 'users' | 'suppliers' | 'invoices' | 'creditNotes'): Promise<LimitCheckResult> {
     return checkLimit(this.organizationId, type)
   }
 

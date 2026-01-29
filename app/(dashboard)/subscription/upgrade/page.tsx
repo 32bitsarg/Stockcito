@@ -10,36 +10,55 @@ import { Crown, Shield, Zap, Clock } from "lucide-react"
 import toast from "react-hot-toast"
 
 const FREE_FEATURES = [
-  { name: "POS completo sin límite de ventas", included: true },
-  { name: "Dashboard en tiempo real", included: true },
+  { name: "POS completo", included: true },
+  { name: "Dashboard básico", included: true },
   { name: "Gestión de descuentos", included: true },
   { name: "App de escritorio", included: true },
   { name: "Gestión de proveedores", included: false },
   { name: "Exportación PDF/Excel", included: false },
   { name: "Reportes avanzados", included: false },
   { name: "Alertas automáticas", included: false },
-  { name: "Soporte prioritario", included: false },
 ]
 
-const PREMIUM_FEATURES = [
-  { name: "POS completo sin límite de ventas", included: true },
+const ENTREPRENEUR_FEATURES = [
+  { name: "POS completo", included: true },
   { name: "Dashboard en tiempo real", included: true },
   { name: "Gestión de descuentos", included: true },
   { name: "App de escritorio", included: true },
-  { name: "Gestión de proveedores", included: true },
+  { name: "Gestión de proveedores (hasta 10)", included: true },
+  { name: "Exportación PDF/Excel", included: true },
+  { name: "Reportes avanzados", included: false },
+  { name: "Alertas automáticas", included: false },
+]
+
+const PYME_FEATURES = [
+  { name: "POS completo", included: true },
+  { name: "Dashboard en tiempo real", included: true },
+  { name: "Gestión de descuentos", included: true },
+  { name: "App de escritorio", included: true },
+  { name: "Gestión de proveedores ilimitados", included: true },
   { name: "Exportación PDF/Excel", included: true },
   { name: "Reportes avanzados", included: true },
   { name: "Alertas automáticas", included: true },
+  { name: "Auditoría completa", included: true },
   { name: "Soporte prioritario", included: true },
 ]
 
 const FREE_LIMITS = [
-  { name: "Productos", value: "100" },
-  { name: "Empleados", value: "5" },
+  { name: "Productos", value: "25" },
+  { name: "Clientes", value: "10" },
+  { name: "Usuarios", value: "1" },
 ]
 
-const PREMIUM_LIMITS = [
+const ENTREPRENEUR_LIMITS = [
+  { name: "Productos", value: "300" },
+  { name: "Clientes", value: "200" },
+  { name: "Usuarios", value: "2" },
+]
+
+const PYME_LIMITS = [
   { name: "Productos", value: "Ilimitados" },
+  { name: "Clientes", value: "Ilimitados" },
   { name: "Usuarios", value: "Ilimitados" },
 ]
 
@@ -47,20 +66,16 @@ export default function UpgradePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan, isTrialing, loading: subscriptionLoading } = useSubscription()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
 
-  // Move handleUpgrade definition up or use a reference if needed, 
-  // but simpler to define handleUpgrade then add useEffect below it.
-
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (targetPlan: "entrepreneur" | "premium") => {
     try {
-      setLoading(true)
-      console.log('Starting checkout session...')
-      const result = await createCheckoutSession("monthly")
+      setLoading(targetPlan)
+      console.log(`Starting checkout session for ${targetPlan}...`)
+      const result = await createCheckoutSession("monthly", targetPlan)
       console.log('Checkout result:', result)
 
       if (result.success && result.checkoutUrl) {
-        // Redirect to MercadoPago checkout
         console.log('Redirecting to:', result.checkoutUrl)
         window.location.href = result.checkoutUrl
       } else {
@@ -71,20 +86,21 @@ export default function UpgradePage() {
       console.error('Checkout exception:', error)
       toast.error("Error al procesar la solicitud")
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
-  const isPremium = plan === "premium" && !isTrialing
+  const isPyme = plan === "premium" && !isTrialing
+  const isEntrepreneur = plan === "entrepreneur" && !isTrialing
 
   useEffect(() => {
-    if (searchParams.get('auto_checkout') === 'true' && !loading && !subscriptionLoading && !isPremium) {
-      handleUpgrade()
+    if (searchParams.get('auto_checkout') === 'true' && !loading && !subscriptionLoading && !isPyme) {
+      handleUpgrade("premium")
     }
-  }, [searchParams, subscriptionLoading, isPremium])
+  }, [searchParams, subscriptionLoading, isPyme])
 
   return (
-    <div className="container max-w-6xl py-8">
+    <div className="container max-w-7xl py-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">
           Elige el plan perfecto para tu negocio
@@ -115,7 +131,7 @@ export default function UpgradePage() {
           <div>
             <h3 className="font-semibold">7 días de prueba</h3>
             <p className="text-sm text-muted-foreground">
-              Prueba todas las funciones Premium sin compromiso
+              Prueba todas las funciones Pyme sin compromiso
             </p>
           </div>
         </div>
@@ -133,11 +149,11 @@ export default function UpgradePage() {
         </div>
       </div>
 
-      {/* Plan Cards */}
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
+      {/* Plan Cards - 3 columns */}
+      <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
         <PlanCard
           name="Free"
-          description="Ideal para comenzar tu negocio"
+          description="Para probar el sistema"
           price="Gratis"
           features={FREE_FEATURES}
           limits={FREE_LIMITS}
@@ -146,28 +162,49 @@ export default function UpgradePage() {
         />
 
         <PlanCard
-          name="Premium"
-          description="Para negocios en crecimiento"
-          price="$10.000"
-          priceYearly="$100.000"
-          features={PREMIUM_FEATURES}
-          limits={PREMIUM_LIMITS}
+          name="Emprendedor"
+          description="Para negocios unipersonales"
+          price="$15.000"
+          priceYearly="$150.000"
+          features={ENTREPRENEUR_FEATURES}
+          limits={ENTREPRENEUR_LIMITS}
+          current={isEntrepreneur}
+          onSelect={isEntrepreneur || isPyme ? undefined : () => handleUpgrade("entrepreneur")}
+          loading={loading === "entrepreneur"}
+          buttonText={
+            isTrialing
+              ? "Suscribirme"
+              : isEntrepreneur
+                ? "Plan actual"
+                : isPyme
+                  ? "Ya tienes Pyme"
+                  : "Elegir Emprendedor"
+          }
+        />
+
+        <PlanCard
+          name="Pyme"
+          description="Para negocios establecidos"
+          price="$30.000"
+          priceYearly="$300.000"
+          features={PYME_FEATURES}
+          limits={PYME_LIMITS}
           popular
-          current={isPremium}
-          onSelect={isPremium ? undefined : handleUpgrade}
-          loading={loading}
+          current={isPyme}
+          onSelect={isPyme ? undefined : () => handleUpgrade("premium")}
+          loading={loading === "premium"}
           buttonText={
             isTrialing
               ? "Suscribirme ahora"
-              : isPremium
+              : isPyme
                 ? "Plan actual"
-                : "Mejorar a Premium"
+                : "Elegir Pyme"
           }
         />
       </div>
 
       {/* Detailed Comparison */}
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-center mb-6">
           Comparación detallada
         </h2>
@@ -184,7 +221,7 @@ export default function UpgradePage() {
           <div>
             <h3 className="font-semibold mb-2">¿Cómo funciona el período de prueba?</h3>
             <p className="text-muted-foreground text-sm">
-              Al registrarte, tienes 7 días para probar todas las funciones Premium gratis.
+              Al registrarte, tienes 7 días para probar todas las funciones Pyme gratis.
               No necesitas tarjeta de crédito. Si no te suscribes, pasas automáticamente al plan Free.
             </p>
           </div>
@@ -198,19 +235,19 @@ export default function UpgradePage() {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-2">¿Puedo cancelar en cualquier momento?</h3>
+            <h3 className="font-semibold mb-2">¿Puedo cambiar de plan en cualquier momento?</h3>
             <p className="text-muted-foreground text-sm">
-              Sí, puedes cancelar cuando quieras. Tu plan Premium seguirá activo hasta
-              el final del período pagado, luego pasarás al plan Free.
+              Sí, puedes subir o bajar de plan cuando quieras. Si bajas, tu plan actual
+              sigue activo hasta el final del período pagado.
             </p>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-2">¿Qué pasa con mis datos si bajo a Free?</h3>
+            <h3 className="font-semibold mb-2">¿Qué pasa con mis datos si bajo de plan?</h3>
             <p className="text-muted-foreground text-sm">
-              Tus datos nunca se borran. Si excedes los límites del plan Free,
+              Tus datos nunca se borran. Si excedes los límites del plan inferior,
               simplemente no podrás crear nuevos registros hasta que elimines algunos
-              o vuelvas a Premium.
+              o subas de plan.
             </p>
           </div>
         </div>
