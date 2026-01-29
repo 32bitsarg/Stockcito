@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isAppwriteConfigured, getAppwriteDatabases, APPWRITE_DATABASE_ID, APPWRITE_LOGS_COLLECTION_ID, ID } from '@/lib/appwrite'
 
 // Test endpoint to verify Appwrite connection
-// GET /api/debug/appwrite
+// GET /api/debug/appwrite?secret=stockcito-debug-2026
 export async function GET(request: NextRequest) {
-    // Only allow in development or with secret header
+    // Only allow in development or with secret header/query param
     const authHeader = request.headers.get('x-debug-secret')
+    const authQuery = request.nextUrl.searchParams.get('secret')
     const isDev = process.env.NODE_ENV !== 'production'
     const expectedSecret = process.env.DEBUG_SECRET || 'stockcito-debug-2026'
 
-    if (!isDev && authHeader !== expectedSecret) {
+    if (!isDev && authHeader !== expectedSecret && authQuery !== expectedSecret) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
