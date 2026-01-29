@@ -11,39 +11,60 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 const plans = [
   {
     name: 'Free',
-    description: 'Perfecto para empezar sin invertir un peso.',
+    description: 'Para probar el sistema.',
     price: '$0',
     priceNote: '/mes',
     popular: false,
     features: [
-      { name: 'POS Básico', included: true },
-      { name: 'Hasta 100 productos', included: true },
-      { name: 'Hasta 5 empleados', included: true },
-      { name: 'Reportes Básicos', included: true },
-      { name: 'Facturación PDF', included: false },
-      { name: 'Control de Stock Avanzado', included: false },
-      { name: 'Soporte Prioritario', included: false },
-      { name: 'Múltiples Cajas', included: false },
+      { name: 'Hasta 25 productos', included: true },
+      { name: 'Hasta 10 clientes', included: true },
+      { name: 'Solo 1 usuario (dueño)', included: true },
+      { name: 'Historial de 24hs', included: true },
+      { name: 'Proveedores', included: false },
+      { name: 'Exportación PDF/Excel', included: false },
+      { name: 'Reportes avanzados', included: false },
     ],
     cta: 'Crear cuenta gratis',
     href: '/register',
     variant: 'outline' as const
   },
   {
-    name: 'Pro',
-    description: 'Para negocios que quieren crecer de verdad.',
-    price: '$10.000',
+    name: 'Emprendedor',
+    description: 'Para negocios unipersonales.',
+    price: '$15.000',
+    priceNote: 'ARS/mes',
+    popular: false,
+    features: [
+      { name: 'Hasta 300 productos', included: true },
+      { name: 'Hasta 200 clientes', included: true },
+      { name: 'Hasta 2 usuarios', included: true },
+      { name: 'Historial de 30 días', included: true },
+      { name: 'Hasta 10 proveedores', included: true },
+      { name: 'Exportación PDF y Excel', included: true },
+      { name: 'Reportes avanzados', included: false },
+      { name: 'Alertas automáticas', included: false },
+    ],
+    cta: 'Empezar prueba gratis',
+    href: '/register',
+    variant: 'outline' as const
+  },
+  {
+    name: 'Pyme',
+    description: 'Para negocios establecidos.',
+    price: '$30.000',
     priceNote: 'ARS/mes',
     popular: true,
     features: [
-      { name: 'POS Ilimitado', included: true },
-      { name: 'Productos Ilimitados', included: true },
-      { name: 'Usuarios Ilimitados', included: true },
-      { name: 'Reportes Avanzados & Excel', included: true },
-      { name: 'Facturación PDF & Fiscal', included: true },
-      { name: 'Alertas de Stock', included: true },
-      { name: 'Soporte Prioritario WhatsApp', included: true },
-      { name: 'Gestión de Proveedores', included: true },
+      { name: 'Productos ilimitados', included: true },
+      { name: 'Clientes ilimitados', included: true },
+      { name: 'Usuarios ilimitados', included: true },
+      { name: 'Historial completo', included: true },
+      { name: 'Proveedores ilimitados', included: true },
+      { name: 'Exportación PDF y Excel', included: true },
+      { name: 'Reportes avanzados', included: true },
+      { name: 'Alertas automáticas', included: true },
+      { name: 'Auditoría completa', included: true },
+      { name: 'Soporte prioritario', included: true },
     ],
     cta: 'Empezar prueba de 7 días',
     href: '/register',
@@ -65,11 +86,11 @@ export function LandingPricing() {
             Precios simples, como tu negocio
           </h2>
           <p className="max-w-[700px] mx-auto text-muted-foreground md:text-xl">
-            Sin contratos a largo plazo. Cancelá cuando quieras.
+            Elegí el plan que mejor se adapte a tu etapa. Sin contratos a largo plazo.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:gap-8 max-w-4xl mx-auto items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
           {plans.map((plan, i) => (
             <motion.div
               key={i}
@@ -89,7 +110,7 @@ export function LandingPricing() {
                 <CardHeader>
                   {plan.popular && (
                     <Badge className="w-fit mb-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                      Recomendado
+                      Más popular
                     </Badge>
                   )}
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
@@ -126,7 +147,7 @@ export function LandingPricing() {
                     <Button className="w-full h-11 text-base font-medium shadow-sm transition-all hover:scale-[1.02]" variant={plan.variant} asChild>
                       <Link href={plan.href}>{plan.cta}</Link>
                     </Button>
-                    {plan.name === 'Pro' && (
+                    {plan.name === 'Pyme' && (
                       <Button className="w-full h-11 border-primary text-primary hover:bg-primary/5 text-base font-medium" variant="outline" asChild>
                         <Link href="/register?mode=subscription">Suscribirse ahora</Link>
                       </Button>

@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache"
 import { requireOrganization, requireRole } from "./session-actions"
 import { logAudit } from "./audit-actions"
 import { UserRole } from "./types"
+import { UsageTracker } from "@/lib/subscription/usage-tracker"
 
 // Get all users (admin only) - filtered by organization
 export async function getUsers(): Promise<any[]> {
@@ -98,6 +99,13 @@ export async function createUser(data: {
 
         if (newRoleIndex > myRoleIndex) {
             return { success: false, error: "No puedes crear usuarios con rol superior al tuyo" }
+        }
+
+        // Check user limit based on plan
+        const tracker = new UsageTracker(organizationId)
+        const userLimit = await tracker.checkLimit('users')
+        if (!userLimit.allowed) {
+            return { success: false, error: userLimit.message || "Has alcanzado el límite de usuarios de tu plan" }
         }
 
         // Check if email exists in this organization

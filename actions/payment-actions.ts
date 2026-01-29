@@ -26,6 +26,7 @@ export interface CheckoutResult {
 // Create checkout session for subscription
 export async function createCheckoutSession(
   planType: 'monthly' | 'yearly' = 'monthly',
+  targetPlan: 'entrepreneur' | 'premium' = 'premium',
   useSubscription: boolean = true
 ): Promise<CheckoutResult> {
   try {
@@ -52,8 +53,8 @@ export async function createCheckoutSession(
 
     if (useSubscription) {
       // Try subscription plan first (recurring payments)
-      paymentLogger.info('Attempting to create subscription plan...')
-      const subscriptionPlan = await createSubscriptionPlan(planType)
+      paymentLogger.info(`Attempting to create subscription plan for ${targetPlan}...`)
+      const subscriptionPlan = await createSubscriptionPlan(planType, targetPlan)
 
       if (subscriptionPlan?.init_point) {
         checkoutUrl = subscriptionPlan.init_point
@@ -65,7 +66,8 @@ export async function createCheckoutSession(
           org.id,
           org.name,
           org.email,
-          planType
+          planType,
+          targetPlan
         )
 
         if (preference) {
@@ -80,7 +82,8 @@ export async function createCheckoutSession(
         org.id,
         org.name,
         org.email,
-        planType
+        planType,
+        targetPlan
       )
 
       if (preference) {
@@ -160,12 +163,24 @@ export async function processPaymentSuccess(
     // Determine if upgrade or renewal
     const amount = paymentInfo.transaction_amount
 
-    if (org.plan === 'premium' && org.planStatus === 'active') {
+    // Determine target plan based on payment amount
+    // Entrepreneur: $15,000 monthly / $150,000 yearly
+    // Premium (Pyme): $30,000 monthly / $300,000 yearly
+    let targetPlan: 'entrepreneur' | 'premium' = 'premium'
+    if (amount <= 16000) { // Monthly entrepreneur
+      targetPlan = 'entrepreneur'
+    } else if (amount <= 151000) { // Yearly entrepreneur
+      targetPlan = 'entrepreneur'
+    }
+    // Otherwise it's premium
+
+    const isPaidPlan = org.plan === 'premium' || org.plan === 'entrepreneur'
+    if (isPaidPlan && org.planStatus === 'active') {
       // Renewal
       await renewSubscription(parsed.organizationId, paymentId, amount)
     } else {
       // New subscription or upgrade
-      await upgradeToPremium(parsed.organizationId, paymentId, amount)
+      await upgradeToPremium(parsed.organizationId, paymentId, amount, targetPlan)
     }
 
     revalidatePath('/subscription')

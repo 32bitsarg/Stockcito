@@ -7,6 +7,7 @@ export interface SubscriptionStatus {
   planStatus: string
   isTrialing: boolean
   isPremium: boolean
+  isEntrepreneur: boolean
   isFree: boolean
   trialDaysRemaining: number | null
   subscriptionDaysRemaining: number | null
@@ -46,16 +47,20 @@ export async function getSubscriptionStatus(organizationId: number): Promise<Sub
     subscriptionDaysRemaining = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
   }
 
+  const isActive = org.planStatus === 'active' || org.planStatus === 'trial'
+  const isPaidPlan = plan === 'premium' || plan === 'entrepreneur'
+
   return {
     plan,
     planStatus: org.planStatus,
     isTrialing: org.planStatus === 'trial',
-    isPremium: plan === 'premium' && (org.planStatus === 'active' || org.planStatus === 'trial'),
+    isPremium: plan === 'premium' && isActive,
+    isEntrepreneur: plan === 'entrepreneur' && isActive,
     isFree: plan === 'free' || org.planStatus === 'expired' || org.planStatus === 'cancelled',
     trialDaysRemaining,
     subscriptionDaysRemaining,
-    canUpgrade: plan === 'free' || org.planStatus === 'expired' || org.planStatus === 'cancelled',
-    canDowngrade: plan === 'premium' && org.planStatus === 'active'
+    canUpgrade: plan === 'free' || plan === 'entrepreneur' || org.planStatus === 'expired' || org.planStatus === 'cancelled',
+    canDowngrade: isPaidPlan && org.planStatus === 'active'
   }
 }
 
@@ -86,11 +91,12 @@ export async function startTrial(organizationId: number): Promise<void> {
   ])
 }
 
-// Upgrade to premium
+// Upgrade to a paid plan (entrepreneur or premium)
 export async function upgradeToPremium(
   organizationId: number,
   paymentId: string,
-  amount: number
+  amount: number,
+  targetPlan: 'entrepreneur' | 'premium' = 'premium'
 ): Promise<void> {
   const now = new Date()
   const subscriptionEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
@@ -104,7 +110,7 @@ export async function upgradeToPremium(
     db.organization.update({
       where: { id: organizationId },
       data: {
-        plan: 'premium',
+        plan: targetPlan,
         planStatus: 'active',
         subscriptionStartedAt: now,
         subscriptionEndsAt: subscriptionEnd,
@@ -119,7 +125,7 @@ export async function upgradeToPremium(
         organizationId,
         event: 'subscription_created',
         fromPlan: org?.plan || 'free',
-        toPlan: 'premium',
+        toPlan: targetPlan,
         amount,
         paymentMethod: 'mercadopago',
         transactionId: paymentId,
@@ -239,7 +245,7 @@ export async function expireSubscription(organizationId: number): Promise<void> 
 // Check and update expired subscriptions (cron job)
 export async function checkExpiredSubscriptions(): Promise<number> {
   const now = new Date()
-  
+
   // Find all organizations with expired subscriptions
   const expiredOrgs = await db.organization.findMany({
     where: {
@@ -271,7 +277,7 @@ export async function checkExpiredSubscriptions(): Promise<number> {
 export async function verifySubscriptionOnline(organizationId: number): Promise<SubscriptionStatus | null> {
   // Update last verified timestamp
   await updateLastVerified(organizationId)
-  
+
   // Check for expired subscriptions
   const org = await db.organization.findUnique({
     where: { id: organizationId },
@@ -285,7 +291,7 @@ export async function verifySubscriptionOnline(organizationId: number): Promise<
 
   if (org) {
     const now = new Date()
-    
+
     // Auto-expire if needed
     if (org.planStatus === 'trial' && org.trialEndsAt && new Date(org.trialEndsAt) < now) {
       await expireSubscription(organizationId)

@@ -22,7 +22,7 @@ const testimonials = [
   {
     name: 'Lucas P.',
     role: 'Ferretería Barrial',
-    text: 'La función de imprimir tickets fiscales y presupuestos me ordenó el local. El soporte responde al toque.',
+    text: 'El control de stock y los tickets de venta me ordenaron el local. Ahora sé exactamente qué tengo y qué me falta.',
     initials: 'LP'
   }
 ]

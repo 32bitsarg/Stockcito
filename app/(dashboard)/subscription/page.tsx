@@ -80,7 +80,7 @@ export default async function SubscriptionPage() {
             Gestiona tu plan y revisa el uso de tu cuenta
           </p>
         </div>
-        
+
         {subscription.canUpgrade && (
           <Button asChild>
             <Link href="/subscription/upgrade">
@@ -103,7 +103,7 @@ export default async function SubscriptionPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-semibold">
-                    Plan {subscription.plan === "premium" ? "Premium" : "Free"}
+                    Plan {subscription.plan === "premium" ? "Pyme" : subscription.plan === "entrepreneur" ? "Emprendedor" : "Free"}
                   </h2>
                   <Badge variant="outline" className={getStatusColor(subscription.planStatus)}>
                     {getStatusIcon(subscription.planStatus)}
@@ -139,10 +139,10 @@ export default async function SubscriptionPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Plan actual</p>
-              <p className="font-medium">{subscription.plan === "premium" ? "Premium" : "Free"}</p>
+              <p className="font-medium">{subscription.plan === "premium" ? "Pyme" : subscription.plan === "entrepreneur" ? "Emprendedor" : "Free"}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-md bg-muted">
               <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -150,13 +150,13 @@ export default async function SubscriptionPage() {
             <div>
               <p className="text-xs text-muted-foreground">Próxima renovación</p>
               <p className="font-medium">
-                {subscription.isPremium 
-                  ? formatDate(paymentStatus.nextPaymentDue) 
+                {subscription.isPremium
+                  ? formatDate(paymentStatus.nextPaymentDue)
                   : "—"}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-md bg-muted">
               <CreditCard className="w-4 h-4 text-muted-foreground" />
@@ -164,7 +164,7 @@ export default async function SubscriptionPage() {
             <div>
               <p className="text-xs text-muted-foreground">Último pago</p>
               <p className="font-medium">
-                {paymentStatus.lastPayment 
+                {paymentStatus.lastPayment
                   ? formatDate(paymentStatus.lastPayment)
                   : "—"}
               </p>
@@ -215,8 +215,8 @@ export default async function SubscriptionPage() {
           </h3>
           <div className="rounded-lg border bg-card divide-y">
             {logs.map((log) => (
-              <div 
-                key={log.id} 
+              <div
+                key={log.id}
                 className="flex items-center justify-between p-4"
               >
                 <div>

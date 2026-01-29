@@ -33,20 +33,21 @@ export async function createPaymentPreference(
   organizationId: number,
   organizationName: string,
   email: string,
-  planType: 'monthly' | 'yearly' = 'monthly'
+  planType: 'monthly' | 'yearly' = 'monthly',
+  targetPlan: 'entrepreneur' | 'premium' = 'premium'
 ): Promise<PaymentPreference | null> {
   if (!MERCADOPAGO_ACCESS_TOKEN) {
     paymentLogger.warn('MercadoPago access token not configured')
     return null
   }
 
-  const price = planType === 'yearly'
-    ? PLAN_PRICES.premium.yearly
-    : PLAN_PRICES.premium.monthly
+  const planPrices = PLAN_PRICES[targetPlan]
+  const price = planType === 'yearly' ? planPrices.yearly : planPrices.monthly
 
+  const planName = targetPlan === 'entrepreneur' ? 'Emprendedor' : 'Pyme'
   const description = planType === 'yearly'
-    ? 'Stockcito Premium - Suscripción Anual'
-    : 'Stockcito Premium - Suscripción Mensual'
+    ? `Stockcito ${planName} - Suscripción Anual`
+    : `Stockcito ${planName} - Suscripción Mensual`
 
   const externalReference = `org_${organizationId}_${Date.now()}`
 
@@ -60,9 +61,9 @@ export async function createPaymentPreference(
       body: JSON.stringify({
         items: [
           {
-            id: `premium_${planType}`,
+            id: `${targetPlan}_${planType}`,
             title: description,
-            description: `Acceso completo a todas las funciones Premium de Stockcito`,
+            description: `Acceso completo a todas las funciones ${planName} de Stockcito`,
             quantity: 1,
             currency_id: 'ARS',
             unit_price: price,
@@ -106,20 +107,21 @@ export async function createPaymentPreference(
 
 // Create a subscription plan (preapproval_plan) - New MercadoPago flow
 export async function createSubscriptionPlan(
-  planType: 'monthly' | 'yearly' = 'monthly'
+  planType: 'monthly' | 'yearly' = 'monthly',
+  targetPlan: 'entrepreneur' | 'premium' = 'premium'
 ): Promise<{ id: string; init_point: string } | null> {
   if (!MERCADOPAGO_ACCESS_TOKEN) {
     paymentLogger.warn('MercadoPago access token not configured')
     return null
   }
 
-  const price = planType === 'yearly'
-    ? PLAN_PRICES.premium.yearly
-    : PLAN_PRICES.premium.monthly
+  const planPrices = PLAN_PRICES[targetPlan]
+  const price = planType === 'yearly' ? planPrices.yearly : planPrices.monthly
 
+  const planName = targetPlan === 'entrepreneur' ? 'Emprendedor' : 'Pyme'
   const description = planType === 'yearly'
-    ? 'Stockcito Premium - Suscripción Anual'
-    : 'Stockcito Premium - Suscripción Mensual'
+    ? `Stockcito ${planName} - Suscripción Anual`
+    : `Stockcito ${planName} - Suscripción Mensual`
 
   try {
     const requestBody = {

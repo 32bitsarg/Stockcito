@@ -17,6 +17,54 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.1.4',
+        date: '2026-01-29',
+        title: 'Restructuración de Planes 💎',
+        description: 'Nuevo sistema de 3 planes: Free, Emprendedor y Pyme con límites mejorados.',
+        changes: [
+            {
+                type: 'new',
+                title: 'Plan Emprendedor',
+                description: 'Nuevo plan intermedio a $15.000/mes ideal para negocios unipersonales con hasta 300 productos, 200 clientes y 2 usuarios.'
+            },
+            {
+                type: 'new',
+                title: 'Plan Pyme',
+                description: 'Antes "Premium", ahora "Pyme" a $30.000/mes con todo ilimitado y funciones avanzadas.'
+            },
+            {
+                type: 'improvement',
+                title: 'Plan Free más restrictivo',
+                description: 'El plan gratuito ahora es solo para probar: 25 productos, 10 clientes, 1 usuario, sin proveedores ni exportación.'
+            },
+            {
+                type: 'new',
+                title: 'Límite de usuarios aplicado',
+                description: 'Ahora se valida correctamente el límite de usuarios al crear empleados según el plan.'
+            },
+            {
+                type: 'new',
+                title: 'Gestión de proveedores por plan',
+                description: 'Los proveedores ahora están bloqueados para Free, limitados a 10 para Emprendedor, e ilimitados para Pyme.'
+            },
+            {
+                type: 'improvement',
+                title: 'Tabla comparativa de 3 planes',
+                description: 'Nueva tabla de comparación en la página de upgrade mostrando todas las diferencias entre planes.'
+            },
+            {
+                type: 'improvement',
+                title: 'Precios de landing actualizados',
+                description: 'La página principal ahora muestra los 3 planes con sus características y precios correctos.'
+            },
+            {
+                type: 'improvement',
+                title: 'Badge de plan en sidebar',
+                description: 'El sidebar ahora muestra correctamente si tienes Free, Emprendedor o Pyme.'
+            }
+        ]
+    },
+    {
         version: '0.1.3',
         date: '2026-01-20',
         title: 'Integración Lector Código de Barras 🛒',
