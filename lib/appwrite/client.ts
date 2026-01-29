@@ -8,12 +8,13 @@
 import { Client, Databases, ID, Query } from 'node-appwrite'
 
 // Environment variables for Appwrite
-const APPWRITE_ENDPOINT = process.env.APPWRITE_ENDPOINT || ''
-const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID || ''
-const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY || ''
+// Support both NEXT_PUBLIC_ prefix (for shared config) and non-prefixed (server-only)
+const APPWRITE_ENDPOINT = process.env.APPWRITE_ENDPOINT || process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''
+const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID || process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''
+const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY || '' // API Key should NEVER have NEXT_PUBLIC_ prefix
 
 // Database and Collection IDs for logging
-export const APPWRITE_DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'stockcito'
+export const APPWRITE_DATABASE_ID = process.env.APPWRITE_DATABASE_ID || process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'stockcito'
 export const APPWRITE_LOGS_COLLECTION_ID = process.env.APPWRITE_LOGS_COLLECTION_ID || 'logs'
 
 // Check if Appwrite is configured
