@@ -85,10 +85,11 @@ export async function sendLogToAppwrite(entry: LogEntry): Promise<boolean> {
             failedLogsQueue.push(entry)
         }
 
-        // Log locally in development
-        if (process.env.NODE_ENV !== 'production') {
-            console.error('[Appwrite Logger] Failed to send log:', error)
-        }
+        // Always log Appwrite errors to console for debugging
+        console.error('[Appwrite Logger] Failed to send log:', {
+            error: error instanceof Error ? error.message : String(error),
+            entry: { level: entry.level, message: entry.message.substring(0, 100) }
+        })
 
         return false
     }
