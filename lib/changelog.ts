@@ -17,278 +17,186 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.1.5',
+        date: '2026-02-11',
+        title: 'Nueva Estética Premium & Mejoras Visuales 🎨',
+        description: 'Hemos renovado completamente la imagen del sistema para que sea más profesional, elegante y fácil de usar.',
+        changes: [
+            {
+                type: 'improvement',
+                title: 'Nuevo Diseño "Total Black"',
+                description: 'Cambiamos el estilo visual por uno mucho más moderno en blanco y negro de alta gama, con tipografías más claras y elegantes.'
+            },
+            {
+                type: 'improvement',
+                title: 'Terminal de Venta más Amplia',
+                description: 'Agrandamos el área de trabajo en el punto de venta para que puedas ver más productos a la vez y sea todo más cómodo.'
+            },
+            {
+                type: 'improvement',
+                title: 'Gráficos de Rendimiento Inteligentes',
+                description: 'Los gráficos de ventas ahora son más limpios y muestran resúmenes automáticos de tus ingresos y promedios diarios.'
+            },
+            {
+                type: 'improvement',
+                title: 'Panel de Control mas "En Vivo"',
+                description: 'Actualizamos los indicadores para que sepas en todo momento que el sistema está sincronizado y funcionando en tiempo real.'
+            },
+            {
+                type: 'improvement',
+                title: 'Traducción Completa al Español',
+                description: 'Eliminamos las palabras que quedaban en inglés para que todo el sistema sea 100% amigable y fácil de entender.'
+            },
+            {
+                type: 'fix',
+                title: 'Ajustes en la Configuración',
+                description: 'Corregimos pequeños errores visuales en la página de ajustes y mejoramos la consistencia de los botones.'
+            },
+        ]
+    },
+    {
         version: '0.1.4',
         date: '2026-01-29',
-        title: 'Restructuración de Planes 💎',
-        description: 'Nuevo sistema de 3 planes: Free, Emprendedor y Pyme con límites mejorados.',
+        title: 'Planes para Todos los Negocios 💎',
+        description: 'Actualizamos nuestros precios y planes para que siempre tengas una opción que se adapte al tamaño de tu comercio.',
         changes: [
             {
                 type: 'new',
-                title: 'Plan Emprendedor',
-                description: 'Nuevo plan intermedio a $15.000/mes ideal para negocios unipersonales con hasta 300 productos, 200 clientes y 2 usuarios.'
-            },
-            {
-                type: 'new',
-                title: 'Plan Pyme',
-                description: 'Antes "Premium", ahora "Pyme" a $30.000/mes con todo ilimitado y funciones avanzadas.'
+                title: 'Plan para tu Primer Negocio',
+                description: 'Lanzamos el Plan Emprendedor, ideal si estás empezando solo o con alguien más. Incluye todo lo necesario para crecer.'
             },
             {
                 type: 'improvement',
-                title: 'Plan Free más restrictivo',
-                description: 'El plan gratuito ahora es solo para probar: 25 productos, 10 clientes, 1 usuario, sin proveedores ni exportación.'
-            },
-            {
-                type: 'new',
-                title: 'Límite de usuarios aplicado',
-                description: 'Ahora se valida correctamente el límite de usuarios al crear empleados según el plan.'
-            },
-            {
-                type: 'new',
-                title: 'Gestión de proveedores por plan',
-                description: 'Los proveedores ahora están bloqueados para Free, limitados a 10 para Emprendedor, e ilimitados para Pyme.'
+                title: 'Plan Pyme Ilimitado',
+                description: 'Mejoramos nuestro plan más completo para que no tengas límites de productos, clientes ni usuarios. ¡Energía total para tu empresa!'
             },
             {
                 type: 'improvement',
-                title: 'Tabla comparativa de 3 planes',
-                description: 'Nueva tabla de comparación en la página de upgrade mostrando todas las diferencias entre planes.'
+                title: 'Prueba Gratis Siempre Lista',
+                description: 'Mantenemos un plan gratuito para que puedas conocer el sistema y dar tus primeros pasos sin costo.'
             },
             {
                 type: 'improvement',
-                title: 'Precios de landing actualizados',
-                description: 'La página principal ahora muestra los 3 planes con sus características y precios correctos.'
+                title: 'Control de Usuarios por Plan',
+                description: 'Ahora el sistema te avisa de forma clara cuántos empleados podés sumar según el plan que elijas.'
             },
             {
                 type: 'improvement',
-                title: 'Badge de plan en sidebar',
-                description: 'El sidebar ahora muestra correctamente si tienes Free, Emprendedor o Pyme.'
+                title: 'Tabla Comparativa Sencilla',
+                description: 'Diseñamos una nueva tabla de planes donde podés ver de un vistazo qué incluye cada opción sin términos técnicos raros.'
             }
         ]
     },
     {
         version: '0.1.3',
         date: '2026-01-20',
-        title: 'Integración Lector Código de Barras 🛒',
-        description: 'Soporte completo para lectores de código de barras en POS e Inventario.',
+        title: 'Lector de Código de Barras y Facturación 🛒',
+        description: '¡Ahora podés vender mucho más rápido! Agregamos soporte para scanners y mejoramos la impresión de tus comprobantes.',
         changes: [
             {
                 type: 'new',
-                title: 'Tickets Profesionales',
-                description: 'Numeración secuencial y formato optimizado para impresoras térmicas de 80mm.'
+                title: 'Ventas con Scanner',
+                description: 'Solo tenés que pasar el código por el scanner y el producto se agrega solo al carrito. ¡Súper rápido!'
+            },
+            {
+                type: 'new',
+                title: 'Tickets más Lindos',
+                description: 'Mejoramos el formato de los tickets para que salgan perfectos en cualquier impresora térmica común.'
+            },
+            {
+                type: 'new',
+                title: 'Carga de Productos al Instante',
+                description: 'Si escaneás un código nuevo que no tenés cargado, el sistema te ayuda a crearlo en un segundo con el código ya puesto.'
             },
             {
                 type: 'improvement',
-                title: 'Snapshot de Productos',
-                description: 'Los tickets guardan el nombre del producto al momento de la venta, preservando el historial.'
-            },
-            {
-                type: 'new',
-                title: 'Impresión Directa',
-                description: 'Botón para imprimir ticket inmediatamente después de la venta.'
-            },
-            {
-                type: 'new',
-                title: 'Escaneo Global',
-                description: 'Escanea productos desde cualquier pantalla para ir directo a la venta o crear el producto.'
-            },
-            {
-                type: 'new',
-                title: 'Búsqueda Inteligente en POS',
-                description: 'El POS ahora busca productos en el servidor si no están cargados localmente al escanear.'
-            },
-            {
-                type: 'new',
-                title: 'Creación Rápida de Productos',
-                description: 'Al escanear un código nuevo, se abre el formulario de creación con el SKU pre-cargado.'
-            },
-            {
-                type: 'new',
-                title: 'Ajuste Rápido de Stock',
-                description: 'Haz clic en el indicador de stock en el POS para ajustar cantidades rápidamente (solo Admin/Manager).'
-            },
-            {
-                type: 'new',
-                title: 'Alerta Stock Agotado al Escanear',
-                description: 'Al escanear un producto sin stock, se muestra alerta con opción de editar stock (según permisos).'
-            },
-            {
-                type: 'improvement',
-                title: 'Actualización Automática de Stock',
-                description: 'El inventario se actualiza automáticamente después de cada venta sin necesidad de recargar.'
-            },
-            {
-                type: 'improvement',
-                title: 'Impresión con Portal React',
-                description: 'Sistema de impresión de tickets robusto usando portales para evitar conflictos con modales.'
+                title: 'Ajuste de Stock a un Clic',
+                description: 'Si ves que el stock está mal mientras vendés, podés tocar el número y corregirlo ahí mismo sin salir de la pantalla.'
             },
             {
                 type: 'fix',
-                title: 'Corrección Rutas Inventario',
-                description: 'Corregida la redirección al crear productos nuevos desde el escáner.'
-            },
-            {
-                type: 'fix',
-                title: 'Navegación Fantasma Scanner',
-                description: 'Corregido comportamiento donde el "Enter" del scanner activaba botones enfocados.'
-            },
-            {
-                type: 'fix',
-                title: 'Creación de Usuario en Modo Automático',
-                description: 'Solucionado bug que impedía crear usuarios con PIN automático.'
-            },
-            {
-                type: 'fix',
-                title: 'Error Venta Modal Éxito',
-                description: 'Corregido error "Cannot read reduce" al mostrar el modal de venta exitosa.'
-            },
-            {
-                type: 'fix',
-                title: 'Sincronización Base de Datos',
-                description: 'Corregidos campos faltantes (ticketNumber, ticketSequence) en base de datos local.'
-            },
-            {
-                type: 'improvement',
-                title: 'Visualización de Credenciales',
-                description: 'Nueva ventana emergente muestra el PIN y contraseña generados al crear un empleado, como respaldo al email.'
-            },
-            {
-                type: 'fix',
-                title: 'Visibilidad de Usuarios en Kiosco',
-                description: 'El modo kiosco ahora muestra a todos los empleados, indicando cuáles tienen PIN pendiente de configurar.'
+                title: 'Ventas sin Errores',
+                description: 'Corregimos errores que hacían que a veces no se pueda imprimir el ticket o que el carrito se trabe.'
             }
         ]
     },
     {
         version: '0.1.2',
         date: '2026-01-20',
-        title: 'Integración Restaurante + Logging 🍽️',
-        description: 'Mejoras importantes en el sistema de restaurantes y monitoreo de la aplicación',
+        title: 'Tu Negocio siempre Monitoreado 🛠️',
+        description: 'Hicimos el sistema mucho más robusto para que nunca te falle en medio de una venta importante.',
         changes: [
             {
                 type: 'new',
-                title: 'Integración Mesas + Cocina',
-                description: 'Ahora puedes asignar mesas a las ventas y el display de cocina muestra el número de mesa para cada pedido'
-            },
-            {
-                type: 'new',
-                title: 'Selector de Mesa en POS',
-                description: 'Nuevo componente visual para seleccionar mesa al crear una venta (solo si gestión de mesas está activada)'
-            },
-            {
-                type: 'new',
-                title: 'Sistema de Logging con Appwrite',
-                description: 'Los errores y eventos se registran en Appwrite para monitoreo centralizado en producción'
+                title: 'Control de Mesas y Comandas',
+                description: 'Si tenés un restaurante o bar, ahora podés marcar qué mesa está pidiendo y que la cocina lo vea clarito.'
             },
             {
                 type: 'improvement',
-                title: 'Método de pago real desde MercadoPago',
-                description: 'La página de configuración ahora muestra los datos reales del método de pago (últimos 4 dígitos, vencimiento)'
+                title: 'Estado de tu suscripción',
+                description: 'Ahora podés ver los datos de tu último pago y cuándo vence tu plan de forma súper sencilla.'
             },
             {
                 type: 'improvement',
-                title: 'Verificación real de suscripción',
-                description: 'La página de éxito de suscripción ahora verifica el pago en tiempo real con MercadoPago'
-            },
-            {
-                type: 'improvement',
-                title: 'Mesa se marca ocupada automáticamente',
-                description: 'Al crear una venta con mesa asignada, la mesa cambia automáticamente a estado "ocupada"'
+                title: 'Mesas Ocupadas',
+                description: 'Cuando abrís un pedido en una mesa, el sistema la marca como ocupada automáticamente para que no haya confusiones.'
             },
             {
                 type: 'fix',
-                title: 'Kitchen Display - tableName',
-                description: 'Corregido el TODO pendiente que mostraba undefined en lugar del nombre de mesa'
-            },
+                title: 'Estabilidad Mejorada',
+                description: 'Agregamos un sistema que nos avisa a nosotros si algo falla para que podamos arreglarlo antes de que te des cuenta.'
+            }
         ]
     },
     {
         version: '0.1.1',
         date: '2026-01-19',
-        title: 'Mejoras de Seguridad y UX 🔐',
-        description: 'Mejoras en la seguridad del registro y experiencia de usuario',
+        title: 'Más Seguridad para vos 🔐',
+        description: 'Protegemos mejor tus datos y hacemos que entrar al sistema sea más cómodo.',
         changes: [
             {
                 type: 'new',
-                title: 'Página de Changelog',
-                description: 'Nueva página para ver el historial de cambios y actualizaciones del sistema'
+                title: 'Botón "Recordarme"',
+                description: 'Si tildás esta opción, no hace falta que pongas tu clave cada vez que entres desde tu compu de confianza.'
             },
             {
                 type: 'new',
-                title: 'Opción "Recordarme"',
-                description: 'Los usuarios pueden elegir mantener su sesión activa por 30 días'
+                title: 'Nueva Sección de Novedades',
+                description: 'Creamos este rinconcito para que siempre sepas qué cosas nuevas estamos agregando para vos.'
             },
             {
                 type: 'improvement',
-                title: 'Validación de contraseña mejorada',
-                description: 'Ahora se requiere mínimo 8 caracteres, mayúscula, minúscula, número y caracter especial'
-            },
-            {
-                type: 'improvement',
-                title: 'Indicador de fortaleza de contraseña',
-                description: 'Barra visual que muestra qué tan segura es la contraseña mientras se escribe'
-            },
-            {
-                type: 'improvement',
-                title: 'Redirección automática de landing',
-                description: 'Si el usuario ya está logueado, la landing lo redirige automáticamente al dashboard'
-            },
-            {
-                type: 'fix',
-                title: 'Warning de searchParams en registro',
-                description: 'Corregido el warning de Next.js 15+ sobre el uso asíncrono de searchParams'
-            },
+                title: 'Claves más Seguras',
+                description: 'Te ayudamos a elegir una contraseña fuerte con un indicador visual para que tu cuenta esté siempre protegida.'
+            }
         ]
     },
     {
         version: '0.1.0',
         date: '2026-01-17',
-        title: 'Lanzamiento Inicial 🎉',
-        description: 'Primera versión pública de Stockcito',
+        title: '¡Bienvenidos a Stockcito! 🎉',
+        description: 'Hoy nace tu mejor aliado para gestionar tus ventas e inventario de forma fácil.',
         changes: [
             {
                 type: 'new',
-                title: 'Sistema POS completo',
-                description: 'Punto de venta con soporte para productos, clientes y múltiples métodos de pago'
+                title: 'Todo para Vendér',
+                description: 'Un sistema de ventas súper simple donde podés cargar productos, buscar clientes y cobrar en efectivo o tarjeta.'
             },
             {
                 type: 'new',
-                title: 'Gestión de inventario',
-                description: 'Control de stock con alertas de bajo inventario y categorización de productos'
+                title: 'Control de tus Productos',
+                description: 'Cargá todo tu stock y dejá que Stockcito te avise cuando te estás quedando sin mercadería.'
             },
             {
                 type: 'new',
-                title: 'Módulo de clientes',
-                description: 'Registro y seguimiento de clientes con historial de compras'
-            },
-            {
-                type: 'new',
-                title: 'Reportes y analytics',
-                description: 'Dashboard con métricas de ventas, productos más vendidos y tendencias'
-            },
-            {
-                type: 'new',
-                title: 'Sistema de suscripciones',
-                description: 'Planes Free y Premium con integración de MercadoPago'
-            },
-            {
-                type: 'new',
-                title: 'Modo restaurante',
-                description: 'Funcionalidades específicas para restaurantes: cocina y gestión de mesas'
-            },
-            {
-                type: 'new',
-                title: 'Control de usuarios',
-                description: 'Roles (owner, admin, manager, cashier) con permisos diferenciados'
+                title: 'Mirá cómo crece tu Negocio',
+                description: 'Un resumen visual con lo que vas vendiendo en el día y cuáles son tus productos estrella.'
             },
             {
                 type: 'improvement',
-                title: 'Diseño responsive',
-                description: 'Interfaz adaptada para desktop, tablet y móvil'
-            },
-            {
-                type: 'improvement',
-                title: 'Tema oscuro/claro',
-                description: 'Soporte completo para modo oscuro con cambio automático'
-            },
+                title: 'Funciona en tu Celu y tu Compu',
+                description: 'Podés usar el sistema desde cualquier lado, ya sea una tablet en el local o tu celular mientras estás afuera.'
+            }
         ]
     },
 ]

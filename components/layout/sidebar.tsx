@@ -15,7 +15,7 @@ const baseRoutes = [
     { href: '/categories', label: 'Categorías', iconName: 'FolderKanban' },
     { href: '/sales/new', label: 'Ventas (POS)', iconName: 'ShoppingCart' },
     { href: '/sales/history', label: 'Historial', iconName: 'History' },
-    { href: '/sales/drawer', label: 'Caja', iconName: 'Calculator' },
+    // { href: '/sales/drawer', label: 'Caja', iconName: 'Calculator' },
     { href: '/clients', label: 'Clientes', iconName: 'Users' },
     { href: '/suppliers', label: 'Proveedores', iconName: 'Building2' },
 
@@ -30,7 +30,7 @@ const restaurantRoutes = [
 
 const adminRoutes = [
     { href: '/users', label: 'Usuarios', iconName: 'Shield' },
-    { href: '/users/time', label: 'Control Horario', iconName: 'Clock' },
+    // { href: '/users/time', label: 'Control Horario', iconName: 'Clock' },
     { href: '/users/audit', label: 'Auditoría', iconName: 'ClipboardList' },
     { href: '/discounts', label: 'Descuentos', iconName: 'Percent' },
     { href: '/settings', label: 'Configuración', iconName: 'Settings' },
@@ -63,7 +63,9 @@ export async function Sidebar() {
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
                     <Package className="h-6 w-6" />
                     <span>Stockcito</span>
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                </Link>
+                <Link href="/changelog">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
                         {APP_VERSION_DISPLAY}
                     </Badge>
                 </Link>
@@ -77,11 +79,11 @@ export async function Sidebar() {
                         className={cn(
                             "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                             isPremium && !isTrialing
-                                ? "bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-800 dark:text-amber-200 hover:from-amber-200 hover:to-orange-200 dark:hover:from-amber-900/50 dark:hover:to-orange-900/50"
+                                ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                                 : plan === 'entrepreneur' && !isTrialing
-                                    ? "bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 text-blue-800 dark:text-blue-200 hover:from-blue-200 hover:to-cyan-200"
+                                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700"
                                     : isTrialing
-                                        ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 text-violet-800 dark:text-violet-200 hover:from-violet-200 hover:to-purple-200"
+                                        ? "bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-900 dark:hover:bg-zinc-100"
                                         : "bg-muted hover:bg-muted/80 text-muted-foreground"
                         )}
                     >
@@ -102,7 +104,7 @@ export async function Sidebar() {
                                     <span>Prueba Gratis</span>
                                     <span className="text-[10px] opacity-75">Pyme activo</span>
                                 </div>
-                                <Badge variant="secondary" className="text-[10px] ml-auto bg-violet-200 dark:bg-violet-800 text-violet-800 dark:text-violet-200">
+                                <Badge variant="secondary" className="text-[10px] ml-auto bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
                                     {trialDays !== null ? `${trialDays}d` : 'Trial'}
                                 </Badge>
                             </>
@@ -148,7 +150,8 @@ export async function Sidebar() {
                         </>
                     )}
 
-                    {activeRestaurantRoutes.length > 0 && (
+                    {/* Restaurant routes hidden for simplification */}
+                    {/* {activeRestaurantRoutes.length > 0 && (
                         <>
                             <div className="my-4 border-t" />
                             <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -156,7 +159,7 @@ export async function Sidebar() {
                             </div>
                             <SidebarLinks routes={activeRestaurantRoutes} />
                         </>
-                    )}
+                    )} */}
                 </nav>
             </div>
 
@@ -165,8 +168,11 @@ export async function Sidebar() {
             {/* Footer with version and feedback */}
             <div className="p-4 border-t mt-auto">
                 <div className="text-center text-xs text-muted-foreground">
-                    <p>Stockcito POS</p>
-                    <p className="text-[10px]">{APP_VERSION_DISPLAY} · {new Date().getFullYear()}</p>
+                    <p className="font-bold">Stockcito POS</p>
+                    <Link href="/changelog" className="text-[10px] hover:text-foreground transition-colors">
+                        {APP_VERSION_DISPLAY} · {new Date().getFullYear()}
+                    </Link>
+                    <br />
                     <a
                         href={`mailto:${FEEDBACK_EMAIL}?subject=Feedback%20-%20Stockcito`}
                         className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"

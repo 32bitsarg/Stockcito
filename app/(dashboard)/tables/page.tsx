@@ -5,6 +5,8 @@ import { getTables, getTableStats } from "@/actions/table-actions"
 import { TablesClient } from "@/components/tables/tables-client"
 import { Card, CardContent } from "@/components/ui/card"
 import { LayoutGrid, Users, Utensils, Clock, Sparkles } from "lucide-react"
+import { PageHeader } from "@/components/layout/page-header"
+import * as motion from "framer-motion/client"
 
 export const dynamic = 'force-dynamic'
 
@@ -29,85 +31,88 @@ export default async function TablesPage() {
     const isAdmin = session.role === 'owner' || session.role === 'admin'
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Gestión de Mesas</h1>
-                    <p className="text-muted-foreground">
-                        Administra el layout y estado de las mesas
-                    </p>
-                </div>
-            </div>
+        <div className="pb-10">
+            <PageHeader
+                title="Gestión de Salón"
+                subtitle="Monitoreo de disponibilidad, reservas y rotación de mesas en tiempo real."
+            />
 
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-5">
-                <Card>
-                    <CardContent className="pt-4">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="grid gap-4 md:grid-cols-5 mb-8"
+            >
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm relative overflow-hidden group">
+                    <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-muted-foreground">Total</p>
-                                <p className="text-2xl font-bold">{stats.total}</p>
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Capacidad Total</p>
+                                <p className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono tracking-tighter">{stats.total.toString().padStart(2, '0')}</p>
                             </div>
-                            <LayoutGrid className="h-8 w-8 text-muted-foreground" />
+                            <LayoutGrid className="h-6 w-6 text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="bg-green-50 dark:bg-green-900/20">
-                    <CardContent className="pt-4">
+
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 shadow-xl group">
+                    <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-green-700 dark:text-green-300">Libres</p>
-                                <p className="text-2xl font-bold text-green-800 dark:text-green-200">
-                                    {stats.available}
-                                </p>
+                                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Disponibles</p>
+                                <p className="text-3xl font-black font-mono tracking-tighter uppercase italic">{stats.available.toString().padStart(2, '0')}</p>
                             </div>
-                            <Sparkles className="h-8 w-8 text-green-600" />
+                            <Sparkles className="h-6 w-6 text-zinc-600 dark:text-zinc-400 animate-pulse" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="bg-red-50 dark:bg-red-900/20">
-                    <CardContent className="pt-4">
+
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm group">
+                    <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-red-700 dark:text-red-300">Ocupadas</p>
-                                <p className="text-2xl font-bold text-red-800 dark:text-red-200">
-                                    {stats.occupied}
-                                </p>
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Ocupación</p>
+                                <p className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono tracking-tighter">{stats.occupied.toString().padStart(2, '0')}</p>
                             </div>
-                            <Utensils className="h-8 w-8 text-red-600" />
+                            <Utensils className="h-6 w-6 text-zinc-200 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="bg-yellow-50 dark:bg-yellow-900/20">
-                    <CardContent className="pt-4">
+
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm group">
+                    <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-yellow-700 dark:text-yellow-300">Reservadas</p>
-                                <p className="text-2xl font-bold text-yellow-800 dark:text-yellow-200">
-                                    {stats.reserved}
-                                </p>
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Reservas</p>
+                                <p className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono tracking-tighter">{stats.reserved.toString().padStart(2, '0')}</p>
                             </div>
-                            <Clock className="h-8 w-8 text-yellow-600" />
+                            <Clock className="h-6 w-6 text-zinc-200 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="bg-blue-50 dark:bg-blue-900/20">
-                    <CardContent className="pt-4">
+
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 shadow-sm border-dashed">
+                    <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-blue-700 dark:text-blue-300">Limpieza</p>
-                                <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                                    {stats.cleaning}
-                                </p>
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Protocolo / Aseo</p>
+                                <p className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono tracking-tighter italic">{stats.cleaning.toString().padStart(2, '0')}</p>
                             </div>
-                            <Users className="h-8 w-8 text-blue-600" />
+                            <Users className="h-6 w-6 text-zinc-300" />
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+            </motion.div>
 
             {/* Tables Grid */}
-            <TablesClient tables={tables} isAdmin={isAdmin} />
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+            >
+                <TablesClient tables={tables} isAdmin={isAdmin} />
+            </motion.div>
         </div>
     )
 }

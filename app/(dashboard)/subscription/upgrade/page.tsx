@@ -95,7 +95,9 @@ export default function UpgradePage() {
 
   useEffect(() => {
     if (searchParams.get('auto_checkout') === 'true' && !loading && !subscriptionLoading && !isPyme) {
-      handleUpgrade("premium")
+      const planParam = searchParams.get('plan')
+      const target = planParam === 'entrepreneur' ? 'entrepreneur' : 'premium'
+      handleUpgrade(target)
     }
   }, [searchParams, subscriptionLoading, isPyme])
 

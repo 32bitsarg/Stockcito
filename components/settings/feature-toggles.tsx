@@ -132,8 +132,8 @@ export function FeatureToggles({ initialFeatures }: FeatureTogglesProps) {
 
     return (
         <div className="space-y-6">
-            {/* Restaurant Features */}
-            <div className="space-y-4">
+            {/* Restaurant Features hidden for simplification */}
+            {/* <div className="space-y-4">
                 <div className="flex items-center gap-2">
                     <h3 className="text-lg font-medium">🍽️ Restaurantes</h3>
                     <Badge variant="outline">Opcional</Badge>
@@ -146,7 +146,7 @@ export function FeatureToggles({ initialFeatures }: FeatureTogglesProps) {
                         <FeatureItem key={feature.key} feature={feature} />
                     ))}
                 </div>
-            </div>
+            </div> */}
 
             {/* Retail Features */}
             <div className="space-y-4">

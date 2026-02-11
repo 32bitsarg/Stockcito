@@ -1,98 +1,49 @@
 "use client"
 
 import Link from 'next/link'
-import { Mail } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { APP_VERSION_DISPLAY, FEEDBACK_EMAIL } from '@/lib/changelog'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingFooter() {
   return (
-    <footer className="w-full border-t mt-12">
-      {/* Feedback CTA Section - Prominent */}
-      <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b">
-        <div className="max-w-7xl mx-auto px-6 md:px-8 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left">
-              <h3 className="text-lg font-bold mb-1">¿Tenés sugerencias o encontraste un bug?</h3>
-              <p className="text-sm text-muted-foreground">
-                Tu feedback nos ayuda a mejorar Stockcito. ¡Escribinos!
-              </p>
-            </div>
-            <a
-              href={`mailto:${FEEDBACK_EMAIL}?subject=Feedback%20-%20Stockcito`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-105 transition-all duration-200"
-            >
-              <Mail className="w-5 h-5" />
-              Escribinos
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Footer */}
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-6 md:px-8 grid md:grid-cols-4 gap-8 items-start">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg">Stockcito</span>
-              <Badge variant="outline" className="text-[10px]">{APP_VERSION_DISPLAY}</Badge>
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">POS · Inventario · Facturación</div>
-            <div className="text-xs text-muted-foreground mt-2">Sistema de punto de venta para PyMEs argentinas</div>
-          </div>
-
-          {/* Producto */}
-          <div>
-            <div className="font-semibold">Producto</div>
-            <nav className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground">
-              <Link href="/sales/new" className="hover:text-foreground transition-colors">POS</Link>
-              <Link href="/inventory" className="hover:text-foreground transition-colors">Inventario</Link>
-              <Link href="/reports" className="hover:text-foreground transition-colors">Reportes</Link>
-              <Link href="/subscription/upgrade" className="hover:text-foreground transition-colors">Planes</Link>
-            </nav>
-          </div>
-
-          {/* Empresa */}
-          <div>
-            <div className="font-semibold">Empresa</div>
-            <nav className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition-colors">Inicio</Link>
-              <Link href="/login" className="hover:text-foreground transition-colors">Ingresar</Link>
-              <Link href="/register" className="hover:text-foreground transition-colors">Registrarse</Link>
-              <Link href="/docs" className="hover:text-foreground transition-colors">Documentación</Link>
-              <Link href="/changelog" className="hover:text-foreground transition-colors">Changelog</Link>
-            </nav>
-          </div>
-
-          {/* Contacto */}
-          <div>
-            <div className="font-semibold">Contacto</div>
-            <div className="mt-2 space-y-3">
-              <a
-                href={`mailto:${FEEDBACK_EMAIL}`}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                {FEEDBACK_EMAIL}
-              </a>
-              <p className="text-xs text-muted-foreground">
-                Respondemos en 24-48hs hábiles
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="max-w-7xl mx-auto px-6 md:px-8 mt-8 pt-6 border-t">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} Stockcito. Diseñado para comercios locales.</p>
-            <p className="text-xs">
-              Pagos procesados por{' '}
-              <a href="https://www.mercadopago.com.ar" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                MercadoPago
-              </a>
+    <footer className="bg-white dark:bg-zinc-950 py-20 border-t border-zinc-50 dark:border-zinc-900">
+      <div className="container mx-auto px-8">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-12 border-b border-zinc-50 dark:border-zinc-900 pb-16">
+          <div className="space-y-4">
+            <span className="text-xl font-black tracking-tighter uppercase italic leading-none">Stockcito</span>
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400 max-w-xs leading-relaxed italic">
+              Un sistema operativo moderno para nodos comerciales argentinos. Diseñado para velocidad y fiabilidad.
             </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-16">
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.4em]">Infraestructura</h4>
+              <ul className="space-y-3">
+                <li><Link href="/docs" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Documentación</Link></li>
+                <li><Link href="/changelog" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Actualizaciones</Link></li>
+                <li><Link href="/api" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Acceso API</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.4em]">Legal</h4>
+              <ul className="space-y-3">
+                <li><Link href="/privacy" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Privacidad</Link></li>
+                <li><Link href="/terms" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Términos</Link></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300">
+            © 2026 Stockcito Node Systems
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-end">
+              <span className="text-[12px] font-black tracking-tighter italic leading-none">{APP_VERSION_DISPLAY}</span>
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] opacity-30">Production Alpha</span>
+            </div>
           </div>
         </div>
       </div>

@@ -54,7 +54,7 @@ function getStatusBadge(status: string) {
             return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Reemb. Parcial</Badge>
         case 'COMPLETED':
         default:
-            return <Badge variant="secondary" className="text-green-600 border-green-600">Completada</Badge>
+            return <Badge variant="secondary" className="text-zinc-900 border-zinc-200 bg-zinc-100 dark:text-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 font-bold">Completada</Badge>
     }
 }
 
@@ -108,7 +108,7 @@ export function SalesHistoryTable({ sales }: SalesHistoryTableProps) {
                                             <TableCell>
                                                 {getStatusBadge(sale.status || 'COMPLETED')}
                                             </TableCell>
-                                            <TableCell className="text-right font-semibold text-green-600">
+                                            <TableCell className="text-right font-semibold text-foreground">
                                                 ${Number(sale.total).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                                             </TableCell>
                                             <TableCell className="text-right space-x-1">
@@ -174,7 +174,7 @@ export function SalesHistoryTable({ sales }: SalesHistoryTableProps) {
                                     </div>
                                     <div className="flex justify-between font-bold text-lg pt-1 border-t">
                                         <span>Total:</span>
-                                        <span className="text-green-600">${Number(selectedSale.total).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                                        <span className="text-foreground">${Number(selectedSale.total).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     <div className="pt-2">
                                         <Button variant="default" size="sm" onClick={async () => {

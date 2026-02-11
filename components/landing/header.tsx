@@ -1,91 +1,70 @@
 "use client"
 
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Menu, LogIn, BookOpen, X, Package, ScrollText } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function LandingHeader() {
-  const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Detect scroll to add border/shadow
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
+    const handleScroll = () => setIsScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300",
-      scrolled ? "bg-background/80 backdrop-blur-md border-b py-3" : "bg-transparent py-5"
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+      isScrolled ? "bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md py-4 border-b border-zinc-100 dark:border-zinc-900" : "bg-transparent py-8"
     )}>
-      <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            <Package className="w-5 h-5" />
+      <div className="container mx-auto px-8 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-8 h-8 md:w-10 md:h-10 border border-zinc-100 dark:border-zinc-900 flex items-center justify-center p-1.5 grayscale hover:grayscale-0 transition-all duration-500">
+            <img src="/icons/icon.svg" alt="Stockcito Logo" className="w-full h-full object-contain" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Stockcito</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-black tracking-tighter uppercase italic leading-none">Stockcito</span>
+            <span className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 mt-1 italic">Gestión en la Nube</span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-            <BookOpen className="w-4 h-4" />
-            Documentación
-          </Link>
-          <Link href="/changelog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-            <ScrollText className="w-4 h-4" />
-            Changelog
-          </Link>
-          <div className="flex items-center gap-4 border-l pl-4 ml-2 h-6">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Ingresar</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/register">Comenzar Gratis</Link>
-            </Button>
-          </div>
+        <nav className="hidden md:flex items-center gap-12">
+          <Link href="/docs" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">Docs</Link>
+          <Link href="/changelog" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">Updates</Link>
+
+          <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
+
+          <Link href="/login" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-900 dark:text-white hover:opacity-70 transition-opacity">Ingreso</Link>
+          <Link href="/register" className="text-[9px] font-black uppercase tracking-[0.3em] bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-6 py-2 rounded-none transition-transform hover:scale-105">Desplegar</Link>
         </nav>
 
-        {/* Mobile Menu Toggle */}
-        <button className="md:hidden p-2" aria-label="menu" onClick={() => setOpen(!open)}>
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {/* Mobile Menu Button */}
+        <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Mobile Nav Overlay */}
-      {open && (
-        <div className="absolute top-full left-0 right-0 bg-background border-b p-4 md:hidden shadow-xl animate-in slide-in-from-top-5">
-          <nav className="flex flex-col gap-4">
-            <Link
-              href="/docs"
-              className="text-sm font-medium p-2 hover:bg-muted rounded-md flex items-center gap-2"
-              onClick={() => setOpen(false)}
-            >
-              <BookOpen className="w-4 h-4" /> Documentación
-            </Link>
-            <Link
-              href="/changelog"
-              className="text-sm font-medium p-2 hover:bg-muted rounded-md flex items-center gap-2"
-              onClick={() => setOpen(false)}
-            >
-              <ScrollText className="w-4 h-4" /> Changelog
-            </Link>
-            <div className="h-px bg-border my-1" />
-            <Button variant="outline" asChild className="w-full justify-start">
-              <Link href="/login" onClick={() => setOpen(false)}>Ingresar</Link>
-            </Button>
-            <Button asChild className="w-full justify-start">
-              <Link href="/register" onClick={() => setOpen(false)}>Crear Cuenta Gratis</Link>
-            </Button>
-          </nav>
-        </div>
-      )}
+      {/* Mobile Menu Placeholder */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-full left-0 right-0 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-900 p-8 flex flex-col gap-6 md:hidden shadow-2xl"
+          >
+            <Link href="/docs" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">Documentación</Link>
+            <Link href="/changelog" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">Actualizaciones</Link>
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">Acceso Terminal</Link>
+            <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em] bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 p-4 text-center">Iniciar Despliegue</Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

@@ -45,8 +45,8 @@ export function PlanComparison({ className }: PlanComparisonProps) {
           <tr>
             <th className="text-left p-3 border-b font-semibold">Característica</th>
             <th className="text-center p-3 border-b font-semibold w-28">Free</th>
-            <th className="text-center p-3 border-b font-semibold w-28 bg-blue-50 dark:bg-blue-900/20">Emprendedor</th>
-            <th className="text-center p-3 border-b font-semibold w-28 bg-primary/5">Pyme</th>
+            <th className="text-center p-3 border-b font-semibold w-28 bg-zinc-100 dark:bg-zinc-800">Emprendedor</th>
+            <th className="text-center p-3 border-b font-semibold w-28 bg-black text-white dark:bg-white dark:text-black">Pyme</th>
           </tr>
         </thead>
         <tbody>
@@ -60,8 +60,8 @@ export function PlanComparison({ className }: PlanComparisonProps) {
             <tr key={`limit-${i}`} className="border-b">
               <td className="p-3 text-sm">{item.name}</td>
               <td className="p-3 text-sm text-center">{item.free}</td>
-              <td className="p-3 text-sm text-center bg-blue-50 dark:bg-blue-900/20">{item.entrepreneur}</td>
-              <td className="p-3 text-sm text-center bg-primary/5 font-medium">{item.premium}</td>
+              <td className="p-3 text-sm text-center bg-zinc-100/50 dark:bg-zinc-800/50">{item.entrepreneur}</td>
+              <td className="p-3 text-sm text-center bg-zinc-200/50 dark:bg-zinc-700/50 font-medium">{item.premium}</td>
             </tr>
           ))}
 
@@ -76,21 +76,21 @@ export function PlanComparison({ className }: PlanComparisonProps) {
               <td className="p-3 text-sm">{item.name}</td>
               <td className="p-3 text-center">
                 {item.free ? (
-                  <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  <Check className="h-5 w-5 text-primary mx-auto" />
                 ) : (
                   <X className="h-5 w-5 text-muted-foreground mx-auto" />
                 )}
               </td>
               <td className="p-3 text-center bg-blue-50 dark:bg-blue-900/20">
                 {item.entrepreneur ? (
-                  <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  <Check className="h-5 w-5 text-primary mx-auto" />
                 ) : (
                   <X className="h-5 w-5 text-muted-foreground mx-auto" />
                 )}
               </td>
               <td className="p-3 text-center bg-primary/5">
                 {item.premium ? (
-                  <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  <Check className="h-5 w-5 text-primary mx-auto" />
                 ) : (
                   <X className="h-5 w-5 text-muted-foreground mx-auto" />
                 )}

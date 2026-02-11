@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, Lock, Loader2, KeyRound, Building2, User, ArrowLeft, Users } from 'lucide-react'
+import { Mail, Lock, Loader2, KeyRound, Building2, User, ArrowLeft, Users, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type LoginMode = 'owner' | 'employee'
@@ -30,17 +30,13 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
-  // Mode selection
   const [mode, setMode] = useState<LoginMode>('owner')
-
-  // Owner login state
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [pin, setPin] = useState('')
   const [ownerMethod, setOwnerMethod] = useState<OwnerMethod>('password')
   const [rememberMe, setRememberMe] = useState(false)
 
-  // Employee login state
   const [businessCode, setBusinessCode] = useState('')
   const [employeeStep, setEmployeeStep] = useState<EmployeeStep>('code')
   const [employees, setEmployees] = useState<Employee[]>([])
@@ -49,11 +45,9 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
   const [employeeMethod, setEmployeeMethod] = useState<EmployeeMethod>('pin')
   const [businessName, setBusinessName] = useState('')
 
-  // Common state
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Format business code as user types (XXX-NNNN-CC)
   const formatBusinessCode = (value: string) => {
     const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '')
     const parts = []
@@ -77,10 +71,10 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
         router.push(callbackUrl)
         router.refresh()
       } else {
-        setError(typeof result.error === 'string' ? result.error : 'Error al iniciar sesión')
+        setError(typeof result.error === 'string' ? result.error : 'FALLO_AUTENTICACION')
       }
     } catch {
-      setError('Error de conexión. Intente nuevamente.')
+      setError('ERROR_CONEXION')
     } finally {
       setLoading(false)
     }
@@ -89,7 +83,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
   const handleBusinessCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (businessCode.length < 11) {
-      setError('Ingresa el código completo (ej: ABC-1234-XY)')
+      setError('CODIGO_INCOMPLETO')
       return
     }
 
@@ -101,17 +95,17 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
 
       if (result.success && result.employees) {
         if (result.employees.length === 0) {
-          setError('No hay empleados registrados en este negocio')
+          setError('SIN_AGENTES_ACTIVOS')
         } else {
           setEmployees(result.employees)
           setBusinessName(result.businessName || '')
           setEmployeeStep('select')
         }
       } else {
-        setError(result.error || 'Código de negocio inválido')
+        setError(result.error || 'CODIGO_INVALIDO')
       }
     } catch {
-      setError('Error de conexión. Intente nuevamente.')
+      setError('ERROR_CONEXION')
     } finally {
       setLoading(false)
     }
@@ -119,7 +113,6 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
 
   const handleEmployeeSelect = (employee: Employee) => {
     setSelectedEmployee(employee)
-    // Default to PIN if available, otherwise password
     setEmployeeMethod(employee.hasPin ? 'pin' : 'password')
     setEmployeeStep('credential')
     setError(null)
@@ -145,10 +138,10 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
         router.push(callbackUrl)
         router.refresh()
       } else {
-        setError(result.error || (employeeMethod === 'pin' ? 'PIN incorrecto' : 'Contraseña incorrecta'))
+        setError(result.error || 'CREDENCIALES_INVALIDAS')
       }
     } catch {
-      setError('Error de conexión. Intente nuevamente.')
+      setError('ERROR_CONEXION')
     } finally {
       setLoading(false)
     }
@@ -173,333 +166,177 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Mode Tabs */}
-      <div className="flex rounded-lg bg-muted p-1">
+    <div className="space-y-8">
+      {/* Tab select - No background, just text with indicators */}
+      <div className="flex gap-8 border-b border-zinc-50 dark:border-zinc-900 pb-2">
         <button
           type="button"
           onClick={() => { setMode('owner'); resetEmployeeFlow() }}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 rounded-md py-2.5 text-sm font-medium transition-all",
-            mode === 'owner'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+            "relative text-[10px] font-black uppercase tracking-[0.3em] transition-all pb-2",
+            mode === 'owner' ? "text-zinc-900 dark:text-white" : "text-zinc-500"
           )}
         >
-          <User className="w-4 h-4" />
           Propietario
+          {mode === 'owner' && <motion.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-zinc-900 dark:bg-white" />}
         </button>
         <button
           type="button"
           onClick={() => { setMode('employee'); setError(null) }}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 rounded-md py-2.5 text-sm font-medium transition-all",
-            mode === 'employee'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+            "relative text-[10px] font-black uppercase tracking-[0.3em] transition-all pb-2",
+            mode === 'employee' ? "text-zinc-900 dark:text-white" : "text-zinc-500"
           )}
         >
-          <Users className="w-4 h-4" />
-          Empleado
+          Personal
+          {mode === 'employee' && <motion.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-zinc-900 dark:bg-white" />}
         </button>
       </div>
 
-      {/* Error Display */}
       <AnimatePresence mode="wait">
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
+            initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+            className="text-red-500 text-[8px] font-black uppercase tracking-[0.2em] italic"
           >
-            {error}
+            [ Error: {error} ]
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Owner Login */}
       <AnimatePresence mode="wait">
         {mode === 'owner' && (
-          <motion.form
-            key="owner"
-            onSubmit={handleOwnerSubmit}
-            className="space-y-5"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-          >
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                  placeholder="tu@email.com"
-                  className="pl-10 h-12"
-                  required
-                />
-              </div>
+          <motion.form key="owner" onSubmit={handleOwnerSubmit} className="grid gap-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="space-y-1">
+              <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Identificador</label>
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                placeholder="CORREO_ELECTRONICO"
+                className="h-10 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold uppercase text-[10px] tracking-widest placeholder:text-zinc-200 dark:placeholder:text-zinc-800 shadow-none"
+                required
+              />
             </div>
 
             {ownerMethod === 'password' ? (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Contraseña</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    type="password"
-                    placeholder="••••••••"
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Clave</label>
+                <Input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  placeholder="CONTRASEÑA"
+                  className="h-10 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold text-[10px] tracking-widest placeholder:text-zinc-200 dark:placeholder:text-zinc-800 shadow-none"
+                  required
+                />
               </div>
             ) : (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">PIN de acceso</label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    type="password"
-                    inputMode="numeric"
-                    placeholder="••••"
-                    className="pl-10 h-12 tracking-widest"
-                    required
-                    minLength={4}
-                    maxLength={6}
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Pin</label>
+                <Input
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  type="password"
+                  inputMode="numeric"
+                  placeholder="0000"
+                  className="h-10 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold text-lg tracking-[1em] placeholder:text-zinc-200 dark:placeholder:text-zinc-800 shadow-none"
+                  required
+                />
               </div>
             )}
 
-            {/* Remember Me Checkbox */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-2">
               <input
                 type="checkbox"
                 id="rememberMe"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                className="h-3 w-3 rounded-none border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer"
               />
-              <label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer select-none">
-                Recordarme por 30 días
+              <label htmlFor="rememberMe" className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500 cursor-pointer italic hover:text-zinc-700 transition-colors">
+                Mantener sesión
               </label>
             </div>
 
-            <div className="space-y-3">
-              <Button type="submit" className="w-full h-12" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Continuar
+            <div className="space-y-4 pt-4">
+              <Button type="submit" className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-none font-black uppercase tracking-[0.3em] text-[10px] shadow-none border border-zinc-900 dark:border-white" disabled={loading}>
+                {loading ? "INICIANDO..." : "Ejecutar Acceso"}
               </Button>
 
               <button
                 type="button"
                 onClick={toggleOwnerMethod}
-                className="w-full text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2"
+                className="w-full text-[7px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all text-center italic"
               >
-                {ownerMethod === 'password' ? (
-                  <><KeyRound className="h-4 w-4" /> Ingresar con PIN</>
-                ) : (
-                  <><Lock className="h-4 w-4" /> Ingresar con contraseña</>
-                )}
+                Cambiar vector de ingreso
               </button>
             </div>
           </motion.form>
         )}
 
-        {/* Employee Login */}
+        {/* Staff / Employee Flow */}
         {mode === 'employee' && employeeStep === 'code' && (
-          <motion.form
-            key="employee-code"
-            onSubmit={handleBusinessCodeSubmit}
-            className="space-y-5"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-          >
-            <div className="text-center pb-2">
-              <p className="text-sm text-muted-foreground">
-                Ingresa el código de negocio que te proporcionó tu empleador
-              </p>
+          <motion.form key="staff-code" onSubmit={handleBusinessCodeSubmit} className="grid gap-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="space-y-1">
+              <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Código de Nodo</label>
+              <Input
+                value={businessCode}
+                onChange={(e) => setBusinessCode(formatBusinessCode(e.target.value))}
+                placeholder="XXX-0000-XX"
+                className="h-10 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-mono font-bold text-center uppercase tracking-widest text-[12px] placeholder:text-zinc-200 dark:placeholder:text-zinc-800 shadow-none"
+                maxLength={11}
+                required
+              />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Código de negocio</label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={businessCode}
-                  onChange={(e) => setBusinessCode(formatBusinessCode(e.target.value))}
-                  placeholder="ABC-1234-XY"
-                  className="pl-10 h-12 font-mono tracking-wider text-center uppercase"
-                  maxLength={11}
-                  required
-                />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full h-12" disabled={loading || businessCode.length < 11}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Buscar mi negocio
+            <Button type="submit" className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-none font-black uppercase tracking-[0.3em] text-[10px] shadow-none border border-zinc-900 dark:border-white" disabled={loading || businessCode.length < 11}>
+              {loading ? "LOCALIZANDO..." : "Localizar Nodo"}
             </Button>
           </motion.form>
         )}
 
-        {mode === 'employee' && employeeStep === 'select' && (
-          <motion.div
-            key="employee-select"
-            className="space-y-5"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-          >
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={resetEmployeeFlow}
-                className="p-2 hover:bg-muted rounded-md transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <div>
-                <p className="font-medium">{businessName}</p>
-                <p className="text-sm text-muted-foreground">Selecciona tu nombre</p>
+        {/* Staff select/cred flows */}
+        {mode === 'employee' && (employeeStep === 'select' || employeeStep === 'credential') && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="flex items-center justify-between border-b border-dashed border-zinc-100 dark:border-zinc-800 pb-4">
+              <div className="space-y-1">
+                <span className="text-[6px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">Nodo: {businessName}</span>
+                <h3 className="text-[10px] font-black uppercase tracking-widest">{selectedEmployee ? selectedEmployee.name : "Seleccionar Agente"}</h3>
               </div>
+              <button onClick={resetEmployeeFlow} className="text-[8px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 underline underline-offset-4">Reiniciar</button>
             </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {employees.map((employee) => (
-                <button
-                  key={employee.id}
-                  type="button"
-                  onClick={() => handleEmployeeSelect(employee)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors text-left"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-semibold text-primary">
-                      {employee.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="font-medium">{employee.name}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {mode === 'employee' && employeeStep === 'credential' && selectedEmployee && (
-          <motion.form
-            key="employee-credential"
-            onSubmit={handleEmployeeCredentialSubmit}
-            className="space-y-5"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-          >
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => { setEmployeeStep('select'); setEmployeeCredential(''); setError(null) }}
-                className="p-2 hover:bg-muted rounded-md transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <div>
-                <p className="font-medium">{selectedEmployee.name}</p>
-                <p className="text-sm text-muted-foreground">{businessName}</p>
-              </div>
-            </div>
-
-            <div className="flex justify-center py-4">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-3xl font-semibold text-primary">
-                  {selectedEmployee.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            </div>
-
-            {/* Method toggle - only show if employee has both options */}
-            {selectedEmployee.hasPin && selectedEmployee.hasPassword && (
-              <div className="flex rounded-lg bg-muted p-1">
-                <button
-                  type="button"
-                  onClick={() => { setEmployeeMethod('pin'); setEmployeeCredential(''); setError(null) }}
-                  className={cn(
-                    "flex-1 flex items-center justify-center gap-2 rounded-md py-2 text-sm font-medium transition-all",
-                    employeeMethod === 'pin'
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <KeyRound className="w-3.5 h-3.5" />
-                  PIN
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setEmployeeMethod('password'); setEmployeeCredential(''); setError(null) }}
-                  className={cn(
-                    "flex-1 flex items-center justify-center gap-2 rounded-md py-2 text-sm font-medium transition-all",
-                    employeeMethod === 'password'
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  Contraseña
-                </button>
+            {employeeStep === 'select' && (
+              <div className="grid gap-2 max-h-40 overflow-y-auto pr-2 scrollbar-none">
+                {employees.map(e => (
+                  <button key={e.id} onClick={() => handleEmployeeSelect(e)} className="flex items-center justify-between p-3 border border-zinc-50 dark:border-zinc-900 hover:border-zinc-900 dark:hover:border-white transition-all text-[9px] font-black uppercase tracking-widest">
+                    {e.name}
+                    <ArrowLeft className="w-3 h-3 rotate-180 opacity-20" />
+                  </button>
+                ))}
               </div>
             )}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-center block">
-                {employeeMethod === 'pin' ? 'Ingresa tu PIN' : 'Ingresa tu contraseña'}
-              </label>
-              <div className="relative">
-                {employeeMethod === 'pin' ? (
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                )}
-                <Input
-                  value={employeeCredential}
-                  onChange={(e) => {
-                    if (employeeMethod === 'pin') {
-                      setEmployeeCredential(e.target.value.replace(/\D/g, '').slice(0, 6))
-                    } else {
-                      setEmployeeCredential(e.target.value)
-                    }
-                  }}
-                  type="password"
-                  inputMode={employeeMethod === 'pin' ? 'numeric' : 'text'}
-                  placeholder={employeeMethod === 'pin' ? '••••' : '••••••••'}
-                  className={cn(
-                    "pl-10 h-12",
-                    employeeMethod === 'pin' && "tracking-widest text-center"
-                  )}
-                  required
-                  minLength={employeeMethod === 'pin' ? 4 : 6}
-                  maxLength={employeeMethod === 'pin' ? 6 : undefined}
-                  autoFocus
-                />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-12"
-              disabled={loading || (employeeMethod === 'pin' ? employeeCredential.length < 4 : employeeCredential.length < 6)}
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Ingresar
-            </Button>
-          </motion.form>
+            {employeeStep === 'credential' && (
+              <form onSubmit={handleEmployeeCredentialSubmit} className="space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Vector: {employeeMethod}</label>
+                  <Input
+                    value={employeeCredential}
+                    onChange={(e) => setEmployeeCredential(employeeMethod === 'pin' ? e.target.value.replace(/\D/g, '').slice(0, 6) : e.target.value)}
+                    type="password"
+                    placeholder="****"
+                    className="h-10 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold text-center tracking-[1em] text-[12px] shadow-none"
+                    required
+                    autoFocus
+                  />
+                </div>
+                <Button type="submit" className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-none font-black uppercase tracking-[0.3em] text-[10px] shadow-none border border-zinc-900 dark:border-white" disabled={loading}>
+                  {loading ? "VERIFICANDO..." : "Verificar Identidad"}
+                </Button>
+              </form>
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -508,20 +345,12 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
 
 function LoginFormLoading() {
   return (
-    <div className="space-y-6">
-      <div className="flex rounded-lg bg-muted p-1">
-        <div className="flex-1 h-10 bg-gray-200 rounded animate-pulse" />
-        <div className="flex-1 h-10 bg-gray-200 rounded animate-pulse" />
+    <div className="space-y-8">
+      <div className="h-4 w-32 bg-zinc-50 dark:bg-zinc-900 animate-pulse" />
+      <div className="space-y-4">
+        <div className="h-10 w-full bg-zinc-50 dark:bg-zinc-900 animate-pulse" />
+        <div className="h-10 w-full bg-zinc-50 dark:bg-zinc-900 animate-pulse" />
       </div>
-      <div className="space-y-2">
-        <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
-        <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
-      </div>
-      <div className="space-y-2">
-        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
-        <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
-      </div>
-      <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
     </div>
   )
 }

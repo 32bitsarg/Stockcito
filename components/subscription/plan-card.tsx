@@ -47,7 +47,7 @@ export function PlanCard({
           Más popular
         </Badge>
       )}
-      
+
       {current && (
         <Badge variant="outline" className="absolute -top-3 left-1/2 -translate-x-1/2">
           Plan actual
@@ -92,7 +92,7 @@ export function PlanCard({
         {features.map((feature, i) => (
           <div key={i} className="flex items-center gap-2 text-sm">
             {feature.included ? (
-              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <Check className="h-4 w-4 text-primary flex-shrink-0" />
             ) : (
               <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             )}
