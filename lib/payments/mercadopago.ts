@@ -132,7 +132,11 @@ export async function createSubscriptionPlan(
         billing_day: new Date().getDate(), // Billing on same day of month
         billing_day_proportional: true,
         transaction_amount: price,
-        currency_id: 'ARS'
+        currency_id: 'ARS',
+        free_trial: {
+          frequency: 7,
+          frequency_type: 'days'
+        }
       },
       back_url: `${APP_URL}/subscription/success`,
       payment_methods_allowed: {
@@ -212,7 +216,11 @@ export async function createSubscription(
         frequency_type: 'months',
         transaction_amount: price,
         currency_id: 'ARS',
-        ...(planType === 'yearly' && { frequency: 12 })
+        ...(planType === 'yearly' && { frequency: 12 }),
+        free_trial: {
+          frequency: 7,
+          frequency_type: 'days'
+        }
       },
       payer_email: email,
       back_url: `${APP_URL}/subscription/success`,

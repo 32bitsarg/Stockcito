@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { RegisterForm } from '@/components/auth/register-form'
 import { AuthHero } from '@/components/auth/auth-hero'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ArrowLeft } from 'lucide-react'
 
 interface PageProps {
   searchParams: Promise<{ mode?: string }>
@@ -12,34 +12,43 @@ export default async function RegisterPage({ searchParams }: PageProps) {
   const params = await searchParams
 
   return (
-    <div className="h-screen w-full flex overflow-hidden">
-      {/* Left side - Info with animations */}
+    <div className="h-screen w-full flex overflow-hidden bg-white dark:bg-zinc-950">
       <AuthHero
-        title="Comenzá con Stockcito"
-        subtitle="Registrate y probá el POS en minutos. Tené tu inventario y facturación listos."
+        title="Registro"
+        subtitle="Inicie su nodo operativo comercial en segundos."
       />
 
-      {/* Right side - Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-background p-6 overflow-y-auto">
-        <div className="w-full max-w-sm space-y-6">
-          <div className="space-y-1 text-center md:text-left">
-            <h1 className="text-2xl font-bold tracking-tight">Crear cuenta</h1>
-            <p className="text-muted-foreground text-sm">Registrate para usar Stockcito gratis</p>
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 lg:p-12 relative">
+        {/* Minimal Navigation */}
+        <div className="absolute top-10 right-10">
+          <Link href="/" className="group flex items-center gap-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+            <span className="text-[9px] font-black uppercase tracking-[0.3em]">Salir</span>
+            <ArrowLeft className="h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+
+        <div className="w-full max-w-[380px] space-y-12">
+          {/* Header */}
+          <div className="space-y-2 text-center md:text-right">
+            <h1 className="text-4xl lg:text-5xl font-black tracking-tighter uppercase italic text-zinc-900 dark:text-zinc-50 leading-none">
+              Alta de Nodo
+            </h1>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 italic">
+              Despliegue de Sistema
+            </p>
           </div>
 
-          <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-            <RegisterForm />
-          </Suspense>
+          <div className="relative">
+            <Suspense fallback={<div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-zinc-200" /></div>}>
+              <RegisterForm />
+            </Suspense>
+          </div>
 
-          <p className="text-center text-sm text-muted-foreground">
-            ¿Ya tenés cuenta?{' '}
-            <Link
-              href={`/login${params.mode ? `?mode=${params.mode}` : ''}`}
-              className="font-medium text-primary hover:underline transition-colors"
-            >
-              Iniciar sesión
+          <div className="pt-8 text-center md:text-right border-t border-zinc-50 dark:border-zinc-900">
+            <Link href={`/login${params.mode ? `?mode=${params.mode}` : ''}`} className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors italic">
+              ¿Ya tienes cuenta? Acceder a Terminal
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

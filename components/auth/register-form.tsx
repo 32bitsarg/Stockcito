@@ -3,19 +3,18 @@
 import { useState, useMemo } from 'react'
 import { registerUser } from '@/actions/auth-actions'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { User, Mail, Lock, Loader2, Building2, AlertCircle, Check, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Password validation rules
 const passwordRules = [
-  { id: 'length', label: 'Mínimo 8 caracteres', test: (p: string) => p.length >= 8 },
-  { id: 'uppercase', label: 'Al menos 1 mayúscula', test: (p: string) => /[A-Z]/.test(p) },
-  { id: 'lowercase', label: 'Al menos 1 minúscula', test: (p: string) => /[a-z]/.test(p) },
-  { id: 'number', label: 'Al menos 1 número', test: (p: string) => /[0-9]/.test(p) },
-  { id: 'special', label: 'Al menos 1 caracter especial (!@#$%^&*)', test: (p: string) => /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;'/`~]/.test(p) },
+  { id: 'length', label: '8+ CHARS', test: (p: string) => p.length >= 8 },
+  { id: 'uppercase', label: 'MAYUS', test: (p: string) => /[A-Z]/.test(p) },
+  { id: 'lowercase', label: 'MINUS', test: (p: string) => /[a-z]/.test(p) },
+  { id: 'number', label: 'NUM', test: (p: string) => /[0-9]/.test(p) },
+  { id: 'special', label: 'ESPEC', test: (p: string) => /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;'/`~]/.test(p) },
 ]
 
 export function RegisterForm() {
@@ -30,273 +29,136 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
   const [showPasswordRules, setShowPasswordRules] = useState(false)
 
-  // Validate password against all rules
-  const passwordValidation = useMemo(() => {
-    return passwordRules.map(rule => ({
-      ...rule,
-      passed: rule.test(password)
-    }))
-  }, [password])
-
+  const passwordValidation = useMemo(() => passwordRules.map(rule => ({ ...rule, passed: rule.test(password) })), [password])
   const allRulesPassed = passwordValidation.every(r => r.passed)
   const passedCount = passwordValidation.filter(r => r.passed).length
   const passwordsMatch = password === confirmPassword && password.length > 0
 
-  // Password strength indicator
   const strengthLevel = useMemo(() => {
-    if (passedCount <= 1) return { label: 'Muy débil', color: 'bg-red-500', width: '20%' }
-    if (passedCount === 2) return { label: 'Débil', color: 'bg-orange-500', width: '40%' }
-    if (passedCount === 3) return { label: 'Regular', color: 'bg-yellow-500', width: '60%' }
-    if (passedCount === 4) return { label: 'Buena', color: 'bg-lime-500', width: '80%' }
-    return { label: 'Excelente', color: 'bg-green-500', width: '100%' }
+    if (passedCount <= 1) return { label: 'CRÍTICO', color: 'bg-red-500', width: '20%' }
+    if (passedCount === 2) return { label: 'DÉBIL', color: 'bg-orange-500', width: '40%' }
+    if (passedCount === 3) return { label: 'REGULAR', color: 'bg-zinc-400', width: '60%' }
+    if (passedCount === 4) return { label: 'BUENO', color: 'bg-zinc-600', width: '80%' }
+    return { label: 'SEGURO', color: 'bg-emerald-500', width: '100%' }
   }, [passedCount])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-
-    if (!allRulesPassed) {
-      setError('La contraseña no cumple con todos los requisitos de seguridad')
-      return
-    }
-
-    if (!passwordsMatch) {
-      setError('Las contraseñas no coinciden')
-      return
-    }
-
-    if (!businessName.trim()) {
-      setError('El nombre del negocio es requerido')
-      return
-    }
+    if (!allRulesPassed) { setError('REQUISITOS_SEGURIDAD_INCUMPLIDOS'); return }
+    if (!passwordsMatch) { setError('LAS_CONTRASEÑAS_NO_COINCIDEN'); return }
+    if (!businessName.trim()) { setError('NOMBRE_NEGOCIO_REQUERIDO'); return }
 
     setLoading(true)
-    const result = await registerUser({
-      name,
-      email,
-      password,
-      businessName
-    })
+    const result = await registerUser({ name, email, password, businessName })
     setLoading(false)
 
     if (result.success) {
       if (searchParams.get('mode') === 'subscription') {
-        router.push('/subscription/upgrade?auto_checkout=true')
-      } else {
-        router.push('/dashboard')
+        const plan = searchParams.get('plan') || 'premium'
+        router.push(`/subscription/upgrade?auto_checkout=true&plan=${plan}`)
       }
+      else router.push('/dashboard')
       router.refresh()
     } else {
-      const errorMsg = typeof result.error === 'string'
-        ? result.error
-        : 'Error al registrarse'
-      setError(errorMsg)
+      setError(typeof result.error === 'string' ? result.error : 'FALLO_DESPLIEGUE')
     }
   }
 
   return (
-    <motion.form
-      onSubmit={handleSubmit}
-      className="space-y-5"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1 }}
-    >
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-3 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 text-sm flex items-start gap-2"
-        >
-          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-          {error}
-        </motion.div>
-      )}
+    <motion.form onSubmit={handleSubmit} className="space-y-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <AnimatePresence mode="wait">
+        {error && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-red-500 text-[8px] font-black uppercase tracking-[0.2em] italic">
+            [ ERROR: {error} ]
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <motion.div
-        className="space-y-2"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      >
-        <label className="text-sm font-medium">Nombre completo</label>
-        <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            aria-label="name"
-            placeholder="Tu nombre"
-            className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
-            required
-          />
+      <div className="grid gap-6">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="space-y-1">
+            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Nombre Agente</label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="ALPHA"
+              className="h-9 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold uppercase text-[10px] tracking-widest placeholder:text-zinc-400 dark:placeholder:text-zinc-600 shadow-none"
+              required
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Nombre Unidad</label>
+            <Input
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="DELTA_6"
+              className="h-9 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold uppercase text-[10px] tracking-widest placeholder:text-zinc-400 dark:placeholder:text-zinc-600 shadow-none"
+              required
+            />
+          </div>
         </div>
-      </motion.div>
 
-      <motion.div
-        className="space-y-2"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: 0.25 }}
-      >
-        <label className="text-sm font-medium">Nombre del negocio</label>
-        <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={businessName}
-            onChange={(e) => setBusinessName(e.target.value)}
-            aria-label="business-name"
-            placeholder="Ej: Kiosco María, Almacén El Sol"
-            className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
-            required
-          />
-        </div>
-      </motion.div>
-
-      <motion.div
-        className="space-y-2"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-      >
-        <label className="text-sm font-medium">Email</label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="space-y-1">
+          <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Email Principal</label>
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
-            aria-label="email"
-            placeholder="tu@email.com"
-            className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
-            required
-          />
-        </div>
-      </motion.div>
-
-      <motion.div
-        className="space-y-2"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: 0.35 }}
-      >
-        <label className="text-sm font-medium">Contraseña</label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onFocus={() => setShowPasswordRules(true)}
-            type="password"
-            aria-label="password"
-            placeholder="••••••••"
-            className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
+            placeholder="USUARIO@NODO.LOCAL"
+            className="h-9 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold uppercase text-[10px] tracking-widest placeholder:text-zinc-400 dark:placeholder:text-zinc-600 shadow-none"
             required
           />
         </div>
 
-        {/* Password Strength Indicator */}
-        {password.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Seguridad:</span>
-              <span className={cn(
-                "font-medium",
-                passedCount <= 2 ? "text-red-500" : passedCount <= 3 ? "text-yellow-500" : "text-green-500"
-              )}>
-                {strengthLevel.label}
-              </span>
-            </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <motion.div
-                className={cn("h-full rounded-full", strengthLevel.color)}
-                initial={{ width: 0 }}
-                animate={{ width: strengthLevel.width }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
+        <div className="grid grid-cols-2 gap-8">
+          <div className="space-y-1">
+            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Clave</label>
+            <Input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => setShowPasswordRules(true)}
+              type="password"
+              placeholder="****"
+              className="h-9 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold text-[10px] tracking-widest placeholder:text-zinc-400 dark:placeholder:text-zinc-600 shadow-none"
+              required
+            />
           </div>
-        )}
-
-        {/* Password Requirements Checklist */}
-        {showPasswordRules && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="p-3 rounded-lg bg-muted/50 border space-y-1.5"
-          >
-            <p className="text-xs font-medium text-muted-foreground mb-2">Requisitos de seguridad:</p>
-            {passwordValidation.map((rule) => (
-              <div key={rule.id} className="flex items-center gap-2 text-xs">
-                {rule.passed ? (
-                  <Check className="w-3.5 h-3.5 text-green-500" />
-                ) : (
-                  <X className="w-3.5 h-3.5 text-muted-foreground/50" />
-                )}
-                <span className={cn(
-                  rule.passed ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
-                )}>
-                  {rule.label}
-                </span>
-              </div>
-            ))}
-          </motion.div>
-        )}
-      </motion.div>
-
-      <motion.div
-        className="space-y-2"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: 0.4 }}
-      >
-        <label className="text-sm font-medium">Confirmar contraseña</label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            type="password"
-            aria-label="confirm-password"
-            placeholder="••••••••"
-            className="pl-10 h-12 transition-all focus:ring-2 focus:ring-primary/20"
-            required
-          />
-          {confirmPassword.length > 0 && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {passwordsMatch ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-red-500" />
-              )}
-            </div>
-          )}
+          <div className="space-y-1">
+            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Confirmar</label>
+            <Input
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              type="password"
+              placeholder="****"
+              className="h-9 bg-transparent border-0 border-b border-zinc-300 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold text-[10px] tracking-widest placeholder:text-zinc-400 dark:placeholder:text-zinc-600 shadow-none"
+              required
+            />
+          </div>
         </div>
-        {confirmPassword.length > 0 && !passwordsMatch && (
-          <p className="text-xs text-red-500">Las contraseñas no coinciden</p>
-        )}
-      </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.45 }}
-      >
-        <Button
-          type="submit"
-          className="w-full h-12 text-base font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-          disabled={loading || !passwordsMatch || !allRulesPassed}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creando cuenta...
-            </>
-          ) : (
-            'Crear cuenta'
+        <AnimatePresence>
+          {(password.length > 0) && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-3 pt-2">
+              <div className="flex items-center justify-between border-b border-dashed border-zinc-100 dark:border-zinc-800 pb-1">
+                <span className="text-[6px] font-black uppercase tracking-widest text-zinc-500 italic">Nivel Encriptación:</span>
+                <span className={cn("text-[6px] font-black tracking-widest italic", strengthLevel.color.replace('bg-', 'text-'))}>{strengthLevel.label}</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1">
+                {passwordValidation.map(rule => (
+                  <div key={rule.id} className={cn("h-1 transition-all", rule.passed ? "bg-zinc-900 dark:bg-white" : "bg-zinc-100 dark:bg-zinc-900")} />
+                ))}
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+      </div>
+
+      <div className="pt-6">
+        <Button type="submit" className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-none font-black uppercase tracking-[0.3em] text-[10px] shadow-none border border-zinc-900 dark:border-white transition-all" disabled={loading || !passwordsMatch || !allRulesPassed}>
+          {loading ? "PROCESANDO..." : "Iniciar Despliegue"}
         </Button>
-      </motion.div>
+      </div>
     </motion.form>
   )
 }

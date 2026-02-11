@@ -1,61 +1,32 @@
 "use client"
 
-import Link from 'next/link'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Sparkles } from 'lucide-react'
-import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingCTA() {
   return (
-    <section className="w-full py-24 bg-background">
-      <div className="container px-4 md:px-6 mx-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="rounded-3xl bg-primary text-primary-foreground overflow-hidden relative"
-        >
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M0 100 C 20 0 50 0 100 100 Z" fill="currentColor" />
-            </svg>
-          </div>
+    <section className="bg-zinc-950 text-white py-32 overflow-hidden relative border-t border-white/5">
+      {/* Background grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-          <div className="relative z-10 py-16 px-6 md:px-12 md:py-24 text-center space-y-8 flex flex-col items-center">
-            <div className="inline-flex items-center rounded-full bg-primary-foreground/10 border border-primary-foreground/20 px-3 py-1 text-sm font-medium backdrop-blur-sm">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Early Access {APP_VERSION_DISPLAY}
-            </div>
+      <div className="container relative z-10 px-8 mx-auto text-center space-y-12">
+        <div className="space-y-4">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 italic">Despliegue Global</span>
+          <h2 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-[0.8]">¿Listo para <br /> Sincronizar?</h2>
+        </div>
 
-            <h3 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-2xl">
-              Potenciá tu negocio hoy con Stockcito
-            </h3>
+        <div className="flex justify-center">
+          <Button size="lg" className="h-16 px-12 bg-white text-black hover:bg-zinc-200 rounded-none text-[12px] font-black uppercase tracking-[0.3em] transition-transform hover:scale-105" asChild>
+            <Link href="/register" className="flex items-center gap-3">
+              Empezar Ahora
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
 
-            <p className="text-primary-foreground/80 md:text-xl max-w-xl">
-              Probá el POS en minutos y empieza a llevar el control real de tu inventario y ventas. Sin tarjetas de crédito.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Button size="lg" variant="secondary" className="h-12 px-8 text-base shadow-lg" asChild>
-                <Link href="/register">
-                  Comenzar ahora
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" asChild>
-                <Link href="/login">
-                  Ya tengo cuenta
-                </Link>
-              </Button>
-            </div>
-
-            <p className="text-sm text-primary-foreground/60">
-              Únete a más de 50 comercios que ya confían en nosotros.
-            </p>
-          </div>
-        </motion.div>
+        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 italic">No se requiere método de pago para el despliegue inicial.</p>
       </div>
     </section>
   )

@@ -4,29 +4,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Shield, User, Eye, ShoppingCart, Users, UserCheck, Crown } from "lucide-react"
+import { Plus, Shield, User, Eye, ShoppingCart, Users, UserCheck, Crown, Edit } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { ToggleUserButton } from "@/components/users/toggle-user-button"
 import { DeleteUserButton } from "@/components/users/delete-user-button"
+import { PageHeader } from "@/components/layout/page-header"
+import * as motion from "framer-motion/client"
 
 function getRoleBadge(role: string) {
     switch (role) {
         case "admin":
-            return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100"><Shield className="w-3 h-3 mr-1" />Admin</Badge>
+            return <Badge className="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 border-none font-bold italic"><Shield className="w-3 h-3 mr-1" />Admin</Badge>
         case "cashier":
-            return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100"><ShoppingCart className="w-3 h-3 mr-1" />Cajero</Badge>
+            return <Badge className="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-800 font-bold"><ShoppingCart className="w-3 h-3 mr-1" />Cajero</Badge>
         case "viewer":
-            return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100"><Eye className="w-3 h-3 mr-1" />Visor</Badge>
+            return <Badge variant="outline" className="text-zinc-500 border-zinc-200 dark:border-zinc-800 font-bold"><Eye className="w-3 h-3 mr-1" />Visor</Badge>
         default:
-            return <Badge variant="secondary">{role}</Badge>
+            return <Badge variant="secondary" className="font-bold uppercase tracking-widest text-[10px]">{role}</Badge>
     }
 }
 
 export default async function UsersPage() {
     const session = await getSession()
-    
+
     if (!session) {
         redirect("/login")
     }
@@ -39,152 +41,159 @@ export default async function UsersPage() {
     const users = await getUsers()
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Usuarios</h1>
-                    <p className="text-muted-foreground">
-                        Gestiona los usuarios del sistema y sus permisos
-                    </p>
-                </div>
-                <Button asChild>
+        <div className="pb-10">
+            <PageHeader
+                title="Usuarios"
+                subtitle="Gestión de acceso, roles administrativos y auditoría de personal."
+            >
+                <Button asChild className="shadow-md shadow-zinc-900/10 dark:shadow-white/5">
                     <Link href="/users/new">
                         <Plus className="w-4 h-4 mr-2" />
                         Nuevo Usuario
                     </Link>
                 </Button>
-            </div>
+            </PageHeader>
 
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card className="relative overflow-hidden">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="grid gap-6 md:grid-cols-3 mb-8"
+            >
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
+                        <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">
                             Total Usuarios
                         </CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <Users className="h-4 w-4 text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{users.length}</div>
-                        <p className="text-xs text-muted-foreground">usuarios registrados</p>
-                    </CardContent>
-                </Card>
-                <Card className="relative overflow-hidden">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Usuarios Activos
-                        </CardTitle>
-                        <UserCheck className="h-4 w-4 text-green-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">
-                            {users.filter(u => u.active).length}
+                        <div className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono italic">
+                            {users.length.toString().padStart(2, '0')}
                         </div>
-                        <p className="text-xs text-muted-foreground">pueden acceder al sistema</p>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-tighter">Cuentas registradas</p>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Administradores
-                        </CardTitle>
-                        <Crown className="h-4 w-4 text-purple-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-purple-600">
-                            {users.filter(u => u.role === "admin").length}
-                        </div>
-                        <p className="text-xs text-muted-foreground">acceso total al sistema</p>
-                    </CardContent>
-                </Card>
-            </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Lista de Usuarios</CardTitle>
-                    <CardDescription>
-                        Usuarios registrados en el sistema
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {users.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground">
-                            No hay usuarios registrados
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">
+                            En línea / Activos
+                        </CardTitle>
+                        <UserCheck className="h-4 w-4 text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono italic">
+                            {users.filter(u => u.active).length.toString().padStart(2, '0')}
                         </div>
-                    ) : (
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Usuario</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Rol</TableHead>
-                                        <TableHead>Ventas</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead>Creado</TableHead>
-                                        <TableHead className="text-right">Acciones</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {users.map((user) => (
-                                        <TableRow key={user.id} className={!user.active ? "opacity-50" : ""}>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                        <User className="w-4 h-4 text-primary" />
-                                                    </div>
-                                                    <span className="font-medium">{user.name}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {user.email}
-                                            </TableCell>
-                                            <TableCell>
-                                                {getRoleBadge(user.role)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {user._count.sales}
-                                            </TableCell>
-                                            <TableCell>
-                                                {user.active ? (
-                                                    <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100">
-                                                        Activo
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge variant="secondary">
-                                                        Inactivo
-                                                    </Badge>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {format(new Date(user.createdAt), "dd MMM yyyy", { locale: es })}
-                                            </TableCell>
-                                            <TableCell className="text-right space-x-1">
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <Link href={`/users/${user.id}/edit`}>
-                                                        Editar
-                                                    </Link>
-                                                </Button>
-                                                {user.id !== session.id && (
-                                                    <>
-                                                        <ToggleUserButton 
-                                                            userId={user.id} 
-                                                            isActive={user.active} 
-                                                        />
-                                                        <DeleteUserButton 
-                                                            userId={user.id} 
-                                                            userName={user.name} 
-                                                        />
-                                                    </>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-tighter">Autorizados para operar</p>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">
+                            Privilegios Altos
+                        </CardTitle>
+                        <Crown className="h-4 w-4 text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-black text-zinc-900 dark:text-zinc-50 font-mono italic">
+                            {users.filter(u => u.role === "admin").length.toString().padStart(2, '0')}
                         </div>
-                    )}
-                </CardContent>
-            </Card>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-tighter">Roles administrativos</p>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm"
+            >
+                <Table>
+                    <TableHeader>
+                        <TableRow className="bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50">
+                            <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs">Identidad</TableHead>
+                            <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs">Email institucional</TableHead>
+                            <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs">Rol</TableHead>
+                            <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs text-center">Ventas</TableHead>
+                            <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs">Estado</TableHead>
+                            <TableHead className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs">Alta</TableHead>
+                            <TableHead className="text-right font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter text-xs">Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {users.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={7} className="text-center h-48 text-zinc-500 font-medium italic">
+                                    No hay usuarios registrados en la infraestructura.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            users.map((user) => (
+                                <TableRow key={user.id} className={`${!user.active ? "opacity-40 grayscale" : ""} group hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors`}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-zinc-100 dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900 transition-colors">
+                                                <User className="w-4 h-4" />
+                                            </div>
+                                            <span className="font-bold text-zinc-900 dark:text-zinc-100">{user.name}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-zinc-500 font-medium text-xs">
+                                        {user.email}
+                                    </TableCell>
+                                    <TableCell>
+                                        {getRoleBadge(user.role)}
+                                    </TableCell>
+                                    <TableCell className="text-center font-mono font-bold text-xs">
+                                        {user._count.sales.toString().padStart(2, '0')}
+                                    </TableCell>
+                                    <TableCell>
+                                        {user.active ? (
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-900 dark:bg-zinc-100 animate-pulse" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100">Activo</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-1.5 grayscale">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Suspendido</span>
+                                            </div>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-zinc-400 font-bold text-[10px] uppercase">
+                                        {format(new Date(user.createdAt), "dd MMM yy", { locale: es })}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500" asChild>
+                                                <Link href={`/users/${user.id}/edit`}>
+                                                    <Edit className="h-4 w-4" />
+                                                </Link>
+                                            </Button>
+                                            {user.id !== session.id && (
+                                                <>
+                                                    <ToggleUserButton
+                                                        userId={user.id}
+                                                        isActive={user.active}
+                                                    />
+                                                    <DeleteUserButton
+                                                        userId={user.id}
+                                                        userName={user.name}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </motion.div>
         </div>
     )
 }

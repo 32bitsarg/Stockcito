@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ExportButton } from "@/components/export-button"
 import { format } from "date-fns"
 
+import { PageHeader } from "@/components/layout/page-header"
+import * as motion from "framer-motion/client"
+import { DollarSign, Hash } from "lucide-react"
+
 export default async function SalesHistoryPage({
     searchParams,
 }: {
@@ -39,43 +43,72 @@ export default async function SalesHistoryPage({
     }))
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Historial de Ventas</h1>
-                    <p className="text-muted-foreground">
-                        Consulta y filtra todas las ventas realizadas
-                    </p>
+        <div className="pb-10">
+            <PageHeader
+                title="Historial de Ventas"
+                subtitle="Consulta y filtra todas las operaciones históricas realizadas."
+            >
+                <ExportButton data={exportData} filename="ventas" label="Descargar reporte" />
+            </PageHeader>
+
+            <div className="grid gap-6 md:grid-cols-2 mb-8">
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                >
+                    <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden group">
+                        <CardHeader className="pb-2">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-zinc-500">Transacciones</CardTitle>
+                                <Hash className="h-4 w-4 text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors" />
+                            </div>
+                            <CardDescription className="text-xs font-medium">Volumen total de operaciones</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50 font-mono tracking-tighter">
+                                {totalSales.toString().padStart(2, '0')}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                    <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden group">
+                        <CardHeader className="pb-2">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-zinc-500">Recaudación</CardTitle>
+                                <DollarSign className="h-4 w-4 text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-50 transition-colors" />
+                            </div>
+                            <CardDescription className="text-xs font-medium">Ingresos brutos acumulados</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50 font-mono tracking-tighter">
+                                ${totalRevenue.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="space-y-6"
+            >
+                <div className="bg-white dark:bg-zinc-950 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                    <SalesFilters />
                 </div>
-                <ExportButton data={exportData} filename="ventas" label="Exportar Ventas" />
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                    <CardHeader className="pb-3">
-                        <CardTitle>Total Ventas</CardTitle>
-                        <CardDescription>Cantidad de ventas en el período</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold">{totalSales}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-3">
-                        <CardTitle>Ingresos Totales</CardTitle>
-                        <CardDescription>Suma de todas las ventas</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-green-600">
-                            ${totalRevenue.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <SalesFilters />
-
-            <SalesHistoryTable sales={sales} />
+                <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+                    <SalesHistoryTable sales={sales} />
+                </div>
+            </motion.div>
         </div>
     )
 }

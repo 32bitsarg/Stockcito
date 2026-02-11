@@ -2,101 +2,62 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Package, ShieldCheck, CheckCircle2 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingHero() {
   return (
-    <section className="relative w-full overflow-hidden bg-background pt-16 pb-32 lg:pt-32">
-      <div className="container relative z-10 px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center text-center space-y-8">
+    <section className="relative w-full overflow-hidden bg-white dark:bg-zinc-950 pt-40 pb-40 lg:pt-60 lg:pb-60">
+      {/* Ultra subtle grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+
+      <div className="container relative z-10 px-8 mx-auto">
+        <div className="max-w-4xl mx-auto text-center">
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 1 }}
           >
-            <Badge variant="outline" className="px-4 py-1.5 text-sm rounded-full border-muted-foreground/20 bg-muted/50 text-foreground mb-4 font-normal">
-              <span className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/80 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-                </span>
-                {APP_VERSION_DISPLAY} Early Access
-              </span>
-            </Badge>
-          </motion.div>
-
-          {/* Logo Animation */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-2 p-4 bg-primary/5 rounded-2xl"
-          >
-            <Package className="w-16 h-16 text-primary stroke-[1.5]" />
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl max-w-4xl text-foreground"
-          >
-            Gestión simple para <br />
-            negocios modernos.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mx-auto max-w-[600px] text-muted-foreground md:text-xl font-light"
-          >
-            Punto de venta, control de inventario y facturación en una plataforma minimalista que evoluciona con vos.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4"
-          >
-            <Button size="lg" className="h-12 px-8 text-base rounded-full" asChild>
-              <Link href="/register">
-                Comenzar gratis
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="ghost" className="h-12 px-8 text-base rounded-full" asChild>
-              <Link href="/login">
-                Ya tengo cuenta
-              </Link>
-            </Button>
+            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 mb-8 block italic">
+              Software de Gestión v0.1.5
+            </span>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="pt-8 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-sm text-muted-foreground"
+            transition={{ duration: 1.2, delay: 0.2 }}
           >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-primary" />
-              <span>Sin tarjeta de crédito</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 text-primary" />
-              <span>Control de Inventario</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-primary" />
-              <span>Datos en la Nube</span>
-            </div>
+            <h1 className="text-7xl md:text-9xl lg:text-[11rem] font-black tracking-tighter text-zinc-900 dark:text-white uppercase italic leading-[0.75] mb-12">
+              Stock <br />
+              Cito
+            </h1>
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-8 justify-center items-center pt-8"
+          >
+            <Link href="/register" className="group flex items-center gap-4 text-zinc-900 dark:text-white">
+              <span className="text-[12px] font-black uppercase tracking-[0.4em] italic border-b-2 border-zinc-900 dark:border-white pb-1">Iniciar Despliegue</span>
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
+            </Link>
+
+            <Link href="/login" className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors italic">
+              Terminal Activa
+            </Link>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* Minimal Version Watermark */}
+      <div className="absolute bottom-12 right-12 opacity-[0.02] select-none pointer-events-none hidden lg:block">
+        <div className="text-[20rem] font-black italic tracking-tighter leading-none uppercase">
+          0.1
         </div>
       </div>
     </section>
