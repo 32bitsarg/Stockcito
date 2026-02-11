@@ -78,7 +78,7 @@ export function RegisterForm() {
       <div className="grid gap-6">
         <div className="grid grid-cols-2 gap-8">
           <div className="space-y-1">
-            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Nombre Agente</label>
+            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Nombre Completo</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -88,7 +88,7 @@ export function RegisterForm() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Nombre Unidad</label>
+            <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Nombre del Negocio</label>
             <Input
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
@@ -100,7 +100,7 @@ export function RegisterForm() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Email Principal</label>
+          <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Email</label>
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -156,7 +156,7 @@ export function RegisterForm() {
 
       <div className="pt-6">
         <Button type="submit" className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-none font-black uppercase tracking-[0.3em] text-[10px] shadow-none border border-zinc-900 dark:border-white transition-all" disabled={loading || !passwordsMatch || !allRulesPassed}>
-          {loading ? "PROCESANDO..." : "Iniciar Despliegue"}
+          {loading ? "PROCESANDO..." : "Crear Cuenta"}
         </Button>
       </div>
     </motion.form>

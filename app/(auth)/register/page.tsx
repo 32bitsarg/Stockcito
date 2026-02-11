@@ -15,7 +15,7 @@ export default async function RegisterPage({ searchParams }: PageProps) {
     <div className="h-screen w-full flex overflow-hidden bg-white dark:bg-zinc-950">
       <AuthHero
         title="Registro"
-        subtitle="Inicie su nodo operativo comercial en segundos."
+        subtitle="Comienza a gestionar tu negocio de forma profesional en segundos."
       />
 
       <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 lg:p-12 relative">
@@ -31,10 +31,10 @@ export default async function RegisterPage({ searchParams }: PageProps) {
           {/* Header */}
           <div className="space-y-2 text-center md:text-right">
             <h1 className="text-4xl lg:text-5xl font-black tracking-tighter uppercase italic text-zinc-900 dark:text-zinc-50 leading-none">
-              Alta de Nodo
+              Registro
             </h1>
             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 italic">
-              Despliegue de Sistema
+              Nuevo Usuario
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export default async function RegisterPage({ searchParams }: PageProps) {
 
           <div className="pt-8 text-center md:text-right border-t border-zinc-50 dark:border-zinc-900">
             <Link href={`/login${params.mode ? `?mode=${params.mode}` : ''}`} className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors italic">
-              ¿Ya tienes cuenta? Acceder a Terminal
+              ¿Ya tienes cuenta? Ingresar
             </Link>
           </div>
         </div>

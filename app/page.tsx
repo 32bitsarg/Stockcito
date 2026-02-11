@@ -4,6 +4,7 @@ import { LandingFeatures } from '@/components/landing/features'
 import { LandingPricing } from '@/components/landing/pricing'
 import { LandingTestimonials } from '@/components/landing/testimonials'
 import { LandingCTA } from '@/components/landing/cta'
+import { LandingShowcase } from '@/components/landing/showcase'
 import { LandingFooter } from '@/components/landing/footer'
 import { getSession } from '@/actions/auth-actions'
 import { redirect } from 'next/navigation'
@@ -22,6 +23,7 @@ export default async function Landing() {
       <LandingHeader />
       <main className="flex-1">
         <LandingHero />
+        <LandingShowcase />
         <LandingFeatures />
         <LandingPricing />
         <LandingTestimonials />

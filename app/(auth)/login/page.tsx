@@ -26,7 +26,7 @@ export default async function LoginPage() {
               Ingreso
             </h1>
             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">
-              Verificación de Credenciales
+              Bienvenido
             </p>
           </div>
 
@@ -40,7 +40,7 @@ export default async function LoginPage() {
           {/* Footer Link */}
           <div className="pt-8 text-center md:text-left border-t border-zinc-50 dark:border-zinc-900">
             <Link href="/register" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors italic">
-              ¿No tienes cuenta? Crear Nodo
+              ¿No tienes cuenta? Crear cuenta
             </Link>
           </div>
         </div>

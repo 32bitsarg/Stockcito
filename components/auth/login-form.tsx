@@ -208,7 +208,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
         {mode === 'owner' && (
           <motion.form key="owner" onSubmit={handleOwnerSubmit} className="grid gap-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="space-y-1">
-              <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Identificador</label>
+              <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Email</label>
               <Input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -261,7 +261,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
 
             <div className="space-y-4 pt-4">
               <Button type="submit" className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 rounded-none font-black uppercase tracking-[0.3em] text-[10px] shadow-none border border-zinc-900 dark:border-white" disabled={loading}>
-                {loading ? "INICIANDO..." : "Ejecutar Acceso"}
+                {loading ? "INICIANDO..." : "Ingresar"}
               </Button>
 
               <button
@@ -269,7 +269,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
                 onClick={toggleOwnerMethod}
                 className="w-full text-[7px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all text-center italic"
               >
-                Cambiar vector de ingreso
+                Cambiar método de acceso
               </button>
             </div>
           </motion.form>
@@ -279,7 +279,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
         {mode === 'employee' && employeeStep === 'code' && (
           <motion.form key="staff-code" onSubmit={handleBusinessCodeSubmit} className="grid gap-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="space-y-1">
-              <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Código de Nodo</label>
+              <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Código de Negocio</label>
               <Input
                 value={businessCode}
                 onChange={(e) => setBusinessCode(formatBusinessCode(e.target.value))}
@@ -300,7 +300,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <div className="flex items-center justify-between border-b border-dashed border-zinc-100 dark:border-zinc-800 pb-4">
               <div className="space-y-1">
-                <span className="text-[6px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">Nodo: {businessName}</span>
+                <span className="text-[6px] font-black uppercase tracking-[0.2em] text-zinc-500 italic">Negocio: {businessName}</span>
                 <h3 className="text-[10px] font-black uppercase tracking-widest">{selectedEmployee ? selectedEmployee.name : "Seleccionar Agente"}</h3>
               </div>
               <button onClick={resetEmployeeFlow} className="text-[8px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 underline underline-offset-4">Reiniciar</button>
@@ -320,7 +320,7 @@ function LoginFormInner({ csrfToken }: LoginFormProps) {
             {employeeStep === 'credential' && (
               <form onSubmit={handleEmployeeCredentialSubmit} className="space-y-6">
                 <div className="space-y-1">
-                  <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Vector: {employeeMethod}</label>
+                  <label className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Ingresar con: {employeeMethod === 'pin' ? 'PIN' : 'Contraseña'}</label>
                   <Input
                     value={employeeCredential}
                     onChange={(e) => setEmployeeCredential(employeeMethod === 'pin' ? e.target.value.replace(/\D/g, '').slice(0, 6) : e.target.value)}
