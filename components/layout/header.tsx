@@ -30,10 +30,15 @@ const UserQuickLogin = dynamic(
     { ssr: false }
 )
 
-export function Header() {
+interface HeaderProps {
+    children?: React.ReactNode
+}
+
+export function Header({ children }: HeaderProps) {
     const router = useRouter()
     const [showQuickLogin, setShowQuickLogin] = useState(false)
     const [isKioskMode, setIsKioskMode] = useState(false)
+    const [isSheetOpen, setIsSheetOpen] = useState(false)
 
     useEffect(() => {
         // Check if we're in kiosk mode
@@ -63,8 +68,8 @@ export function Header() {
     }
 
     return (
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-            <Sheet>
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <Sheet open={isSheetOpen} onOpenChange={(e) => setIsSheetOpen(e.open)}>
                 <SheetTrigger asChild>
                     <Button
                         variant="outline"
@@ -75,11 +80,10 @@ export function Header() {
                         <span className="sr-only">Toggle navigation menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="flex flex-col">
-                    <nav className="grid gap-2 text-lg font-medium">
-                        {/* Mobile Nav items here if needed, for now just placeholder */}
-                        <span>Menu</span>
-                    </nav>
+                <SheetContent side="left" className="flex flex-col p-0 w-72 border-r">
+                    <div className="h-full" onClick={() => setIsSheetOpen(false)}>
+                        {children}
+                    </div>
                 </SheetContent>
             </Sheet>
             <div className="w-full flex-1">
