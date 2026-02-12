@@ -10,11 +10,11 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden max-w-[100vw];
   }
 
-  /* Smooth scrolling */
   html {
+    @apply overflow-x-hidden;
     scroll-behavior: smooth;
   }
 
@@ -218,8 +218,9 @@
 
 /* Print media query */
 @media print {
+
   /* Hide everything except the print portal */
-  body > *:not(.print-portal) {
+  body>*:not(.print-portal) {
     display: none !important;
     visibility: hidden !important;
   }

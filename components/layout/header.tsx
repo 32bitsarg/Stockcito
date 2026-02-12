@@ -86,7 +86,7 @@ export function Header({ children }: HeaderProps) {
                     </div>
                 </SheetContent>
             </Sheet>
-            <div className="w-full flex-1">
+            <div className="w-full flex-1 min-w-0">
                 <form>
                     <div className="relative">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

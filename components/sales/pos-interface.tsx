@@ -225,26 +225,26 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             </div>
 
             {/* Right: Cart & Checkout */}
-            <div className="w-full md:w-[380px] flex flex-col bg-zinc-50/30 dark:bg-zinc-900/10 border-t md:border-t-0 h-1/3 md:h-full">
-                <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 space-y-4">
+            <div className="w-full md:w-[380px] flex flex-col bg-zinc-50/30 dark:bg-zinc-900/10 border-t md:border-t-0 h-[60vh] md:h-full shrink-0">
+                <div className="p-4 md:p-5 border-b border-zinc-200 dark:border-zinc-800 space-y-3 md:space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <CreditCard className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
-                            <h2 className="text-xs font-black uppercase tracking-widest italic">Terminal / Facturación</h2>
+                            <h2 className="text-[10px] md:text-xs font-black uppercase tracking-widest italic">Terminal / Facturación</h2>
                         </div>
-                        <span className="text-[10px] font-mono font-black border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded uppercase">
+                        <span className="text-[9px] font-mono font-black border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded uppercase">
                             UID: {Math.floor(Date.now() / 1000).toString().slice(-6)}
                         </span>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 italic">Asignación de Cliente</label>
-                        <div className="flex items-center gap-2.5 bg-white dark:bg-zinc-900 p-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all focus-within:ring-2 ring-zinc-900/5">
-                            <div className="h-9 w-9 flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-                                <User className="h-4 w-4 text-zinc-400" />
+                    <div className="space-y-1">
+                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-zinc-400 italic">Asignación de Cliente</label>
+                        <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                            <div className="h-8 w-8 flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                                <User className="h-3.5 w-3.5 text-zinc-400" />
                             </div>
                             <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                                <SelectTrigger className="border-0 shadow-none h-9 w-full focus:ring-0 font-bold uppercase text-xs tracking-tighter">
+                                <SelectTrigger className="border-0 shadow-none h-8 w-full focus:ring-0 font-bold uppercase text-[10px] tracking-tighter">
                                     <SelectValue placeholder="CONSUMIDOR FINAL" />
                                 </SelectTrigger>
                                 <SelectContent className="font-sans">
@@ -269,39 +269,35 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                 />
 
                 {/* Footer: Totals */}
-                <div className="p-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-t-[32px] shadow-2xl space-y-5">
-                    <div className="space-y-1.5">
-                        <div className="flex justify-between text-[9px] font-black uppercase tracking-widest opacity-60 tabular-nums">
+                <div className="p-4 md:p-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-t-[24px] md:rounded-t-[32px] shadow-2xl space-y-3 md:space-y-5">
+                    <div className="space-y-1">
+                        <div className="flex justify-between text-[8px] font-black uppercase tracking-widest opacity-60 tabular-nums">
                             <span>Base Imponible</span>
                             <span>${calculations.subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        <div className="flex justify-between text-[9px] font-black uppercase tracking-widest opacity-60 tabular-nums">
-                            <span>Estimación Impuestos</span>
-                            <span>${calculations.tax.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                        <div className="flex justify-between items-end pt-3 border-t border-white/10 dark:border-zinc-200">
+                        <div className="flex justify-between items-end pt-2 border-t border-white/10 dark:border-zinc-200">
                             <div>
-                                <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-0.5">Total a Liquidar</p>
-                                <div className="text-3xl font-black font-mono tracking-tighter tabular-nums italic">
+                                <p className="text-[8px] font-black uppercase tracking-widest opacity-60 mb-0.5">Total a Liquidar</p>
+                                <div className="text-2xl md:text-3xl font-black font-mono tracking-tighter tabular-nums italic leading-none">
                                     ${calculations.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
-                            <div className="h-10 w-10 rounded-xl bg-white/10 dark:bg-zinc-100 flex items-center justify-center">
-                                <ChevronRight className="h-5 w-5" />
+                            <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-white/10 dark:bg-zinc-100 flex items-center justify-center">
+                                <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                             </div>
                         </div>
                     </div>
 
                     <Button
                         size="lg"
-                        className="w-full h-14 text-xs font-black uppercase tracking-widest transition-all bg-white text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-2xl group active:scale-95"
+                        className="w-full h-12 md:h-14 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all bg-white text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 rounded-xl md:rounded-2xl group active:scale-95"
                         disabled={cart.length === 0 || isPending}
                         onClick={handleCheckout}
                     >
                         {isPending ? "PROCESANDO..." : (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
                                 FINALIZAR OPERACIÓN
-                                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                             </div>
                         )}
                     </Button>
