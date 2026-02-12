@@ -163,7 +163,7 @@ export default async function Dashboard() {
             <div className="h-8 w-1.5 bg-zinc-900 dark:bg-zinc-100 rounded-full" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Sistema Operativo / v0.1.5</span>
           </Link>
-          <h1 className="text-5xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase italic">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase italic">
             Dashboard
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[10px]">

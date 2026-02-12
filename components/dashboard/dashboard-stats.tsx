@@ -28,7 +28,7 @@ function StatCard({ title, value, icon, trend, trendLabel, delay = 0, variant = 
             <Card className={cn(
                 "group relative overflow-hidden h-full border-zinc-200 dark:border-zinc-800 transition-all duration-500 shadow-sm hover:shadow-2xl",
                 variant === 'premium'
-                    ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-none scale-105 z-10"
+                    ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-none lg:scale-105 z-10"
                     : "bg-white dark:bg-zinc-950 hover:border-zinc-900 dark:hover:border-zinc-100"
             )}>
                 <CardContent className="p-6">
@@ -85,7 +85,7 @@ function StatCard({ title, value, icon, trend, trendLabel, delay = 0, variant = 
                     "absolute -right-4 -bottom-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.07] transition-opacity duration-700",
                     variant === 'premium' ? "text-white" : "text-zinc-900"
                 )}>
-                    <Hash className="w-32 h-32" />
+                    <Hash className="w-24 h-24 md:w-32 md:h-32" />
                 </div>
             </Card>
         </motion.div>

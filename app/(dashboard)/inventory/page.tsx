@@ -62,7 +62,8 @@ export default async function InventoryPage(props: {
                     )}
                 </div>
 
-                <div className="overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl">
+                {/* Desktop View: Table */}
+                <div className="hidden md:block overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl">
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-900 dark:hover:bg-zinc-100 border-none">
@@ -122,6 +123,59 @@ export default async function InventoryPage(props: {
                             )}
                         </TableBody>
                     </Table>
+                </div>
+
+                {/* Mobile View: Cards */}
+                <div className="md:hidden flex flex-col gap-4">
+                    {products.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-zinc-950 rounded-3xl border border-zinc-200 dark:border-zinc-800 opacity-40">
+                            <Package className="h-12 w-12 mb-4" />
+                            <p className="font-black uppercase tracking-widest text-xs">Catálogo no disponible</p>
+                        </div>
+                    ) : (
+                        products.map((product) => (
+                            <div key={product.id} className="bg-white dark:bg-zinc-950 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <div className="font-mono text-[10px] font-black text-zinc-400 uppercase">
+                                            SKU: {product.sku || '---'}
+                                        </div>
+                                        <h3 className="font-black text-zinc-900 dark:text-zinc-100 uppercase italic tracking-tighter text-base leading-none">
+                                            {product.name}
+                                        </h3>
+                                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                                            {product.category?.name || 'Inventario General'}
+                                        </p>
+                                    </div>
+                                    <div className={cn(
+                                        "flex flex-col items-center justify-center px-3 py-2 rounded-xl font-mono font-black transition-all",
+                                        product.stock <= product.minStock
+                                            ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xl"
+                                            : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
+                                    )}>
+                                        <span className="text-xs uppercase group-hover:text-zinc-400 opacity-60 leading-none mb-1">Stock</span>
+                                        <span className="text-lg leading-none">{product.stock.toString().padStart(2, '0')}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-zinc-900">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Precio Unitario</span>
+                                        <span className="font-mono font-black text-xl text-zinc-900 dark:text-zinc-100 italic tracking-tighter">
+                                            ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                        </span>
+                                    </div>
+                                    {canEdit && (
+                                        <Button size="sm" asChild className="rounded-xl h-10 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-black uppercase text-[10px] tracking-widest">
+                                            <Link href={`/inventory/${product.id}/edit`}>
+                                                Gestionar
+                                            </Link>
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </motion.div>
         </div>
