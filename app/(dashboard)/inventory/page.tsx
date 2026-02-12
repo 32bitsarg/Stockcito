@@ -53,9 +53,9 @@ export default async function InventoryPage(props: {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="space-y-6"
             >
-                <div className="flex items-center gap-4 bg-white dark:bg-zinc-950 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all focus-within:shadow-xl focus-within:border-zinc-500">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 bg-white dark:bg-zinc-950 p-4 md:p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all focus-within:shadow-xl focus-within:border-zinc-500">
                     <div className="flex-1">
-                        <SearchInput placeholder="BUSCAR POR NOMBRE O IDENTIFICADOR SKU..." className="max-w-xl border-dashed bg-zinc-50/50 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800" />
+                        <SearchInput placeholder="BUSCAR POR NOMBRE O IDENTIFICADOR SKU..." className="w-full max-w-none md:max-w-xl border-dashed bg-zinc-50/50 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800" />
                     </div>
                     {canExport && (
                         <ExportButton data={exportData} filename="inventario_master" label="Descargar Reporte SKU" />

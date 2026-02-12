@@ -214,9 +214,9 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
     const [lastSale, setLastSale] = useState<{ sale: any, organization: any } | null>(null)
 
     return (
-        <div className="flex h-full bg-white dark:bg-zinc-950 font-sans">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] md:h-full bg-white dark:bg-zinc-950 font-sans overflow-hidden">
             {/* Left: Product Selection */}
-            <div className="flex-1 flex flex-col border-r border-zinc-200 dark:border-zinc-800">
+            <div className="flex-1 flex flex-col border-r border-zinc-200 dark:border-zinc-800 h-full overflow-hidden">
                 <POSProductList
                     products={products}
                     onAddToCart={addToCart}
@@ -225,7 +225,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             </div>
 
             {/* Right: Cart & Checkout */}
-            <div className="w-[380px] flex flex-col bg-zinc-50/30 dark:bg-zinc-900/10">
+            <div className="w-full md:w-[380px] flex flex-col bg-zinc-50/30 dark:bg-zinc-900/10 border-t md:border-t-0 h-1/3 md:h-full">
                 <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
