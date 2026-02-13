@@ -62,7 +62,7 @@ export async function Sidebar({ className }: SidebarProps) {
     })
 
     return (
-        <div className={cn("hidden border-r bg-muted/40 md:block w-64 min-h-screen flex flex-col", className)}>
+        <div className={cn("hidden border-r bg-muted/40 md:flex flex-col w-64 min-h-screen md:sticky top-0 h-screen", className)}>
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
                     <Package className="h-6 w-6" />

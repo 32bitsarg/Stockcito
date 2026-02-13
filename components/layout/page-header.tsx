@@ -19,7 +19,7 @@ export function PageHeader({ title, subtitle, children, className }: PageHeaderP
             className={cn("flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8", className)}
         >
             <div className="space-y-1">
-                <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
                     {title}
                 </h1>
                 {subtitle && (

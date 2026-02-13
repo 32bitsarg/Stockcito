@@ -57,7 +57,7 @@ export function SalesChartInner({ data }: SalesChartInnerProps) {
             <Card className="h-full flex flex-col border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden group relative">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none">
-                    <div className="w-64 h-64 border border-zinc-900 dark:border-white rounded-full scale-150" />
+                    <div className="w-48 h-48 md:w-64 md:h-64 border border-zinc-900 dark:border-white rounded-full scale-150" />
                 </div>
 
                 <CardHeader className="pb-6 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/30 dark:bg-zinc-950 relative z-10">
@@ -75,8 +75,8 @@ export function SalesChartInner({ data }: SalesChartInnerProps) {
                     </div>
                 </CardHeader>
 
-                <CardContent className="flex-1 pt-10 px-2 pb-0 relative z-10">
-                    <ResponsiveContainer width="100%" height="100%">
+                <CardContent className="flex-1 pt-10 px-2 pb-0 relative z-10 min-w-0 overflow-hidden">
+                    <ResponsiveContainer width="99%" height="100%">
                         <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">

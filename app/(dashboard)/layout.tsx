@@ -31,11 +31,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] max-w-[100vw] overflow-x-hidden">
       <Sidebar />
-      <div className="flex flex-col">
+      <div className="flex flex-col min-w-0">
         <Header>
-          <Sidebar className="block w-full border-r-0" />
+          <Sidebar className="flex h-full w-full border-r-0 relative" />
         </Header>
         {/* Global shortcuts for quick-search, ctrl+k and '/' */}
         <GlobalShortcuts />
@@ -45,7 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         )}
         <ThemeSetter theme={organization?.theme || 'default'} />
         <BarcodeProvider>
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto">{children}</main>
+          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-y-auto overflow-x-hidden">{children}</main>
         </BarcodeProvider>
       </div>
     </div>
