@@ -2,7 +2,10 @@
 @import "tw-animate-css";
 @import "./themes.css";
 
-@custom-variant dark (&:is(.dark *));
+@theme {
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
+}
 
 @layer base {
   * {
@@ -10,7 +13,16 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading), sans-serif;
   }
 
   /* Smooth scrolling */
@@ -218,8 +230,9 @@
 
 /* Print media query */
 @media print {
+
   /* Hide everything except the print portal */
-  body > *:not(.print-portal) {
+  body>*:not(.print-portal) {
     display: none !important;
     visibility: hidden !important;
   }
