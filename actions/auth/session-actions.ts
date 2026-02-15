@@ -23,45 +23,68 @@ export async function getSession(): Promise<SessionUser | null> {
             return null
         }
 
-        const user = await db.user.findUnique({
-            where: { id: payload.userId },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                active: true,
-                organizationId: true,
-                permissions: true,
-                emailVerified: true,
-                organization: {
-                    select: {
-                        name: true,
-                        plan: true,
-                        planStatus: true
+        try {
+            const user = await db.user.findUnique({
+                where: { id: payload.userId },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    active: true,
+                    organizationId: true,
+                    permissions: true,
+                    emailVerified: true,
+                    organization: {
+                        select: {
+                            name: true,
+                            plan: true,
+                            planStatus: true
+                        }
                     }
                 }
+            })
+
+            if (!user || !user.active) {
+                return null
             }
-        })
 
-        if (!user || !user.active) {
+            // Get permissions combining role + custom permissions
+            const permissions = getUserPermissions(user.role as SystemRole, user.permissions)
+
+            return {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role as UserRole,
+                organizationId: user.organizationId,
+                organizationName: user.organization?.name || null,
+                plan: user.organization?.plan || null,
+                planStatus: user.organization?.planStatus || null,
+                permissions,
+                emailVerified: !!user.emailVerified
+            }
+        } catch (dbError) {
+            console.error("Database connection error in getSession, entering degraded mode:", dbError)
+
+            // Si estamos en producción (Electron standalone) y falla la DB, permitimos el paso si el JWT es válido
+            // Esto es el "Modo Degradado" para soporte offline
+            if (process.env.NODE_ENV === 'production') {
+                return {
+                    id: payload.userId,
+                    name: "Usuario Offline", // No tenemos el nombre real sin DB
+                    email: "offline@local",
+                    role: (payload.role || "cashier") as UserRole,
+                    organizationId: payload.organizationId || null,
+                    organizationName: "Stockcito (Offline)",
+                    plan: "premium", // Asumimos premium en offline por defecto para no bloquear funciones
+                    planStatus: "active",
+                    permissions: getUserPermissions((payload.role || "cashier") as SystemRole, null),
+                    emailVerified: true
+                }
+            }
+
             return null
-        }
-
-        // Get permissions combining role + custom permissions
-        const permissions = getUserPermissions(user.role as SystemRole, user.permissions)
-
-        return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role as UserRole,
-            organizationId: user.organizationId,
-            organizationName: user.organization?.name || null,
-            plan: user.organization?.plan || null,
-            planStatus: user.organization?.planStatus || null,
-            permissions,
-            emailVerified: !!user.emailVerified
         }
     } catch {
         return null

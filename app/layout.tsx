@@ -5,8 +5,12 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { RegisterSW } from "@/components/pwa/register-sw";
+import QueryProvider from "@/components/providers/query-provider";
+import { OfflineBanner } from "@/components/offline/offline-banner";
+import { SyncService } from "@/components/offline/sync-service";
 import { validateEnv } from "@/lib/env";
 import { Toaster } from "sonner";
+import { UpdateNotifier } from "@/components/layout/update-notifier";
 
 // Validate environment variables at startup
 if (typeof window === 'undefined') {
@@ -78,18 +82,23 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${spaceGrotesk.variable} ${robotoMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-            {children}
-          </main>
-          <RegisterSW />
-          <Toaster richColors closeButton position="top-center" />
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <OfflineBanner />
+            <SyncService />
+            <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+              {children}
+            </main>
+            <RegisterSW />
+            <Toaster richColors closeButton position="top-center" />
+            <UpdateNotifier />
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -41,6 +41,9 @@ export function UserMenu({ user }: UserMenuProps) {
 
     const handleLogout = async () => {
         startTransition(async () => {
+            // SEGURIDAD: Limpiar caché offline antes de cerrar sesión
+            const { clearOfflineCache } = await import('@/hooks/use-offline-data')
+            await clearOfflineCache()
             await logoutUser()
             router.push("/login")
             router.refresh()

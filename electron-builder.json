@@ -5,6 +5,11 @@
   "directories": {
     "output": "dist-electron"
   },
+  "publish": {
+    "provider": "github",
+    "owner": "32bitsarg",
+    "repo": "Stockcito"
+  },
   "files": [
     "electron/**/*",
     "public/**/*"
@@ -12,7 +17,18 @@
   "extraResources": [
     {
       "from": ".next/standalone/",
-      "to": "standalone/"
+      "to": "standalone/",
+      "filter": [
+        "**/*",
+        "!node_modules"
+      ]
+    },
+    {
+      "from": ".next/standalone/node_modules",
+      "to": "standalone/node_modules",
+      "filter": [
+        "**/*"
+      ]
     },
     {
       "from": ".next/static",
@@ -38,16 +54,37 @@
     "target": [
       {
         "target": "AppImage",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       },
       {
         "target": "deb",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       }
     ],
     "category": "Office",
     "maintainer": "Stockcito Team <contacto@stockcito.com>",
     "synopsis": "Sistema POS e Inventario",
     "description": "Aplicación de punto de venta e inventario para pequeños negocios. Incluye gestión de productos, clientes, ventas y reportes."
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "public/icon.ico",
+    "verifyUpdateCodeSignature": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": true,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Stockcito",
+    "installerIcon": "public/icon.ico",
+    "uninstallerIcon": "public/icon.ico",
+    "installerHeaderIcon": "public/icon.ico",
+    "deleteAppDataOnUninstall": true
   }
 }

@@ -51,6 +51,10 @@ export function Header({ children }: HeaderProps) {
 
     const handleLogout = async () => {
         startTransition(async () => {
+            // SEGURIDAD: Limpiar caché offline antes de cerrar sesión
+            // Esto previene que otro usuario vea datos del usuario anterior
+            const { clearOfflineCache } = await import('@/hooks/use-offline-data')
+            await clearOfflineCache()
             await logoutUser()
             router.push('/login')
             router.refresh()

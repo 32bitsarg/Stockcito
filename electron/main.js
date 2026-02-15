@@ -1,6 +1,7 @@
-const { app, BrowserWindow, shell } = require('electron')
+const { app, BrowserWindow, shell, ipcMain } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
+const { autoUpdater } = require('electron-updater')
 
 // Deshabilitar aceleración por hardware para evitar crashes en algunos sistemas Linux
 app.disableHardwareAcceleration()
@@ -23,10 +24,11 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 600,
     title: 'Stockcito - POS & Inventario',
-    icon: path.join(appRoot, 'public', 'icon.svg'),
+    icon: path.join(isDev ? appRoot : app.getAppPath(), 'public', 'icon.ico'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
     autoHideMenuBar: true,
     show: false,
@@ -40,18 +42,27 @@ function createWindow() {
   // Cargar la app - ir directo al dashboard, no a la landing
   const baseUrl = `http://localhost:${port}`
   const appUrl = `${baseUrl}/dashboard`
-  
-  // Esperar a que el servidor esté listo
+
+  // Esperar a que el servidor esté listo con timeout mejorado
+  let attempts = 0
   const checkServer = () => {
     const http = require('http')
     const req = http.get(baseUrl, (res) => {
+      console.log('Servidor Next.js detectado, cargando URL...')
       mainWindow.loadURL(appUrl)
     })
+
     req.on('error', () => {
+      attempts++
+      if (attempts > 60) { // ~30 segundos
+        console.error('El servidor no arrancó a tiempo.')
+        mainWindow.show() // Mostrar ventana aunque cargue error para que el usuario sepa que algo pasó
+        return
+      }
       setTimeout(checkServer, 500)
     })
   }
-  
+
   checkServer()
 
   // Abrir links externos en el navegador
@@ -67,7 +78,7 @@ function createWindow() {
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const urlObj = new URL(url)
     const blockedPaths = ['/', '/docs']
-    
+
     // Si intenta ir a una ruta bloqueada, redirigir al dashboard
     if (blockedPaths.includes(urlObj.pathname)) {
       event.preventDefault()
@@ -87,38 +98,68 @@ function startServer() {
     return Promise.resolve()
   }
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // En producción, el servidor está en extraResources
     const resourcesPath = process.resourcesPath
     const serverPath = path.join(resourcesPath, 'standalone', 'server.js')
     const serverCwd = path.join(resourcesPath, 'standalone')
-    
-    console.log('Resources path:', resourcesPath)
-    console.log('Iniciando servidor desde:', serverPath)
-    console.log('CWD del servidor:', serverCwd)
-    
-    serverProcess = spawn('node', [serverPath], {
+
+    // Cargar variables de entorno explícitamente en producción
+    const dotenv = require('dotenv')
+    const envPath = path.join(serverCwd, '.env')
+    const envConfig = dotenv.config({ path: envPath })
+
+    // Setup logging to file for debugging
+    const fs = require('fs')
+    const logPath = path.join(app.getPath('userData'), 'server.log')
+    const log = (msg) => {
+      console.log(msg)
+      fs.appendFileSync(logPath, `[${new Date().toISOString()}] ${msg}\n`)
+    }
+
+    log('Iniciando servidor Next.js standalone...')
+    log(`Server Path: ${serverPath}`)
+    log(`Env Path: ${envPath}`)
+
+    if (envConfig.error) {
+      log(`Error cargando .env: ${envConfig.error}`)
+    } else {
+      log('.env cargado correctamente')
+    }
+
+    // Usar el propio ejecutable de Electron para correr el script de Node
+    // Esto garantiza que funcione aunque no haya Node.js instalado globalmente
+    serverProcess = spawn(process.execPath, [serverPath], {
       env: {
         ...process.env,
         PORT: port.toString(),
         HOSTNAME: 'localhost',
+        ELECTRON_RUN_AS_NODE: '1' // Truco clave para que Electron actúe como Node pura
       },
       cwd: serverCwd,
     })
 
     serverProcess.stdout.on('data', (data) => {
-      console.log(`Server: ${data}`)
-      if (data.toString().includes('Ready') || data.toString().includes('started')) {
+      log(`Server: ${data}`)
+      if (data.toString().includes('Ready') || data.toString().includes('started') || data.toString().includes('Listening')) {
         resolve()
       }
     })
 
     serverProcess.stderr.on('data', (data) => {
-      console.error(`Server Error: ${data}`)
+      log(`Server Error: ${data}`)
+    })
+
+    serverProcess.on('close', (code) => {
+      log(`Server process exited with code ${code}`)
     })
 
     // Timeout para resolver si el servidor no emite "Ready"
-    setTimeout(resolve, 3000)
+    // Aumentado a 10s para dar tiempo en máquinas lentas
+    setTimeout(() => {
+      log('Timeout esperando al servidor, resolviendo de todas formas...')
+      resolve()
+    }, 10000)
   })
 }
 
@@ -131,6 +172,32 @@ app.whenReady().then(async () => {
       createWindow()
     }
   })
+
+  // Configuración de autoUpdater
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify()
+
+    autoUpdater.on('update-available', () => {
+      if (mainWindow) {
+        mainWindow.webContents.send('update-available')
+      }
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      if (mainWindow) {
+        mainWindow.webContents.send('update-ready')
+      }
+    })
+
+    autoUpdater.on('error', (err) => {
+      console.error('Error en autoUpdater:', err)
+    })
+  }
+})
+
+// IPC para forzar el reinicio e instalación
+ipcMain.on('restart-app', () => {
+  autoUpdater.quitAndInstall()
 })
 
 app.on('window-all-closed', () => {

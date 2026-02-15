@@ -1,7 +1,7 @@
 import { getSession } from "@/actions/auth-actions"
 import { redirect } from "next/navigation"
-import { db } from "@/lib/db"
 import { ProfileContent } from "@/components/profile/profile-content"
+import { getUserProfile } from "@/actions/profile-actions"
 
 export default async function ProfilePage(props: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -14,57 +14,24 @@ export default async function ProfilePage(props: {
         redirect("/login")
     }
 
-    const user = await db.user.findUnique({
-        where: { id: session.id },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            pin: true,
-            emailVerified: true,
-            createdAt: true,
-            organizationId: true,
-            _count: {
-                select: { sales: true }
-            }
-        }
-    })
+    let profileData = null
+    try {
+        profileData = await getUserProfile()
+    } catch (error) {
+        console.error("Error loading profile data:", error)
+    }
 
-    if (!user) {
+    if (!profileData) {
         redirect("/login")
     }
 
-    // Get organization data for owners
-    let organization: { name: string; businessCode: string } | undefined
-    if (user.role === 'owner' && user.organizationId) {
-        const org = await db.organization.findUnique({
-            where: { id: user.organizationId },
-            select: { name: true, businessCode: true }
-        })
-        if (org) {
-            organization = org
-        }
-    }
-
-    const isAdmin = ['owner', 'admin'].includes(session.role)
-    const isOwner = session.role === 'owner'
-
     return (
         <ProfileContent
-            user={{
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                hasPin: !!user.pin,
-                createdAt: user.createdAt.toISOString(),
-                salesCount: user._count.sales
-            }}
-            organization={organization}
-            emailVerified={!!user.emailVerified}
-            isAdmin={isAdmin}
-            isOwner={isOwner}
+            user={profileData.user}
+            organization={profileData.organization}
+            emailVerified={profileData.emailVerified}
+            isAdmin={profileData.isAdmin}
+            isOwner={profileData.isOwner}
             showVerificationWarning={verify}
         />
     )

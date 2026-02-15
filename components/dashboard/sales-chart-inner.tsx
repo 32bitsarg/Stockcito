@@ -156,7 +156,7 @@ export function SalesChartInner({ data }: SalesChartInnerProps) {
                             </div>
                         </div>
                         <Link href="/changelog" className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-300 dark:text-zinc-700 hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors">
-                            Analytics Unit v0.1.5
+                            Analytics Unit v0.1.6
                         </Link>
                     </div>
                 </CardContent>
