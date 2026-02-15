@@ -14,6 +14,17 @@ export async function getCategories() {
     })
 }
 
+export async function getCategoryById(id: number) {
+    try {
+        return await db.category.findUnique({
+            where: { id },
+        })
+    } catch (error) {
+        console.error("Error fetching category:", error)
+        return null
+    }
+}
+
 export async function createCategory(data: { name: string }) {
     try {
         await db.category.create({ data })

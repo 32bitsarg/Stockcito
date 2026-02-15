@@ -58,3 +58,8 @@ next-env.d.ts
 *.AppImage
 dev.db
 docs/docker-commands.md
+docs/REDES_SOCIALES.md
+redes_sociales.md
+
+# Cache regions
+.cache/

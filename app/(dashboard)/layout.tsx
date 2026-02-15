@@ -15,19 +15,29 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect('/login')
   }
 
-  // Get current organization for theme
-  const { getCurrentOrganization } = await import('@/actions/organization-actions')
-  const organization = await getCurrentOrganization()
+  // Get current organization for theme (safe for offline)
+  let organization = null
+  try {
+    const { getCurrentOrganization } = await import('@/actions/organization-actions')
+    organization = await getCurrentOrganization()
+  } catch (error) {
+    console.error('Layout: Error obteniendo organización (modo offline):', error)
+  }
 
-  // Check if we're in kiosk mode
-  const kioskSession = await getKioskSession()
-  const isKioskMode = kioskSession?.kioskMode && kioskSession?.activeEmployeeId != null
-
-  // Get auto-lock settings
+  // Check if we're in kiosk mode (safe for offline)
+  let isKioskMode = false
   let autoLockMinutes = 0
-  if (isKioskMode) {
-    const settings = await getKioskSettings()
-    autoLockMinutes = settings.autoLockMinutes
+  try {
+    const kioskSession = await getKioskSession()
+    isKioskMode = !!(kioskSession?.kioskMode && kioskSession?.activeEmployeeId != null)
+
+    // Get auto-lock settings
+    if (isKioskMode) {
+      const settings = await getKioskSettings()
+      autoLockMinutes = settings.autoLockMinutes
+    }
+  } catch (error) {
+    console.error('Layout: Error obteniendo sesión kiosk (modo offline):', error)
   }
 
   return (

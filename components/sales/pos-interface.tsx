@@ -15,6 +15,7 @@ import { QuickStockModal } from "@/components/inventory/quick-stock-modal"
 import { toast } from "sonner"
 import { SaleSuccessModal } from "./sale-success-modal"
 import * as motion from "framer-motion/client"
+import { usePOSOffline } from "@/hooks/use-pos-offline"
 
 interface CartItem {
     id: string
@@ -64,8 +65,8 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
-    const [products, setProducts] = useState<Product[]>([])
-    const [clients, setClients] = useState<Client[]>([])
+    const { products, clients, createSale, isOnline, refetchProducts } = usePOSOffline()
+
     const [cart, setCart] = useState<CartItem[]>([])
     const [selectedClientId, setSelectedClientId] = useState<string>("")
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
@@ -76,35 +77,20 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
 
     const initialSkuProcessed = useRef(false)
 
-    useEffect(() => {
-        const load = async () => {
-            const [c, p] = await Promise.all([getClientsAll(), getProducts()])
-            setClients(c)
-            setProducts(p as any)
-        }
-        load()
-    }, [])
-
+    // Initial SKU processing (only runs once products are loaded)
     useEffect(() => {
         const processInitialSku = async () => {
-            if (!initialSku || initialSkuProcessed.current) return
+            if (!initialSku || initialSkuProcessed.current || products.length === 0) return
             initialSkuProcessed.current = true
 
             let product = products.find(p => p.sku === initialSku)
-            if (!product) {
+            if (!product && isOnline) {
                 try {
                     const result = await searchByBarcode(initialSku)
                     if (result.found && result.product) {
-                        product = {
-                            id: result.product.id,
-                            name: result.product.name,
-                            sku: result.product.sku,
-                            price: result.product.price,
-                            stock: result.product.stock,
-                            taxRate: result.product.taxRate,
-                            category: result.product.category ? { name: result.product.category } : null
-                        }
-                        setProducts(prev => [...prev, product!])
+                        // Optimistically add to local list if found online but not in cache
+                        // Note: In a real scenario we might want to update the cache
+                        product = result.product as any
                     }
                 } catch (e) {
                     console.error("Error fetching initial SKU product", e)
@@ -129,7 +115,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             }
         }
         processInitialSku()
-    }, [initialSku, products.length, canEditStock])
+    }, [initialSku, products, canEditStock, isOnline])
 
     const addToCart = (product: Product) => {
         setCart(prev => {
@@ -200,10 +186,18 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                 requireOpenDrawer: false,
                 tableId: selectedTableId ?? undefined
             })
+
             if (result.success) {
                 setCart([]); setSelectedTableId(null)
-                setLastSale({ sale: result.sale, organization: result.organization })
-                const updated = await getProducts(); setProducts(updated as any)
+                // If offline, we construct a temp sale object for the modal
+                const saleData = result.data?.sale || {
+                    id: 'OFFLINE-' + Date.now(),
+                    total: calculations.total,
+                    date: new Date(),
+                    status: 'pending-sync'
+                }
+                setLastSale({ sale: saleData, organization: {} })
+                await refetchProducts()
                 router.refresh()
             } else {
                 toast.error("Error en la venta", { description: result.error as string })
@@ -309,7 +303,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     isOpen={stockModal.isOpen}
                     onClose={() => setStockModal({ isOpen: false, product: null })}
                     product={stockModal.product}
-                    onSuccess={(newStock) => setProducts(prev => prev.map(p => p.id === stockModal.product.id ? { ...p, stock: newStock } : p))}
+                    onSuccess={(newStock) => refetchProducts()}
                 />
             )}
 

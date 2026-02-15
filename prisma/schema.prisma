@@ -55,6 +55,7 @@ model Organization {
   categories            Category[]
   clients               Client[]
   sales                 Sale[]
+  stockAlerts           StockAlert[]
   suppliers             Supplier[]
   discounts             Discount[]
   invoices              Invoice[]
@@ -180,6 +181,7 @@ model Product {
   updatedAt      DateTime      @updatedAt
   saleItems      SaleItem[]
   discounts      Discount[]
+  stockAlerts    StockAlert[]
 
   @@index([organizationId])
   @@index([sku])
@@ -235,6 +237,7 @@ model Sale {
   user           User?         @relation(fields: [userId], references: [id])
   invoice        Invoice?
   creditNotes    CreditNote[]
+  stockAlerts    StockAlert[]
   
   // Kitchen Display fields
   kitchenStatus    String?   @default("pending") // pending, preparing, ready, delivered
@@ -312,6 +315,7 @@ model User {
   // Relations
   sales               Sale[]
   auditLogs           AuditLog[]
+  resolvedStockAlerts StockAlert[] @relation("StockAlertResolvedBy")
   timeEntries         TimeEntry[]
   cashMovements       CashMovement[]
   currentDrawer       CashDrawer?     @relation("CurrentCashier")
@@ -727,3 +731,29 @@ model OrganizationFeatures {
   updatedAt      DateTime @updatedAt
 }
 
+// ==========================================
+// STOCK ALERTS (Offline Conflict Detection)
+// ==========================================
+
+model StockAlert {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productId      Int
+  product        Product       @relation(fields: [productId], references: [id])
+  saleId         Int?
+  sale           Sale?         @relation(fields: [saleId], references: [id])
+  type           String        // NEGATIVE_STOCK
+  severity       String        @default("warning") // warning, critical
+  message        String
+  metadata       String?       @db.Text // JSON con detalles del conflicto
+  resolved       Boolean       @default(false)
+  resolvedAt     DateTime?
+  resolvedById   Int?
+  resolvedBy     User?         @relation("StockAlertResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAction String?       // adjusted, acknowledged, restocked
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, resolved])
+  @@index([productId])
+}

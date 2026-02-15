@@ -154,6 +154,14 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
             const saleItemsData: any[] = []
             const lineCalculations: Array<{ idx: number; taxableBase: Decimal; taxAmount: Decimal }> = []
 
+            // Track stock conflicts for offline sync detection
+            const stockConflicts: Array<{
+                productId: number
+                productName: string
+                currentStock: number
+                soldQuantity: number
+            }> = []
+
             // First pass: calculate per-line without sale-level discount
             for (let i = 0; i < items.length; i++) {
                 const item = items[i]
@@ -196,6 +204,20 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                     where: { id: product.id },
                     data: { stock: { decrement: item.quantity } }
                 })
+
+                // Check if stock went negative (offline conflict detection)
+                const updatedProduct = await tx.product.findUnique({
+                    where: { id: product.id },
+                    select: { stock: true }
+                })
+                if (updatedProduct && updatedProduct.stock < 0) {
+                    stockConflicts.push({
+                        productId: product.id,
+                        productName: product.name,
+                        currentStock: updatedProduct.stock,
+                        soldQuantity: item.quantity
+                    })
+                }
             }
 
             // Apply sale-level discount proportionally if exists
@@ -309,7 +331,30 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                 )
             }
 
-            return { sale, organization }
+            // 4. Create stock alerts if any product went negative (offline conflict)
+            if (stockConflicts.length > 0) {
+                for (const conflict of stockConflicts) {
+                    const severity = conflict.currentStock < -5 ? 'critical' : 'warning'
+                    await tx.stockAlert.create({
+                        data: {
+                            organizationId,
+                            productId: conflict.productId,
+                            saleId: sale.id,
+                            type: 'NEGATIVE_STOCK',
+                            severity,
+                            message: `${conflict.productName} tiene stock negativo (${conflict.currentStock}) después de vender ${conflict.soldQuantity} unidad(es)`,
+                            metadata: JSON.stringify({
+                                ...conflict,
+                                saleTicket: ticketNumber,
+                                userId: session.id,
+                                timestamp: new Date().toISOString()
+                            })
+                        }
+                    })
+                }
+            }
+
+            return { sale, organization, stockConflicts }
         })
 
         revalidatePath("/sales")
@@ -318,7 +363,12 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
         revalidatePath("/kitchen") // refresh kitchen display
         if (tableId) revalidatePath("/tables") // refresh tables if assigned
 
-        return { success: true, sale: transactionResult.sale, organization: transactionResult.organization }
+        return {
+            success: true,
+            sale: transactionResult.sale,
+            organization: transactionResult.organization,
+            stockConflicts: transactionResult.stockConflicts
+        }
 
     } catch (error) {
         saleLogger.error('Error al procesar la venta', error)

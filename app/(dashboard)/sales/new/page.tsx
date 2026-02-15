@@ -20,10 +20,19 @@ export default async function POSPage({ searchParams }: POSPageProps) {
     const resolvedParams = await searchParams
     const addSku = typeof resolvedParams.addSku === 'string' ? resolvedParams.addSku : undefined
 
-    const features = await getOrganizationFeatures()
-    const tables = features?.tableManagement
-        ? await getTables()
-        : []
+    // Protección offline: features y tables pueden fallar sin DB
+    let features: any = null
+    let tables: any[] = []
+    try {
+        features = await getOrganizationFeatures()
+        if (features?.tableManagement) {
+            tables = await getTables()
+        }
+    } catch (error) {
+        console.error("Error loading POS features (offline mode):", error)
+        features = { tableManagement: false }
+        tables = []
+    }
 
     return (
         <div className="flex-1 flex flex-col -m-4 lg:-m-6 overflow-hidden min-h-[600px]">

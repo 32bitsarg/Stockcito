@@ -1,4 +1,4 @@
-import { db } from "@/lib/db"
+import { getCategoryById } from "@/actions/category-actions"
 import { CategoryForm } from "@/components/categories/category-form"
 import { notFound } from "next/navigation"
 
@@ -8,9 +8,13 @@ export default async function EditCategoryPage({
     params: Promise<{ id: string }>
 }) {
     const { id } = await params
-    const category = await db.category.findUnique({
-        where: { id: parseInt(id) },
-    })
+
+    let category = null
+    try {
+        category = await getCategoryById(parseInt(id))
+    } catch (error) {
+        console.error("Error loading category:", error)
+    }
 
     if (!category) {
         notFound()
