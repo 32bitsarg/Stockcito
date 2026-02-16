@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('electron', {
         }
     },
     on: (channel, func) => {
-        const validChannels = ['update-available', 'update-ready']
+        const validChannels = ['update-available', 'update-ready', 'download-progress']
         if (validChannels.includes(channel)) {
             // Delibery subscripción
             const subscription = (event, ...args) => func(...args)

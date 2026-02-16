@@ -17,6 +17,57 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.1.7',
+        date: '2026-02-16',
+        title: 'Arquitectura Offline-First & Sincronización Inteligente 📡',
+        description: 'Hemos transformado Stockcito para que tu negocio nunca se detenga, incluso si te quedás sin internet.',
+        changes: [
+            {
+                type: 'new',
+                title: 'Modo Offline Completo',
+                description: 'Ahora podés navegar por todas las secciones, realizar ventas y crear clientes sin conexión a internet.'
+            },
+            {
+                type: 'new',
+                title: 'Sincronización Automática',
+                description: 'Tus operaciones offline se guardan localmente y se sincronizan solas apenas recuperás la conexión.'
+            },
+            {
+                type: 'improvement',
+                title: 'Resolución de Conflictos de Stock',
+                description: 'Implementamos el sistema "Vende Siempre, Alerta Después" para manejar conflictos de stock entre múltiples cajeros offline.'
+            },
+            {
+                type: 'improvement',
+                title: 'Alertas de Stock Negativo',
+                description: 'Nuevo banner en el Dashboard para que los administradores revisen y resuelvan inconsistencias de stock tras una sincronización.'
+            },
+            {
+                type: 'improvement',
+                title: 'Indicadores de Conexión "En Vivo"',
+                description: 'Agregamos puntos de estado (🟢/🔴) y el timestamp de la última sincronización al Dashboard.'
+            }
+        ]
+    },
+    {
+        version: '0.1.6',
+        date: '2026-02-15',
+        title: 'Preparación para el modo Offline 🛠️',
+        description: 'Mejoras internas en la gestión de datos para soportar el funcionamiento sin conexión.',
+        changes: [
+            {
+                type: 'improvement',
+                title: 'Migración de Páginas a Client Components',
+                description: 'Refactorizamos las páginas principales para soportar el cacheo de datos en el cliente.'
+            },
+            {
+                type: 'fix',
+                title: 'Estabilidad de Sesión',
+                description: 'Mejoramos la validación de sesiones para evitar desconexiones accidentales.'
+            }
+        ]
+    },
+    {
         version: '0.1.5',
         date: '2026-02-11',
         title: 'Nueva Estética Premium & Mejoras Visuales 🎨',
