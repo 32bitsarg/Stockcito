@@ -11,6 +11,7 @@ app.commandLine.appendSwitch('no-sandbox')
 
 let mainWindow
 let serverProcess
+let currentUpdateStatus = 'none' // 'none', 'available', 'ready'
 
 // Detectar si estamos en desarrollo (si hay un servidor en localhost:3000)
 const isDev = !app.isPackaged
@@ -50,6 +51,15 @@ function createWindow() {
     const req = http.get(baseUrl, (res) => {
       console.log('Servidor Next.js detectado, cargando URL...')
       mainWindow.loadURL(appUrl)
+
+      // Si ya detectamos un update mientras el server levantaba, avisarle al UI
+      if (currentUpdateStatus !== 'none') {
+        setTimeout(() => {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send(currentUpdateStatus === 'ready' ? 'update-ready' : 'update-available')
+          }
+        }, 1000) // Pequeño delay para asegurar que el componente de React se montó
+      }
     })
 
     req.on('error', () => {
@@ -164,6 +174,46 @@ function startServer() {
 }
 
 app.whenReady().then(async () => {
+  // Configurar autoUpdater ANTES de esperar al servidor (corre en paralelo)
+  // Los event listeners se registran primero para no perder ningún evento
+  if (!isDev) {
+    autoUpdater.autoInstallOnAppQuit = true
+
+    autoUpdater.on('update-available', () => {
+      console.log('Update available, downloading...')
+      currentUpdateStatus = 'available'
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('update-available')
+      }
+    })
+
+    autoUpdater.on('download-progress', (progress) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('download-progress', progress.percent)
+      }
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      console.log('Update downloaded, ready to install')
+      currentUpdateStatus = 'ready'
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('update-ready')
+      }
+    })
+
+    autoUpdater.on('error', (err) => {
+      console.error('Error en autoUpdater:', err)
+    })
+
+    // Lanzar check en paralelo (no bloqueante)
+    // Usa checkForUpdates() en vez de checkForUpdatesAndNotify()
+    // porque tenemos nuestro propio UI de notificacion
+    autoUpdater.checkForUpdates().catch(err => {
+      console.error('Error checking for updates:', err)
+    })
+  }
+
+  // Mientras el updater ya corre, levantamos el servidor y la ventana
   await startServer()
   createWindow()
 
@@ -172,27 +222,6 @@ app.whenReady().then(async () => {
       createWindow()
     }
   })
-
-  // Configuración de autoUpdater
-  if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify()
-
-    autoUpdater.on('update-available', () => {
-      if (mainWindow) {
-        mainWindow.webContents.send('update-available')
-      }
-    })
-
-    autoUpdater.on('update-downloaded', () => {
-      if (mainWindow) {
-        mainWindow.webContents.send('update-ready')
-      }
-    })
-
-    autoUpdater.on('error', (err) => {
-      console.error('Error en autoUpdater:', err)
-    })
-  }
 })
 
 // IPC para forzar el reinicio e instalación

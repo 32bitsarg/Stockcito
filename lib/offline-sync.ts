@@ -36,15 +36,43 @@ export function useNetworkStatus() {
     useEffect(() => {
         if (typeof window === 'undefined') return
 
-        setIsOnline(navigator.onLine)
+        // Real connectivity check - navigator.onLine is unreliable in Electron
+        const checkConnectivity = async () => {
+            if (!navigator.onLine) {
+                setIsOnline(false)
+                return
+            }
+            try {
+                // Fetch our own server with a short timeout as a heartbeat
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 3000)
+                await fetch('/api/sales/sync', {
+                    method: 'HEAD',
+                    signal: controller.signal,
+                    cache: 'no-store'
+                })
+                clearTimeout(timeout)
+                setIsOnline(true)
+            } catch {
+                setIsOnline(false)
+            }
+        }
 
-        const handleOnline = () => setIsOnline(true)
-        const handleOffline = () => setIsOnline(false)
+        // Initial check
+        checkConnectivity()
+
+        // Heartbeat every 10 seconds
+        const interval = setInterval(checkConnectivity, 10000)
+
+        // Also respond to browser events immediately 
+        const handleOnline = () => { checkConnectivity() }
+        const handleOffline = () => { setIsOnline(false) }
 
         window.addEventListener('online', handleOnline)
         window.addEventListener('offline', handleOffline)
 
         return () => {
+            clearInterval(interval)
             window.removeEventListener('online', handleOnline)
             window.removeEventListener('offline', handleOffline)
         }
