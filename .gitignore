@@ -56,7 +56,6 @@ next-env.d.ts
 *.exe
 *.dmg
 *.deb
-*.rpm
 *.snap
 *.AppImage
 dev.db
@@ -66,3 +65,7 @@ redes_sociales.md
 
 # Cache regions
 .cache/
+
+# Archivos personales e internos
+COMANDOS.md
+fixsfuturos.md

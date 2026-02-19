@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { discountSchema, DiscountFormValues } from "@/lib/schemas"
 import { createDiscount, updateDiscount } from "@/actions/discount-actions"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useState } from "react"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -40,9 +41,29 @@ interface DiscountFormProps {
 
 export function DiscountForm({ discount, categories }: DiscountFormProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const isEditing = !!discount
+
+    const saveMutation = useOfflineMutation({
+        mutationFn: (data: DiscountFormValues) =>
+            isEditing ? updateDiscount(discount.id, data) : createDiscount(data),
+        invalidateQueries: [['discounts']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                if (typeof result.error === 'string') {
+                    setError(result.error)
+                } else {
+                    setError("Error al guardar el descuento")
+                }
+            } else {
+                router.push("/discounts")
+                router.refresh()
+            }
+        },
+        onError: () => setError("Error de conexión al guardar")
+    })
+
+    const isPending = saveMutation.isPending
 
     const form = useForm<DiscountFormValues>({
         resolver: zodResolver(discountSchema) as any,
@@ -64,22 +85,7 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
 
     function onSubmit(data: DiscountFormValues) {
         setError(null)
-        startTransition(async () => {
-            const result = isEditing 
-                ? await updateDiscount(discount.id, data)
-                : await createDiscount(data)
-
-            if (result.error) {
-                if (typeof result.error === 'string') {
-                    setError(result.error)
-                } else {
-                    setError("Error al guardar el descuento")
-                }
-            } else {
-                router.push("/discounts")
-                router.refresh()
-            }
-        })
+        saveMutation.mutate(data)
     }
 
     return (
@@ -87,8 +93,8 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
             <CardHeader>
                 <CardTitle>{isEditing ? "Editar Descuento" : "Nuevo Descuento"}</CardTitle>
                 <CardDescription>
-                    {isEditing 
-                        ? "Modifica los datos del descuento" 
+                    {isEditing
+                        ? "Modifica los datos del descuento"
                         : "Crea una nueva promoción o descuento"}
                 </CardDescription>
             </CardHeader>
@@ -122,11 +128,11 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                 <FormItem>
                                     <FormLabel>Descripción</FormLabel>
                                     <FormControl>
-                                        <Textarea 
-                                            placeholder="Describe la promoción..." 
+                                        <Textarea
+                                            placeholder="Describe la promoción..."
                                             className="resize-none"
                                             rows={2}
-                                            {...field} 
+                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -167,12 +173,12 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                                                     {discountType === 'percentage' ? '%' : '$'}
                                                 </span>
-                                                <Input 
-                                                    type="number" 
+                                                <Input
+                                                    type="number"
                                                     step="0.01"
                                                     className="pl-8"
                                                     placeholder={discountType === 'percentage' ? '10' : '500'}
-                                                    {...field} 
+                                                    {...field}
                                                 />
                                             </div>
                                         </FormControl>
@@ -192,8 +198,8 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                         <FormControl>
                                             <div className="relative">
                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                                <Input 
-                                                    type="number" 
+                                                <Input
+                                                    type="number"
                                                     step="0.01"
                                                     className="pl-8"
                                                     placeholder="0"
@@ -219,8 +225,8 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                             <FormControl>
                                                 <div className="relative">
                                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                                                    <Input 
-                                                        type="number" 
+                                                    <Input
+                                                        type="number"
                                                         step="0.01"
                                                         className="pl-8"
                                                         placeholder="Sin límite"
@@ -247,7 +253,7 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                     <FormItem>
                                         <FormLabel>Fecha de Inicio</FormLabel>
                                         <FormControl>
-                                            <Input 
+                                            <Input
                                                 type="date"
                                                 {...field}
                                                 value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
@@ -265,7 +271,7 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                     <FormItem>
                                         <FormLabel>Fecha de Fin</FormLabel>
                                         <FormControl>
-                                            <Input 
+                                            <Input
                                                 type="date"
                                                 {...field}
                                                 value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
@@ -284,8 +290,8 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Categoría (Opcional)</FormLabel>
-                                    <Select 
-                                        onValueChange={(val) => field.onChange(val ? parseInt(val) : undefined)} 
+                                    <Select
+                                        onValueChange={(val) => field.onChange(val ? parseInt(val) : undefined)}
                                         defaultValue={field.value?.toString()}
                                     >
                                         <FormControl>
@@ -350,9 +356,9 @@ export function DiscountForm({ discount, categories }: DiscountFormProps) {
                                     </>
                                 )}
                             </Button>
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 onClick={() => router.back()}
                             >
                                 Cancelar

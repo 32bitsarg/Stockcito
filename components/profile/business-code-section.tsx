@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { Copy, Check, RefreshCw, Building2, AlertTriangle, Mail, Loader2 } from "lucide-react"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import toast from "react-hot-toast"
 import { cn } from "@/lib/utils"
-import { 
-    requestBusinessCodeRegeneration, 
+import {
+    requestBusinessCodeRegeneration,
     confirmBusinessCodeRegeneration,
-    resendVerificationEmailAction 
+    resendVerificationEmailAction
 } from "@/actions/auth-actions"
 
 interface BusinessCodeSectionProps {
@@ -20,8 +21,8 @@ interface BusinessCodeSectionProps {
     userEmail: string
 }
 
-export function BusinessCodeSection({ 
-    businessCode, 
+export function BusinessCodeSection({
+    businessCode,
     businessName,
     emailVerified,
     userEmail
@@ -30,7 +31,6 @@ export function BusinessCodeSection({
     const [showRegenerate, setShowRegenerate] = useState(false)
     const [confirmCode, setConfirmCode] = useState("")
     const [regenerateStep, setRegenerateStep] = useState<'initial' | 'waiting' | 'confirm'>('initial')
-    const [isPending, startTransition] = useTransition()
     const [isResending, setIsResending] = useState(false)
 
     const copyToClipboard = async () => {
@@ -40,26 +40,28 @@ export function BusinessCodeSection({
         setTimeout(() => setCopied(false), 2000)
     }
 
-    const handleRequestRegenerate = () => {
-        startTransition(async () => {
-            const result = await requestBusinessCodeRegeneration()
+    const requestMutation = useOfflineMutation({
+        mutationFn: requestBusinessCodeRegeneration,
+        invalidateQueries: [],
+        onSuccess: (result: any) => {
             if (result.success) {
                 setRegenerateStep('confirm')
                 toast.success("Te enviamos un código de confirmación por email")
             } else {
                 toast.error(result.error || "Error al solicitar regeneración")
             }
-        })
+        },
+        onError: () => { toast.error("Error de conexión al solicitar código") }
+    })
+
+    const handleRequestRegenerate = () => {
+        requestMutation.mutate(undefined)
     }
 
-    const handleConfirmRegenerate = () => {
-        if (confirmCode.length !== 6) {
-            toast.error("Ingresa el código de 6 dígitos")
-            return
-        }
-
-        startTransition(async () => {
-            const result = await confirmBusinessCodeRegeneration(confirmCode)
+    const confirmMutation = useOfflineMutation({
+        mutationFn: (code: string) => confirmBusinessCodeRegeneration(code),
+        invalidateQueries: [['user']], // Refresh user if needed or reload
+        onSuccess: (result: any) => {
             if (result.success && result.newCode) {
                 toast.success("Código regenerado exitosamente")
                 setShowRegenerate(false)
@@ -70,14 +72,26 @@ export function BusinessCodeSection({
             } else {
                 toast.error(result.error || "Código de confirmación inválido")
             }
-        })
+        },
+        onError: () => { toast.error("Error de conexión al confirmar") }
+    })
+
+    const isPending = requestMutation.isPending || confirmMutation.isPending
+
+    const handleConfirmRegenerate = () => {
+        if (confirmCode.length !== 6) {
+            toast.error("Ingresa el código de 6 dígitos")
+            return
+        }
+
+        confirmMutation.mutate(confirmCode)
     }
 
     const handleResendVerification = async () => {
         setIsResending(true)
         const result = await resendVerificationEmailAction()
         setIsResending(false)
-        
+
         if (result.success) {
             toast.success("Email de verificación reenviado")
         } else {
@@ -111,9 +125,9 @@ export function BusinessCodeSection({
                                 <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                                     Verifica tu email para poder crear empleados y acceder a todas las funciones.
                                 </p>
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
+                                <Button
+                                    variant="outline"
+                                    size="sm"
                                     className="mt-3"
                                     onClick={handleResendVerification}
                                     disabled={isResending}
@@ -147,13 +161,13 @@ export function BusinessCodeSection({
                             Para login de empleados
                         </Badge>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                         <div className="flex-1 bg-muted rounded-lg p-4 font-mono text-xl tracking-wider text-center border-2 border-dashed">
                             {businessCode}
                         </div>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             size="icon"
                             onClick={copyToClipboard}
                             className="shrink-0"
@@ -174,8 +188,8 @@ export function BusinessCodeSection({
 
                 {/* Regenerate Code Section */}
                 {!showRegenerate ? (
-                    <Button 
-                        variant="ghost" 
+                    <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => setShowRegenerate(true)}
                         className="text-muted-foreground hover:text-foreground"
@@ -192,7 +206,7 @@ export function BusinessCodeSection({
                                     ¿Regenerar código de negocio?
                                 </p>
                                 <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                                    El código anterior dejará de funcionar inmediatamente. 
+                                    El código anterior dejará de funcionar inmediatamente.
                                     Todos tus empleados necesitarán el nuevo código para ingresar.
                                 </p>
                             </div>
@@ -200,15 +214,15 @@ export function BusinessCodeSection({
 
                         {regenerateStep === 'initial' && (
                             <div className="flex items-center gap-2 justify-end">
-                                <Button 
-                                    variant="ghost" 
+                                <Button
+                                    variant="ghost"
                                     size="sm"
                                     onClick={() => setShowRegenerate(false)}
                                 >
                                     Cancelar
                                 </Button>
-                                <Button 
-                                    variant="destructive" 
+                                <Button
+                                    variant="destructive"
                                     size="sm"
                                     onClick={handleRequestRegenerate}
                                     disabled={isPending}
@@ -238,8 +252,8 @@ export function BusinessCodeSection({
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 justify-end">
-                                    <Button 
-                                        variant="ghost" 
+                                    <Button
+                                        variant="ghost"
                                         size="sm"
                                         onClick={() => {
                                             setShowRegenerate(false)
@@ -249,8 +263,8 @@ export function BusinessCodeSection({
                                     >
                                         Cancelar
                                     </Button>
-                                    <Button 
-                                        variant="destructive" 
+                                    <Button
+                                        variant="destructive"
                                         size="sm"
                                         onClick={handleConfirmRegenerate}
                                         disabled={isPending || confirmCode.length !== 6}

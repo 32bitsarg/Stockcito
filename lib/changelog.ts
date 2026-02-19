@@ -17,6 +17,34 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.1.8',
+        date: '2026-02-19',
+        title: 'Sincronización en Tiempo Real & Mejoras de Planes ⚡',
+        description: 'Mejoramos la forma en que Stockcito guarda tu información para que todo sea instantáneo y más seguro.',
+        changes: [
+            {
+                type: 'new',
+                title: 'Reflejo Instantáneo en Pantalla',
+                description: 'Ahora cuando creás, editás o eliminás un producto, cliente, proveedor o categoría, los cambios aparecen al instante sin necesidad de actualizar la página (F5).'
+            },
+            {
+                type: 'improvement',
+                title: 'Sistema de Suscripciones Renovado',
+                description: 'Arreglamos los límites de uso. Ahora si estás probando la plataforma (Período de Prueba), vas a tener acceso a todas las funciones premium completas por 14 días.'
+            },
+            {
+                type: 'fix',
+                title: 'Descuentos y Empleados Fluidos',
+                description: 'Las activaciones y desactivaciones de descuentos y los cambios en el equipo de empleados ahora también se reflejan automáticamente en todo el sistema.'
+            },
+            {
+                type: 'fix',
+                title: 'Anulaciones de Venta Mejoradas',
+                description: 'Al anular o devolver una venta, el dinero y los productos vuelven a su lugar, y ahora tu historial de ventas se refresca solo, de manera inmediata.'
+            }
+        ]
+    },
+    {
         version: '0.1.7',
         date: '2026-02-16',
         title: 'Arquitectura Offline-First & Sincronización Inteligente 📡',

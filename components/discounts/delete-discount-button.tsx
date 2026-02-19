@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { deleteDiscount } from "@/actions/discount-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import {
     AlertDialog,
@@ -24,17 +25,23 @@ interface DeleteDiscountButtonProps {
 
 export function DeleteDiscountButton({ discountId, discountName }: DeleteDiscountButtonProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
 
-    const handleDelete = () => {
-        startTransition(async () => {
-            const result = await deleteDiscount(discountId)
+    const deleteMutation = useOfflineMutation({
+        mutationFn: deleteDiscount,
+        invalidateQueries: [['discounts']],
+        onSuccess: (result: any) => {
             if (!result.error) {
                 setOpen(false)
                 router.refresh()
             }
-        })
+        }
+    })
+
+    const isPending = deleteMutation.isPending
+
+    const handleDelete = () => {
+        deleteMutation.mutate(discountId)
     }
 
     return (

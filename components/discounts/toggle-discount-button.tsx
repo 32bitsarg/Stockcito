@@ -1,8 +1,8 @@
 "use client"
 
-import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { toggleDiscountActive } from "@/actions/discount-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Power, Loader2 } from "lucide-react"
 
@@ -13,19 +13,25 @@ interface ToggleDiscountButtonProps {
 
 export function ToggleDiscountButton({ discountId, isActive }: ToggleDiscountButtonProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
+
+    const toggleMutation = useOfflineMutation({
+        mutationFn: toggleDiscountActive,
+        invalidateQueries: [['discounts']],
+        onSuccess: () => {
+            router.refresh()
+        }
+    })
+
+    const isPending = toggleMutation.isPending
 
     const handleToggle = () => {
-        startTransition(async () => {
-            await toggleDiscountActive(discountId)
-            router.refresh()
-        })
+        toggleMutation.mutate(discountId)
     }
 
     return (
-        <Button 
-            variant="ghost" 
-            size="icon" 
+        <Button
+            variant="ghost"
+            size="icon"
             title={isActive ? "Desactivar" : "Activar"}
             onClick={handleToggle}
             disabled={isPending}

@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createCategory, updateCategory, deleteCategory } from "@/actions/category-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,9 +17,39 @@ interface CategoryFormProps {
 
 export function CategoryForm({ initialData }: CategoryFormProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const [name, setName] = useState(initialData?.name || "")
+
+    const saveMutation = useOfflineMutation({
+        mutationFn: (data: { name: string }) =>
+            initialData ? updateCategory(initialData.id, data) : createCategory(data),
+        invalidateQueries: [['categories'], ['products']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                setError(result.error)
+            } else {
+                router.push("/categories")
+                router.refresh()
+            }
+        },
+        onError: () => setError("Error de conexión al guardar")
+    })
+
+    const deleteMutation = useOfflineMutation({
+        mutationFn: () => deleteCategory(initialData!.id),
+        invalidateQueries: [['categories'], ['products']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                setError(result.error)
+            } else {
+                router.push("/categories")
+                router.refresh()
+            }
+        },
+        onError: () => setError("Error de conexión al eliminar")
+    })
+
+    const isPending = saveMutation.isPending || deleteMutation.isPending
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -29,32 +60,12 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
             return
         }
 
-        startTransition(async () => {
-            const result = initialData
-                ? await updateCategory(initialData.id, { name })
-                : await createCategory({ name })
-
-            if (result.error) {
-                setError(result.error)
-            } else {
-                router.push("/categories")
-                router.refresh()
-            }
-        })
+        saveMutation.mutate({ name })
     }
 
     function handleDelete() {
         if (!initialData) return
-
-        startTransition(async () => {
-            const result = await deleteCategory(initialData.id)
-            if (result.error) {
-                setError(result.error)
-            } else {
-                router.push("/categories")
-                router.refresh()
-            }
-        })
+        deleteMutation.mutate(undefined)
     }
 
     return (

@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { clientSchema, ClientFormValues } from "@/lib/schemas"
 import { createClient, updateClient } from "@/actions/client-actions"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useState } from "react"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -26,9 +27,31 @@ interface ClientFormProps {
 
 export function ClientForm({ client }: ClientFormProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const isEditing = !!client
+
+    const mutation = useOfflineMutation({
+        mutationFn: (data: ClientFormValues) =>
+            isEditing ? updateClient(client.id, data) : createClient(data),
+        invalidateQueries: [['clients']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                if (typeof result.error === 'string') {
+                    setError(result.error)
+                } else {
+                    setError("Error al guardar el cliente")
+                }
+            } else {
+                router.push("/clients")
+                router.refresh()
+            }
+        },
+        onError: () => {
+            setError("Error al procesar la solicitud. Verifica tu conexión.")
+        }
+    })
+
+    const isPending = mutation.isPending
 
     const form = useForm<ClientFormValues>({
         resolver: zodResolver(clientSchema),
@@ -43,22 +66,7 @@ export function ClientForm({ client }: ClientFormProps) {
 
     function onSubmit(data: ClientFormValues) {
         setError(null)
-        startTransition(async () => {
-            const result = isEditing 
-                ? await updateClient(client.id, data)
-                : await createClient(data)
-
-            if (result.error) {
-                if (typeof result.error === 'string') {
-                    setError(result.error)
-                } else {
-                    setError("Error al guardar el cliente")
-                }
-            } else {
-                router.push("/clients")
-                router.refresh()
-            }
-        })
+        mutation.mutate(data)
     }
 
     return (
@@ -66,8 +74,8 @@ export function ClientForm({ client }: ClientFormProps) {
             <CardHeader>
                 <CardTitle>{isEditing ? "Editar Cliente" : "Nuevo Cliente"}</CardTitle>
                 <CardDescription>
-                    {isEditing 
-                        ? "Modifica los datos del cliente" 
+                    {isEditing
+                        ? "Modifica los datos del cliente"
                         : "Ingresa los datos del nuevo cliente"}
                 </CardDescription>
             </CardHeader>
@@ -150,10 +158,10 @@ export function ClientForm({ client }: ClientFormProps) {
                                 <FormItem>
                                     <FormLabel>Dirección</FormLabel>
                                     <FormControl>
-                                        <Textarea 
-                                            placeholder="Av. Siempre Viva 123, Ciudad, Provincia" 
+                                        <Textarea
+                                            placeholder="Av. Siempre Viva 123, Ciudad, Provincia"
                                             className="resize-none"
-                                            {...field} 
+                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -180,9 +188,9 @@ export function ClientForm({ client }: ClientFormProps) {
                                     </>
                                 )}
                             </Button>
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 onClick={() => router.back()}
                             >
                                 Cancelar

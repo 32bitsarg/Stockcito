@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { productSchema, ProductFormValues } from "@/lib/schemas"
 import { createProduct, updateProduct } from "@/actions/product-actions"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useState } from "react"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
@@ -23,8 +24,31 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, categories = [], initialSku }: ProductFormProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
+
+    const mutation = useOfflineMutation({
+        mutationFn: (data: ProductFormValues) =>
+            initialData ? updateProduct(initialData.id, data) : createProduct(data),
+        invalidateQueries: [['products'], ['dashboard']],
+        onSuccess: (result: any) => {
+            if (result && result.error) {
+                if (typeof result.error === 'string') {
+                    setError(result.error)
+                } else {
+                    console.error(result.error)
+                    setError("Error al procesar la solicitud.")
+                }
+            } else {
+                router.push("/inventory")
+                router.refresh()
+            }
+        },
+        onError: () => {
+            setError("Error al guardar el producto. Verifica tu conexión.")
+        }
+    })
+
+    const isPending = mutation.isPending
 
     const form = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema) as any,
@@ -43,20 +67,7 @@ export function ProductForm({ initialData, categories = [], initialSku }: Produc
 
     function onSubmit(data: ProductFormValues) {
         setError(null)
-        startTransition(async () => {
-            const result = initialData
-                ? await updateProduct(initialData.id, data)
-                : await createProduct(data)
-
-            if (result && result.error) {
-                if (typeof result.error === 'string') {
-                    setError(result.error)
-                } else {
-                    console.error(result.error)
-                }
-            }
-            // If success, server action redirects, so we don't need to do anything here.
-        })
+        mutation.mutate(data)
     }
 
     return (

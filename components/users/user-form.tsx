@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { createUser, updateUser, UserRole } from "@/actions/auth-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -69,7 +70,6 @@ type CredentialMode = 'auto' | 'pin' | 'password'
 
 export function UserForm({ user }: UserFormProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
 
     // Basic info
@@ -97,6 +97,28 @@ export function UserForm({ user }: UserFormProps) {
 
     // Filter out 'owner' role - can't create owners
     const availableRoles = Object.entries(SYSTEM_ROLES).filter(([key]) => key !== 'owner')
+
+    const saveMutation = useOfflineMutation({
+        mutationFn: async (data: any) =>
+            isEditing ? updateUser(user.id, data) : createUser(data),
+        invalidateQueries: [['users']],
+        onSuccess: (result: any) => {
+            if (result.success) {
+                if (!isEditing && result.credentials) {
+                    setCreatedCredentials(result.credentials)
+                    setShowCredentials(true)
+                } else {
+                    router.push("/users")
+                    router.refresh()
+                }
+            } else {
+                setError(result.error || "Error al guardar")
+            }
+        },
+        onError: () => setError("Error de conexión al guardar")
+    })
+
+    const isPending = saveMutation.isPending
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -127,50 +149,21 @@ export function UserForm({ user }: UserFormProps) {
             }
         }
 
-        startTransition(async () => {
-            try {
-                if (isEditing) {
-                    const result = await updateUser(user.id, {
-                        name,
-                        email,
-                        role: role as UserRole,
-                        active,
-                        ...(password ? { password } : {})
-                    })
+        const payload = isEditing ? {
+            name,
+            email,
+            role: role as UserRole,
+            active,
+            ...(password ? { password } : {})
+        } : {
+            name,
+            email,
+            password: credentialMode === 'password' ? password : undefined,
+            pin: credentialMode === 'pin' ? pin : undefined,
+            role: role as UserRole
+        }
 
-                    if (result.success) {
-                        router.push("/users")
-                        router.refresh()
-                    } else {
-                        setError(result.error || "Error al guardar")
-                    }
-                } else {
-                    const result = await createUser({
-                        name,
-                        email,
-                        password: credentialMode === 'password' ? password : undefined,
-                        pin: credentialMode === 'pin' ? pin : undefined,
-                        role: role as UserRole
-                    })
-
-                    if (result.success) {
-                        // Cast to any to access credentials which might not be inferred correctly yet through re-exports
-                        const responseWithCreds = result as any
-                        if (responseWithCreds.credentials) {
-                            setCreatedCredentials(responseWithCreds.credentials)
-                            setShowCredentials(true)
-                        } else {
-                            router.push("/users")
-                            router.refresh()
-                        }
-                    } else {
-                        setError(result.error || "Error al guardar")
-                    }
-                }
-            } catch {
-                setError("Error al guardar el usuario")
-            }
-        })
+        saveMutation.mutate(payload)
     }
 
     const handleCopy = (text: string) => {
