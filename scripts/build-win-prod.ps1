@@ -23,7 +23,7 @@ try {
         Write-Host "2. Iniciando empaquetado con electron-builder..." -ForegroundColor Green
         
         $env:CSC_IDENTITY_AUTO_DISCOVERY = "false"
-        $cacheDir = "E:\Programacion\cache"
+        $cacheDir = Join-Path $env:LOCALAPPDATA "electron-builder-cache"
         if (!(Test-Path $cacheDir)) { New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null }
         $env:ELECTRON_BUILDER_CACHE = $cacheDir
         

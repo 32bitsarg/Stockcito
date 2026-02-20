@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { APP_VERSION_DISPLAY } from '@/lib/changelog'
 
 export function LandingHero() {
   return (
@@ -20,7 +21,7 @@ export function LandingHero() {
             transition={{ duration: 1 }}
           >
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 mb-8 block italic">
-              Software de Gestión v0.1.5
+              Software de Gestión {APP_VERSION_DISPLAY}
             </span>
           </motion.div>
 

@@ -36,6 +36,7 @@ export function LandingHeader() {
         <nav className="hidden md:flex items-center gap-12">
           <Link href="/docs" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">Docs</Link>
           <Link href="/changelog" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">Updates</Link>
+          <Link href="#descarga" className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">Escritorio</Link>
 
           <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800" />
 
@@ -60,6 +61,7 @@ export function LandingHeader() {
           >
             <Link href="/docs" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">Documentación</Link>
             <Link href="/changelog" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">Actualizaciones</Link>
+            <Link href="#descarga" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">App Escritorio</Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em]">Acceso Terminal</Link>
             <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black uppercase tracking-[0.4em] bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 p-4 text-center">Iniciar Despliegue</Link>
           </motion.div>

@@ -13,6 +13,7 @@ import { EmailVerificationBanner } from "@/components/dashboard/email-verificati
 import { OfflineDataBadge } from "@/components/offline/offline-data-badge"
 import Link from "next/link"
 import * as motion from "framer-motion/client"
+import { APP_VERSION_DISPLAY } from "@/lib/changelog"
 import { Loader2, AlertTriangle } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -261,7 +262,7 @@ function AdminDashboard({ session, showVerificationBanner }: { session: Dashboar
                 <div className="space-y-1">
                     <Link href="/changelog" className="flex items-center gap-3 mb-2 group cursor-pointer">
                         <div className="h-8 w-1.5 bg-zinc-900 dark:bg-zinc-100 rounded-full" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Sistema Operativo / v0.1.7</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Sistema Operativo / {APP_VERSION_DISPLAY}</span>
                     </Link>
                     <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase italic">
                         Dashboard
