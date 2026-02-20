@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { deleteUser } from "@/actions/auth-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import {
     AlertDialog,
@@ -24,19 +25,26 @@ interface DeleteUserButtonProps {
 
 export function DeleteUserButton({ userId, userName }: DeleteUserButtonProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
 
-    const handleDelete = () => {
-        startTransition(async () => {
-            const result = await deleteUser(userId)
+    const deleteMutation = useOfflineMutation({
+        mutationFn: deleteUser,
+        invalidateQueries: [['users']],
+        onSuccess: (result: any) => {
             if (result.success) {
                 setOpen(false)
                 router.refresh()
             } else {
                 alert(result.error || "Error al eliminar")
             }
-        })
+        },
+        onError: () => alert("Error de conexión al eliminar")
+    })
+
+    const isPending = deleteMutation.isPending
+
+    const handleDelete = () => {
+        deleteMutation.mutate(userId)
     }
 
     return (

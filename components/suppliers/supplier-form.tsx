@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { supplierSchema, SupplierFormValues } from "@/lib/schemas"
 import { createSupplier, updateSupplier } from "@/actions/supplier-actions"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useState } from "react"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -28,9 +29,31 @@ interface SupplierFormProps {
 
 export function SupplierForm({ supplier }: SupplierFormProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const isEditing = !!supplier
+
+    const mutation = useOfflineMutation({
+        mutationFn: (data: SupplierFormValues) =>
+            isEditing ? updateSupplier(supplier.id, data) : createSupplier(data),
+        invalidateQueries: [['suppliers']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                if (typeof result.error === 'string') {
+                    setError(result.error)
+                } else {
+                    setError("Error al guardar el proveedor")
+                }
+            } else {
+                router.push("/suppliers")
+                router.refresh()
+            }
+        },
+        onError: () => {
+            setError("Error al procesar la solicitud. Verifica tu conexión.")
+        }
+    })
+
+    const isPending = mutation.isPending
 
     const form = useForm<SupplierFormValues>({
         resolver: zodResolver(supplierSchema),
@@ -47,22 +70,7 @@ export function SupplierForm({ supplier }: SupplierFormProps) {
 
     function onSubmit(data: SupplierFormValues) {
         setError(null)
-        startTransition(async () => {
-            const result = isEditing 
-                ? await updateSupplier(supplier.id, data)
-                : await createSupplier(data)
-
-            if (result.error) {
-                if (typeof result.error === 'string') {
-                    setError(result.error)
-                } else {
-                    setError("Error al guardar el proveedor")
-                }
-            } else {
-                router.push("/suppliers")
-                router.refresh()
-            }
-        })
+        mutation.mutate(data)
     }
 
     return (
@@ -70,8 +78,8 @@ export function SupplierForm({ supplier }: SupplierFormProps) {
             <CardHeader>
                 <CardTitle>{isEditing ? "Editar Proveedor" : "Nuevo Proveedor"}</CardTitle>
                 <CardDescription>
-                    {isEditing 
-                        ? "Modifica los datos del proveedor" 
+                    {isEditing
+                        ? "Modifica los datos del proveedor"
                         : "Ingresa los datos del nuevo proveedor"}
                 </CardDescription>
             </CardHeader>
@@ -180,11 +188,11 @@ export function SupplierForm({ supplier }: SupplierFormProps) {
                                 <FormItem>
                                     <FormLabel>Notas</FormLabel>
                                     <FormControl>
-                                        <Textarea 
-                                            placeholder="Notas adicionales sobre el proveedor..." 
+                                        <Textarea
+                                            placeholder="Notas adicionales sobre el proveedor..."
                                             className="resize-none"
                                             rows={3}
-                                            {...field} 
+                                            {...field}
                                         />
                                     </FormControl>
                                     <FormDescription>
@@ -214,9 +222,9 @@ export function SupplierForm({ supplier }: SupplierFormProps) {
                                     </>
                                 )}
                             </Button>
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 onClick={() => router.back()}
                             >
                                 Cancelar

@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { deleteClient } from "@/actions/client-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import {
     AlertDialog,
@@ -24,17 +25,23 @@ interface DeleteClientButtonProps {
 
 export function DeleteClientButton({ clientId, clientName }: DeleteClientButtonProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
 
-    const handleDelete = () => {
-        startTransition(async () => {
-            const result = await deleteClient(clientId)
+    const deleteMutation = useOfflineMutation({
+        mutationFn: deleteClient,
+        invalidateQueries: [['clients']],
+        onSuccess: (result: any) => {
             if (!result.error) {
                 setOpen(false)
                 router.refresh()
             }
-        })
+        }
+    })
+
+    const isPending = deleteMutation.isPending
+
+    const handleDelete = () => {
+        deleteMutation.mutate(clientId)
     }
 
     return (

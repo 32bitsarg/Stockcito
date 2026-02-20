@@ -62,6 +62,13 @@ export async function getCurrentUsage(organizationId: number): Promise<UsageData
   }
 }
 
+// Get effective plan considering trial, expired, etc.
+export function getEffectivePlan(org: { plan: string | null; planStatus: string | null }): PlanType {
+  if (org.planStatus === 'trial') return 'premium'
+  if (org.planStatus === 'expired' || org.planStatus === 'cancelled') return 'free'
+  return (org.plan as PlanType) || 'free'
+}
+
 // Check if a specific limit allows a new item
 export async function checkLimit(
   organizationId: number,
@@ -76,7 +83,7 @@ export async function checkLimit(
     return { allowed: false, current: 0, limit: 0, limitReached: true, message: 'Organización no encontrada' }
   }
 
-  const plan = org.plan as PlanType
+  const plan = getEffectivePlan(org)
   const limits = PLAN_LIMITS[plan]
   const usage = await getCurrentUsage(organizationId)
 
@@ -152,19 +159,8 @@ export async function checkFeatureAccess(
     return { allowed: false, plan: 'free' }
   }
 
-  const plan = org.plan as PlanType
-
-  // Trial users get premium features
-  if (org.planStatus === 'trial') {
-    return { allowed: true, plan: 'premium' }
-  }
-
-  // Expired or cancelled don't get premium features
-  if (org.planStatus === 'expired' || org.planStatus === 'cancelled') {
-    return { allowed: hasFeature('free', feature), plan: 'free' }
-  }
-
-  return { allowed: hasFeature(plan, feature), plan }
+  const effectivePlan = getEffectivePlan(org)
+  return { allowed: hasFeature(effectivePlan, feature), plan: effectivePlan }
 }
 
 // Get usage percentage for display

@@ -181,7 +181,7 @@ export async function createProduct(data: z.infer<typeof productSchema>) {
     }
 
     revalidatePath("/inventory")
-    redirect("/inventory")
+    return { success: true }
 }
 
 export async function updateProduct(id: number, data: z.infer<typeof productSchema>) {
@@ -218,7 +218,7 @@ export async function updateProduct(id: number, data: z.infer<typeof productSche
     }
 
     revalidatePath("/inventory")
-    redirect("/inventory")
+    return { success: true }
 }
 
 export async function deleteProduct(id: number) {

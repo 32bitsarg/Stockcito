@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createPartialRefund } from "@/actions/sale-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -41,7 +42,6 @@ interface RefundSaleButtonProps {
 
 export function RefundSaleButton({ sale }: RefundSaleButtonProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState<string | null>(null)
@@ -59,7 +59,7 @@ export function RefundSaleButton({ sale }: RefundSaleButtonProps) {
                         (refundedQuantities.get(item.productId) || 0) + item.quantity
                     )
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
     }
 
@@ -83,6 +83,25 @@ export function RefundSaleButton({ sale }: RefundSaleButtonProps) {
         setSelectedItems(newSelected)
     }
 
+    const refundMutation = useOfflineMutation({
+        mutationFn: (data: { saleId: number, reason: string, items: any[] }) =>
+            createPartialRefund(data.saleId, data.reason, data.items),
+        invalidateQueries: [['sales'], ['dashboard'], ['products']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                setError(typeof result.error === 'string' ? result.error : 'Error al procesar devolución')
+            } else {
+                setOpen(false)
+                setReason("")
+                setSelectedItems(new Map())
+                router.refresh()
+            }
+        },
+        onError: () => setError("Error de conexión al procesar la devolución")
+    })
+
+    const isPending = refundMutation.isPending
+
     const handleRefund = () => {
         if (!reason.trim()) {
             setError("Debe proporcionar un motivo de devolución")
@@ -100,17 +119,7 @@ export function RefundSaleButton({ sale }: RefundSaleButtonProps) {
         }))
 
         setError(null)
-        startTransition(async () => {
-            const result = await createPartialRefund(sale.id, reason, items)
-            if (result.error) {
-                setError(typeof result.error === 'string' ? result.error : 'Error al procesar devolución')
-            } else {
-                setOpen(false)
-                setReason("")
-                setSelectedItems(new Map())
-                router.refresh()
-            }
-        })
+        refundMutation.mutate({ saleId: sale.id, reason, items })
     }
 
     const handleClose = () => {
@@ -135,7 +144,7 @@ export function RefundSaleButton({ sale }: RefundSaleButtonProps) {
                         Seleccione los productos a devolver y las cantidades. Se restaurará el stock y se generará una nota de crédito.
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="space-y-4">
                     <Table>
                         <TableHeader>
@@ -201,7 +210,7 @@ export function RefundSaleButton({ sale }: RefundSaleButtonProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="refund-reason">Motivo de devolución *</Label>
-                        <Textarea 
+                        <Textarea
                             id="refund-reason"
                             placeholder="Ingrese el motivo de la devolución..."
                             value={reason}

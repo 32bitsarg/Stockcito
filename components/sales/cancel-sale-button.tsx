@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { cancelSale } from "@/actions/sale-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -25,10 +26,26 @@ interface CancelSaleButtonProps {
 
 export function CancelSaleButton({ saleId }: CancelSaleButtonProps) {
     const router = useRouter()
-    const [isPending, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState<string | null>(null)
+
+    const cancelMutation = useOfflineMutation({
+        mutationFn: (data: { id: number, reason: string }) => cancelSale(data.id, data.reason),
+        invalidateQueries: [['sales'], ['dashboard'], ['products']],
+        onSuccess: (result: any) => {
+            if (result.error) {
+                setError(typeof result.error === 'string' ? result.error : 'Error al cancelar')
+            } else {
+                setOpen(false)
+                setReason("")
+                router.refresh()
+            }
+        },
+        onError: () => setError("Error de conexión al anular la venta")
+    })
+
+    const isPending = cancelMutation.isPending
 
     const handleCancel = () => {
         if (!reason.trim()) {
@@ -37,16 +54,7 @@ export function CancelSaleButton({ saleId }: CancelSaleButtonProps) {
         }
 
         setError(null)
-        startTransition(async () => {
-            const result = await cancelSale(saleId, reason)
-            if (result.error) {
-                setError(typeof result.error === 'string' ? result.error : 'Error al cancelar')
-            } else {
-                setOpen(false)
-                setReason("")
-                router.refresh()
-            }
-        })
+        cancelMutation.mutate({ id: saleId, reason })
     }
 
     return (
@@ -64,10 +72,10 @@ export function CancelSaleButton({ saleId }: CancelSaleButtonProps) {
                         Esta acción anulará completamente la venta #{saleId}, restaurará el stock de todos los productos y generará una nota de crédito.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                
+
                 <div className="space-y-2">
                     <Label htmlFor="reason">Motivo de anulación *</Label>
-                    <Textarea 
+                    <Textarea
                         id="reason"
                         placeholder="Ingrese el motivo de la anulación..."
                         value={reason}

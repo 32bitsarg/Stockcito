@@ -1,20 +1,39 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { changePassword } from "@/actions/auth-actions"
+import { useOfflineMutation } from "@/hooks/use-offline-mutation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Check, Lock } from "lucide-react"
 
 export function ChangePasswordForm() {
-    const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
 
     const [currentPassword, setCurrentPassword] = useState("")
     const [newPassword, setNewPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
+
+    const passwordMutation = useOfflineMutation({
+        mutationFn: (data: any) => changePassword(data.current, data.new),
+        invalidateQueries: [],
+        onSuccess: (result: any) => {
+            if (result.success) {
+                setSuccess(true)
+                setCurrentPassword("")
+                setNewPassword("")
+                setConfirmPassword("")
+                setTimeout(() => setSuccess(false), 3000)
+            } else {
+                setError(result.error || "Error al cambiar contraseña")
+            }
+        },
+        onError: () => setError("Error de conexión al cambiar contraseña")
+    })
+
+    const isPending = passwordMutation.isPending
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -36,25 +55,7 @@ export function ChangePasswordForm() {
             return
         }
 
-        startTransition(async () => {
-            try {
-                const result = await changePassword(currentPassword, newPassword)
-                
-                if (result.success) {
-                    setSuccess(true)
-                    setCurrentPassword("")
-                    setNewPassword("")
-                    setConfirmPassword("")
-                    
-                    // Hide success message after 3 seconds
-                    setTimeout(() => setSuccess(false), 3000)
-                } else {
-                    setError(result.error || "Error al cambiar contraseña")
-                }
-            } catch (err) {
-                setError("Error al cambiar contraseña")
-            }
-        })
+        passwordMutation.mutate({ current: currentPassword, new: newPassword })
     }
 
     return (
