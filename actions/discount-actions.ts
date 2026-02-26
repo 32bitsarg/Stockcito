@@ -7,7 +7,10 @@ import { discountSchema, DiscountFormValues } from "@/lib/schemas"
 import { getSession } from "@/actions/auth-actions"
 
 export async function getDiscounts(query?: string, activeOnly = false) {
-    const where: any = {}
+    const session = await getSession()
+    if (!session?.organizationId) return []
+
+    const where: any = { organizationId: session.organizationId }
 
     if (query) {
         where.name = { contains: query }
@@ -31,8 +34,11 @@ export async function getDiscounts(query?: string, activeOnly = false) {
 }
 
 export async function getDiscountById(id: number) {
-    return db.discount.findUnique({
-        where: { id },
+    const session = await getSession()
+    if (!session?.organizationId) return null
+
+    return db.discount.findFirst({
+        where: { id, organizationId: session.organizationId },
         include: {
             category: { select: { id: true, name: true } }
         }
@@ -62,6 +68,7 @@ export async function createDiscount(data: DiscountFormValues) {
                 endDate: result.data.endDate || null,
                 isActive: result.data.isActive,
                 categoryId: result.data.categoryId || null,
+                organizationId: session.organizationId,
             }
         })
         revalidatePath("/discounts")
@@ -83,6 +90,9 @@ export async function updateDiscount(id: number, data: DiscountFormValues) {
     if (!result.success) return { error: result.error.flatten().fieldErrors }
 
     try {
+        const existing = await db.discount.findFirst({ where: { id, organizationId: session.organizationId } })
+        if (!existing) return { error: "No autorizado" }
+
         await db.discount.update({
             where: { id },
             data: {
@@ -115,6 +125,9 @@ export async function deleteDiscount(id: number) {
         return { error: "No tienes permisos para eliminar descuentos" }
     }
     try {
+        const existing = await db.discount.findFirst({ where: { id, organizationId: session.organizationId } })
+        if (!existing) return { error: "No autorizado" }
+
         await db.discount.delete({ where: { id } })
         revalidatePath("/discounts")
         return { success: true }
@@ -131,7 +144,7 @@ export async function toggleDiscountActive(id: number) {
         return { error: "No tienes permisos para editar descuentos" }
     }
     try {
-        const discount = await db.discount.findUnique({ where: { id } })
+        const discount = await db.discount.findFirst({ where: { id, organizationId: session.organizationId } })
         if (!discount) return { error: "Descuento no encontrado." }
 
         await db.discount.update({
@@ -147,10 +160,14 @@ export async function toggleDiscountActive(id: number) {
 
 // Get applicable discounts for a sale
 export async function getApplicableDiscounts(categoryId?: number, total?: number) {
+    const session = await getSession()
+    if (!session?.organizationId) return []
+
     const now = new Date()
 
     const discounts = await db.discount.findMany({
         where: {
+            organizationId: session.organizationId,
             isActive: true,
             AND: [
                 {

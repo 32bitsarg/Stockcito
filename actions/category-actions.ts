@@ -3,8 +3,14 @@
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
+import { getSession } from "@/actions/auth-actions"
+
 export async function getCategories() {
+    const session = await getSession()
+    if (!session?.organizationId) return []
+
     return db.category.findMany({
+        where: { organizationId: session.organizationId },
         include: {
             _count: {
                 select: { products: true }
@@ -27,7 +33,15 @@ export async function getCategoryById(id: number) {
 
 export async function createCategory(data: { name: string }) {
     try {
-        await db.category.create({ data })
+        const session = await getSession()
+        if (!session?.organizationId) return { error: "No autorizado" }
+
+        await db.category.create({
+            data: {
+                ...data,
+                organizationId: session.organizationId
+            }
+        })
         revalidatePath("/categories")
         revalidatePath("/inventory")
         return { success: true }
@@ -38,7 +52,19 @@ export async function createCategory(data: { name: string }) {
 
 export async function updateCategory(id: number, data: { name: string }) {
     try {
-        await db.category.update({ where: { id }, data })
+        const session = await getSession()
+        if (!session?.organizationId) return { error: "No autorizado" }
+
+        // Verificar propiedad antes de actualizar
+        const category = await db.category.findUnique({ where: { id } })
+        if (category?.organizationId !== session.organizationId) {
+            return { error: "No autorizado" }
+        }
+
+        await db.category.update({
+            where: { id },
+            data
+        })
         revalidatePath("/categories")
         revalidatePath("/inventory")
         return { success: true }
@@ -49,9 +75,18 @@ export async function updateCategory(id: number, data: { name: string }) {
 
 export async function deleteCategory(id: number) {
     try {
-        // Primero desasociar productos
+        const session = await getSession()
+        if (!session?.organizationId) return { error: "No autorizado" }
+
+        // Verificar propiedad
+        const category = await db.category.findUnique({ where: { id } })
+        if (category?.organizationId !== session.organizationId) {
+            return { error: "No autorizado" }
+        }
+
+        // Primero desasociar productos de forma segura
         await db.product.updateMany({
-            where: { categoryId: id },
+            where: { categoryId: id, organizationId: session.organizationId },
             data: { categoryId: null }
         })
         await db.category.delete({ where: { id } })

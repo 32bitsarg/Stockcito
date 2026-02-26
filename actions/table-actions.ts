@@ -473,6 +473,20 @@ export async function updateTablePositions(
     }
 
     try {
+        const tableIds = updates.map(u => u.id)
+
+        // Verify that all provided table IDs belong to the current organization
+        const count = await db.table.count({
+            where: {
+                id: { in: tableIds },
+                organizationId: session.organizationId
+            }
+        })
+
+        if (count !== updates.length) {
+            return { success: false, error: 'Varias mesas no autorizadas' }
+        }
+
         await db.$transaction(
             updates.map(update =>
                 db.table.update({
