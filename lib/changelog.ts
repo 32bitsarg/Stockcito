@@ -17,6 +17,19 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.2.1',
+        date: '2026-02-26',
+        title: 'Parche de Seguridad Crítico 🛡️',
+        description: 'Actualización de emergencia para proteger la integridad y privacidad de tus datos.',
+        changes: [
+            {
+                type: 'fix',
+                title: 'Protección de Datos',
+                description: 'Implementamos un parche de seguridad de alta prioridad para asegurar que tu información comercial se mantenga estrictamente privada y accesible únicamente por los miembros de tu negocio.'
+            }
+        ]
+    },
+    {
         version: '0.2.0',
         date: '2026-02-26',
         title: 'Ventas por Peso y Escáner de Balanzas ⚖️',
