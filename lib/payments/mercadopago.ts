@@ -5,11 +5,11 @@ import { paymentLogger } from '@/lib/logger'
 import { PLAN_PRICES } from '@/lib/subscription/plans'
 import crypto from 'crypto'
 
-const MERCADOPAGO_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN || ''
+const MERCADOPAGO_ACCESS_TOKEN = (process.env.MERCADOPAGO_ACCESS_TOKEN || '').trim()
 // Support both naming conventions for public key
-const MERCADOPAGO_PUBLIC_KEY = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || process.env.MERCADOPAGO_PUBLIC_KEY || ''
-const MERCADOPAGO_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET || ''
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+const MERCADOPAGO_PUBLIC_KEY = (process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || process.env.MERCADOPAGO_PUBLIC_KEY || '').trim()
+const MERCADOPAGO_WEBHOOK_SECRET = (process.env.MERCADOPAGO_WEBHOOK_SECRET || '').trim()
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').trim()
 
 export interface PaymentPreference {
   id: string
@@ -49,7 +49,7 @@ export async function createPaymentPreference(
     ? `Stockcito ${planName} - Suscripción Anual`
     : `Stockcito ${planName} - Suscripción Mensual`
 
-  const externalReference = `org_${organizationId}_${Date.now()}`
+  const externalReference = `org_${organizationId}_${targetPlan}_${planType}_${Date.now()}`
 
   try {
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
@@ -107,6 +107,7 @@ export async function createPaymentPreference(
 
 // Create a subscription plan (preapproval_plan) - New MercadoPago flow
 export async function createSubscriptionPlan(
+  organizationId: number,
   planType: 'monthly' | 'yearly' = 'monthly',
   targetPlan: 'entrepreneur' | 'premium' = 'premium'
 ): Promise<{ id: string; init_point: string } | null> {
@@ -123,9 +124,12 @@ export async function createSubscriptionPlan(
     ? `Stockcito ${planName} - Suscripción Anual`
     : `Stockcito ${planName} - Suscripción Mensual`
 
+  const externalReference = `org_${organizationId}_${targetPlan}_${planType}_${Date.now()}`
+
   try {
     const requestBody = {
       reason: description,
+      external_reference: externalReference,
       auto_recurring: {
         frequency: planType === 'yearly' ? 12 : 1,
         frequency_type: 'months',
@@ -139,6 +143,7 @@ export async function createSubscriptionPlan(
         }
       },
       back_url: `${APP_URL}/subscription/success`,
+      notification_url: `${APP_URL}/api/webhooks/mercadopago`,
       payment_methods_allowed: {
         payment_types: [{ id: 'credit_card' }, { id: 'debit_card' }]
       }
@@ -185,101 +190,6 @@ export async function createSubscriptionPlan(
   }
 }
 
-
-// Create a subscription (preapproval)
-export async function createSubscription(
-  organizationId: number,
-  organizationName: string,
-  email: string,
-  planType: 'monthly' | 'yearly' = 'monthly'
-): Promise<{ id: string; init_point: string; error?: string } | null> {
-  if (!MERCADOPAGO_ACCESS_TOKEN) {
-    paymentLogger.warn('MercadoPago access token not configured')
-    return null
-  }
-
-  const price = planType === 'yearly'
-    ? PLAN_PRICES.premium.yearly
-    : PLAN_PRICES.premium.monthly
-
-  const description = planType === 'yearly'
-    ? 'Stockcito Premium - Suscripción Anual'
-    : 'Stockcito Premium - Suscripción Mensual'
-
-  const externalReference = `org_${organizationId}_${Date.now()}`
-
-  try {
-    const requestBody = {
-      reason: description,
-      auto_recurring: {
-        frequency: 1,
-        frequency_type: 'months',
-        transaction_amount: price,
-        currency_id: 'ARS',
-        ...(planType === 'yearly' && { frequency: 12 }),
-        free_trial: {
-          frequency: 7,
-          frequency_type: 'days'
-        }
-      },
-      payer_email: email,
-      back_url: `${APP_URL}/subscription/success`,
-      external_reference: externalReference,
-      status: 'pending'
-    }
-
-    paymentLogger.info('Creating subscription with:', {
-      organizationId,
-      email,
-      price,
-      planType,
-      back_url: `${APP_URL}/subscription/success`
-    })
-
-    const response = await fetch('https://api.mercadopago.com/preapproval', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody)
-    })
-
-    const responseText = await response.text()
-
-    if (!response.ok) {
-      paymentLogger.error('MercadoPago subscription error:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: responseText
-      })
-      // Try to parse error message for better debugging
-      try {
-        const errorJson = JSON.parse(responseText)
-        console.error('[MercadoPago Error]', JSON.stringify(errorJson, null, 2))
-      } catch {
-        console.error('[MercadoPago Error]', responseText)
-      }
-      return null
-    }
-
-    const data = JSON.parse(responseText)
-
-    if (!data.init_point) {
-      paymentLogger.error('MercadoPago subscription missing init_point:', data)
-      return null
-    }
-
-    return {
-      id: data.id,
-      init_point: data.init_point
-    }
-  } catch (error) {
-    paymentLogger.error('MercadoPago subscription creation error:', error)
-    return null
-  }
-}
-
 // Get payment info by ID
 export async function getPaymentInfo(paymentId: string): Promise<PaymentInfo | null> {
   if (!MERCADOPAGO_ACCESS_TOKEN) {
@@ -314,16 +224,36 @@ export async function getPaymentInfo(paymentId: string): Promise<PaymentInfo | n
   }
 }
 
-// Parse external reference to get organization ID
-export function parseExternalReference(reference: string): { organizationId: number; timestamp: number } | null {
-  // Format: org_123_1703704800000
-  const match = reference.match(/^org_(\d+)_(\d+)$/)
-  if (!match) return null
-
-  return {
-    organizationId: parseInt(match[1], 10),
-    timestamp: parseInt(match[2], 10)
+// Parse external reference to get organization ID and plan info
+export function parseExternalReference(reference: string): {
+  organizationId: number
+  targetPlan: 'entrepreneur' | 'premium'
+  planType: 'monthly' | 'yearly'
+  timestamp: number
+} | null {
+  // New format: org_123_premium_monthly_1703704800000
+  const newMatch = reference.match(/^org_(\d+)_(entrepreneur|premium)_(monthly|yearly)_(\d+)$/)
+  if (newMatch) {
+    return {
+      organizationId: parseInt(newMatch[1], 10),
+      targetPlan: newMatch[2] as 'entrepreneur' | 'premium',
+      planType: newMatch[3] as 'monthly' | 'yearly',
+      timestamp: parseInt(newMatch[4], 10)
+    }
   }
+
+  // Legacy format: org_123_1703704800000 (backwards compatibility)
+  const legacyMatch = reference.match(/^org_(\d+)_(\d+)$/)
+  if (legacyMatch) {
+    return {
+      organizationId: parseInt(legacyMatch[1], 10),
+      targetPlan: 'premium', // Default for legacy references
+      planType: 'monthly',
+      timestamp: parseInt(legacyMatch[2], 10)
+    }
+  }
+
+  return null
 }
 
 // Verify webhook signature using HMAC-SHA256
@@ -406,6 +336,7 @@ export interface SubscriptionInfo {
   status: 'pending' | 'authorized' | 'paused' | 'cancelled'
   reason: string
   payer_email: string
+  external_reference: string
   next_payment_date: string | null
   transaction_amount: number
   currency_id: string
@@ -444,6 +375,7 @@ export async function getSubscriptionInfo(subscriptionId: string): Promise<Subsc
       status: data.status,
       reason: data.reason || '',
       payer_email: data.payer_email || '',
+      external_reference: data.external_reference || '',
       next_payment_date: data.next_payment_date || null,
       transaction_amount: data.auto_recurring?.transaction_amount || 0,
       currency_id: data.auto_recurring?.currency_id || 'ARS',
@@ -493,6 +425,7 @@ export async function searchSubscriptionByEmail(email: string): Promise<Subscrip
         status: subscription.status,
         reason: subscription.reason || '',
         payer_email: subscription.payer_email || '',
+        external_reference: subscription.external_reference || '',
         next_payment_date: subscription.next_payment_date || null,
         transaction_amount: subscription.auto_recurring?.transaction_amount || 0,
         currency_id: subscription.auto_recurring?.currency_id || 'ARS',

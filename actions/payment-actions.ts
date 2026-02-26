@@ -54,7 +54,7 @@ export async function createCheckoutSession(
     if (useSubscription) {
       // Try subscription plan first (recurring payments)
       paymentLogger.info(`Attempting to create subscription plan for ${targetPlan}...`)
-      const subscriptionPlan = await createSubscriptionPlan(planType, targetPlan)
+      const subscriptionPlan = await createSubscriptionPlan(org.id, planType, targetPlan)
 
       if (subscriptionPlan?.init_point) {
         checkoutUrl = subscriptionPlan.init_point
@@ -160,24 +160,14 @@ export async function processPaymentSuccess(
       return { success: true }
     }
 
-    // Determine if upgrade or renewal
+    // Determine target plan from external_reference metadata
+    const targetPlan = parsed.targetPlan
     const amount = paymentInfo.transaction_amount
-
-    // Determine target plan based on payment amount
-    // Entrepreneur: $15,000 monthly / $150,000 yearly
-    // Premium (Pyme): $30,000 monthly / $300,000 yearly
-    let targetPlan: 'entrepreneur' | 'premium' = 'premium'
-    if (amount <= 16000) { // Monthly entrepreneur
-      targetPlan = 'entrepreneur'
-    } else if (amount <= 151000) { // Yearly entrepreneur
-      targetPlan = 'entrepreneur'
-    }
-    // Otherwise it's premium
 
     const isPaidPlan = org.plan === 'premium' || org.plan === 'entrepreneur'
     if (isPaidPlan && org.planStatus === 'active') {
       // Renewal
-      await renewSubscription(parsed.organizationId, paymentId, amount)
+      await renewSubscription(parsed.organizationId, paymentId, amount, targetPlan)
     } else {
       // New subscription or upgrade
       await upgradeToPremium(parsed.organizationId, paymentId, amount, targetPlan)
@@ -292,8 +282,9 @@ export async function getPaymentMethod(): Promise<PaymentMethod | null> {
 
     const org = user.organization
 
-    // If not premium or no payment history, return null
-    if (org.plan !== 'premium' && org.planStatus !== 'trial') {
+    // If not on a paid plan or trial, return null
+    const isPaidPlan = org.plan === 'premium' || org.plan === 'entrepreneur'
+    if (!isPaidPlan && org.planStatus !== 'trial') {
       return null
     }
 
@@ -360,6 +351,7 @@ export interface VerificationResult {
   status: 'approved' | 'pending' | 'rejected' | 'error'
   message: string
   planActive: boolean
+  planName?: string
 }
 
 export async function verifySubscriptionPayment(
@@ -385,52 +377,82 @@ export async function verifySubscriptionPayment(
 
     const org = user.organization
 
-    // First check: Is the organization already premium?
-    if (org.plan === 'premium' && org.planStatus === 'active') {
+    const parsed = externalReference ? parseExternalReference(externalReference) : null
+    const targetPlanName = parsed?.targetPlan === 'entrepreneur' ? 'Emprendedor' : 'Pyme'
+
+    // If organization already has the plan active, just return success
+    if (org.plan === parsed?.targetPlan && org.planStatus === 'active') {
       return {
         success: true,
         status: 'approved',
-        message: 'Tu suscripción Premium está activa',
-        planActive: true
+        message: `Tu suscripción ${targetPlanName} está activa`,
+        planActive: true,
+        planName: targetPlanName
       }
     }
 
-    // If we have a payment ID, verify with MercadoPago
+    // If we have an ID, verify with MercadoPago
     if (paymentId) {
-      const paymentInfo = await getPaymentInfo(paymentId)
+      // Subscription IDs are usually 32-char hex strings, payments are numbers
+      const isSubscriptionId = paymentId.length >= 30 && /^[a-f0-9]+$/i.test(paymentId)
 
-      if (paymentInfo) {
-        if (paymentInfo.status === 'approved') {
-          // Payment approved - check if org needs to be updated
-          if (org.plan !== 'premium') {
-            // This might happen if webhook hasn't processed yet
-            // The webhook should handle the actual upgrade
-            return {
-              success: true,
-              status: 'approved',
-              message: 'Pago aprobado. Tu cuenta Premium se activará en breve.',
-              planActive: false
-            }
+      const info = isSubscriptionId
+        ? await getSubscriptionInfo(paymentId)
+        : await getPaymentInfo(paymentId)
+
+      if (info) {
+        if (info.status === 'approved' || info.status === 'authorized') {
+          // Use the reference from MercadoPago if the argument is null
+          const refToUse = externalReference || info.external_reference
+          const p = parseExternalReference(refToUse)
+
+          // Determine plan from metadata OR amount as fallback
+          const amount = info.transaction_amount
+          let targetPlan: 'entrepreneur' | 'premium' = p?.targetPlan || 'premium'
+
+          // CRITICAL FIX: If we can't parse the plan, use the amount to detect it
+          if (!p && amount > 0) {
+            targetPlan = amount >= 25000 ? 'premium' : 'entrepreneur'
+            paymentLogger.info(`[Payment] Plan detected by amount (${amount}): ${targetPlan}`)
           }
+
+          const targetPlanName = targetPlan === 'entrepreneur' ? 'Emprendedor' : 'Pyme'
+
+          // Proactively upgrade if needed (before webhook arrives)
+          const isCorrectPlan = org.plan === targetPlan && org.planStatus === 'active'
+          if (!isCorrectPlan) {
+            paymentLogger.info(`[Payment] Proactive upgrade to ${targetPlan} for org ${org.id}`)
+            await upgradeToPremium(org.id, paymentId, amount, targetPlan)
+
+            // Revalidate to ensure UI updates
+            const { revalidatePath } = await import('next/cache')
+            revalidatePath('/subscription')
+            revalidatePath('/dashboard')
+            revalidatePath('/', 'layout')
+          }
+
           return {
             success: true,
             status: 'approved',
-            message: '¡Bienvenido a Premium!',
-            planActive: true
+            message: `¡Bienvenido al Plan ${targetPlanName}!`,
+            planActive: true,
+            planName: targetPlanName
           }
-        } else if (paymentInfo.status === 'pending') {
+        } else if (info.status === 'pending') {
           return {
             success: false,
             status: 'pending',
             message: 'Tu pago está pendiente de confirmación',
-            planActive: false
+            planActive: false,
+            planName: targetPlanName
           }
         } else {
           return {
             success: false,
             status: 'rejected',
             message: 'El pago no fue aprobado',
-            planActive: false
+            planActive: false,
+            planName: targetPlanName
           }
         }
       }
@@ -443,8 +465,9 @@ export async function verifySubscriptionPayment(
       return {
         success: true,
         status: 'approved',
-        message: 'Suscripción activa',
-        planActive: org.plan === 'premium'
+        message: `Suscripción ${targetPlanName} activa`,
+        planActive: org.plan === parsed?.targetPlan,
+        planName: targetPlanName
       }
     }
 
@@ -453,7 +476,8 @@ export async function verifySubscriptionPayment(
       success: false,
       status: 'pending',
       message: 'Verificando estado de la suscripción...',
-      planActive: org.plan === 'premium'
+      planActive: org.plan === parsed?.targetPlan,
+      planName: targetPlanName
     }
 
   } catch (error) {

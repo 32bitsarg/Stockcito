@@ -40,9 +40,10 @@ export function middleware(request: NextRequest) {
     // Ensure csrf_token cookie exists
     if (!request.cookies.has('csrf_token')) {
         const csrfToken = uuidv4()
+        const isSecure = process.env.NODE_ENV === 'production' || request.nextUrl.protocol === 'https:'
         response.cookies.set('csrf_token', csrfToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: isSecure,
             sameSite: 'strict',
             path: '/',
             maxAge: 60 * 60 * 24, // 24 hours

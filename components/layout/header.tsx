@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { HelpDialog } from "@/components/help/help-dialog"
 import { OfflineStatus } from "@/components/pwa/offline-status"
 import { logoutUser } from '@/actions/auth-actions'
@@ -149,7 +148,6 @@ export function Header({ children }: HeaderProps) {
             {/* Offline/Sync Status */}
             <OfflineStatus />
 
-            <ThemeToggle />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon" className="rounded-full">

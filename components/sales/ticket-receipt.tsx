@@ -4,7 +4,7 @@ import type { Sale, Organization, SaleItem } from "@prisma/client"
 import { formatCurrency } from "@/lib/utils"
 
 // Extend SaleItem to include productName if not in type definition yet (handled at runtime)
-type ExtendedSaleItem = SaleItem & { productName?: string | null; product?: { name: string } }
+type ExtendedSaleItem = SaleItem & { productName?: string | null; product?: { name?: string; isWeighable?: boolean; unitMeasure?: string } | null }
 
 interface TicketReceiptProps {
     sale: Sale & { items?: ExtendedSaleItem[]; client?: { name: string; taxId?: string } | null; ticketNumber?: string | null }
@@ -61,7 +61,11 @@ export function TicketReceipt({ sale, organization }: TicketReceiptProps) {
                             <td className="pr-1 py-1">
                                 {item.productName || item.product?.name || "Item"}
                             </td>
-                            <td className="text-right py-1">x{item.quantity}</td>
+                            <td className="text-right py-1">
+                                {item.product?.isWeighable
+                                    ? (item.quantity >= 1000 ? `${(item.quantity / 1000).toFixed(3)}kg` : `${item.quantity}g`)
+                                    : `x${item.quantity}`}
+                            </td>
                             <td className="text-right py-1">
                                 {formatCurrency(Number(item.subtotal))}
                             </td>

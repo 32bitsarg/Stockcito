@@ -51,7 +51,7 @@ export async function Sidebar({ className }: SidebarProps) {
     // Owner and admin have access to admin routes
     const isAdmin = session?.role === 'admin' || session?.role === 'owner'
     const plan = session?.plan || 'free'
-    const isPremium = plan === 'premium'
+    const isPaid = (plan === 'premium' || plan === 'entrepreneur') && session?.planStatus === 'active'
     const isTrialing = session?.planStatus === 'trial'
 
     // Filter restaurant routes based on enabled features
@@ -82,31 +82,31 @@ export async function Sidebar({ className }: SidebarProps) {
                         href="/subscription"
                         className={cn(
                             "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                            isPremium && !isTrialing
+                            isPaid && plan === 'premium'
                                 ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800"
-                                : plan === 'entrepreneur' && !isTrialing
-                                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700"
+                                : isPaid && plan === 'entrepreneur'
+                                    ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                                     : isTrialing
                                         ? "bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-900 dark:hover:bg-zinc-100"
                                         : "bg-muted hover:bg-muted/80 text-muted-foreground"
                         )}
                     >
-                        {isPremium && !isTrialing ? (
+                        {isPaid && plan === 'premium' ? (
                             <>
                                 <Crown className="h-4 w-4" />
                                 <span>Plan Pyme</span>
                             </>
-                        ) : plan === 'entrepreneur' && !isTrialing ? (
+                        ) : isPaid && plan === 'entrepreneur' ? (
                             <>
                                 <Crown className="h-4 w-4" />
-                                <span>Emprendedor</span>
+                                <span>Plan Emprendedor</span>
                             </>
                         ) : isTrialing ? (
                             <>
                                 <Crown className="h-4 w-4" />
                                 <div className="flex flex-col">
                                     <span>Prueba Gratis</span>
-                                    <span className="text-[10px] opacity-75">Pyme activo</span>
+                                    <span className="text-[10px] opacity-75">Suscripción trial</span>
                                 </div>
                                 <Badge variant="secondary" className="text-[10px] ml-auto bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
                                     {trialDays !== null ? `${trialDays}d` : 'Trial'}
@@ -116,7 +116,7 @@ export async function Sidebar({ className }: SidebarProps) {
                             <>
                                 <CreditCard className="h-4 w-4" />
                                 <span>Plan Free</span>
-                                <Badge className="text-[10px] ml-auto bg-primary">
+                                <Badge className="text-[10px] ml-auto bg-primary text-white border-none">
                                     Mejorar
                                 </Badge>
                             </>

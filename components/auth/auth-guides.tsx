@@ -13,12 +13,12 @@ const GUIDES = [
   },
   {
     title: 'Soporte y ayuda',
-    desc: 'Accedé a guías paso a paso y soporte por correo para configurar tu negocio y emitir comprobantes.',
+    desc: 'Accedé a guías paso a paso y soporte por correo para configurar tu negocio y empezar a vender hoy.',
     icon: LifeBuoy
   },
   {
-    title: 'Facturación y IVA',
-    desc: 'Guardamos precios sin IVA y desglosamos impuestos en cada venta. Generá PDF para tu contabilidad.',
+    title: 'Control de Ventas',
+    desc: 'Administrá tus ventas, aplicá descuentos e identificá a tus clientes rápidamente. Generá reportes en PDF.',
     icon: FileText
   },
   {
@@ -66,8 +66,8 @@ export function AuthGuides({ mode = 'login' }: { mode?: 'login' | 'register' }) 
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center"><FileText className="w-5 h-5 text-white" /></div>
               <div>
-                <div className="text-sm font-semibold">Facturación simplificada</div>
-                <div className="text-xs text-white/80">Precios netos y IVA desglosado por alícuota.</div>
+                <div className="text-sm font-semibold">Ventas Múltiples</div>
+                <div className="text-xs text-white/80">Gestión de carritos, clientes, descuentos e IVA.</div>
               </div>
             </div>
             <div className="flex items-start gap-3">

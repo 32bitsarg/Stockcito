@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, Crown, ArrowRight, Loader2, AlertCircle, Clock } from "lucide-react"
+import { CheckCircle2, Crown, ArrowRight, Loader2, AlertCircle, Clock, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { verifySubscriptionPayment, type VerificationResult } from "@/actions/payment-actions"
 
@@ -17,13 +17,16 @@ function SuccessContent() {
   const [result, setResult] = useState<VerificationResult | null>(null)
   const [retryCount, setRetryCount] = useState(0)
 
-  const paymentId = searchParams.get("payment_id")
+  const preapprovalId = searchParams.get("preapproval_id")
+  const paymentId = searchParams.get("payment_id") || preapprovalId
   const externalReference = searchParams.get("external_reference")
   const mpStatus = searchParams.get("status")
 
   const verify = useCallback(async () => {
     try {
-      const verificationResult = await verifySubscriptionPayment(paymentId, externalReference)
+      // Use preapprovalId if paymentId is not available (subscription flow)
+      const idToVerify = paymentId || preapprovalId
+      const verificationResult = await verifySubscriptionPayment(idToVerify, externalReference)
       setResult(verificationResult)
 
       if (verificationResult.success && verificationResult.status === 'approved') {
@@ -159,87 +162,121 @@ function SuccessContent() {
   }
 
   // Success state
+  const isEntrepreneur = result?.planName === 'Emprendedor'
+  const planTitle = isEntrepreneur ? '¡Bienvenido a Emprendedor!' : '¡Bienvenido a Pyme!'
+
   return (
-    <div className="container max-w-2xl py-16">
-      <Card className="border-2 border-primary">
-        <CardHeader className="text-center pb-4">
-          <div className="mx-auto mb-4 p-4 rounded-full bg-green-100 dark:bg-green-900/20 w-fit">
-            <CheckCircle2 className="h-12 w-12 text-green-600" />
+    <div className="flex flex-col items-center justify-center min-h-[80vh] py-12 px-4">
+      <Card className="border-2 border-primary max-w-2xl w-full shadow-xl overflow-hidden">
+        <div className="h-2 bg-primary w-full" />
+        <CardHeader className="text-center pb-4 pt-8">
+          <div className="mx-auto mb-6 p-4 rounded-full bg-green-100 dark:bg-green-900/20 w-fit ring-8 ring-green-50 dark:ring-green-900/10">
+            <CheckCircle2 className="h-16 w-16 text-green-600" />
           </div>
-          <CardTitle className="text-3xl">¡Bienvenido a Premium!</CardTitle>
+          <CardTitle className="text-4xl font-bold text-zinc-900 dark:text-zinc-50">
+            {planTitle}
+          </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <p className="text-lg text-muted-foreground mb-4">
+        <CardContent className="space-y-8 px-8 pb-10">
+          <div className="text-center space-y-3">
+            <p className="text-xl text-muted-foreground leading-relaxed">
               {result?.planActive
-                ? 'Tu pago fue procesado exitosamente. Ahora tienes acceso a todas las funciones Premium de Stockcito.'
-                : 'Tu pago fue aprobado. Tu cuenta Premium se activará en breve.'
+                ? `Tu pago de ${isEntrepreneur ? '$15.000' : '$30.000'} fue procesado exitosamente. Ahora tienes acceso a todas las funciones ${result?.planName} de Stockcito.`
+                : `Tu pago fue aprobado exitosamente. Tu cuenta ${result?.planName} se activará en pocos segundos.`
               }
             </p>
 
-            <div className="flex items-center justify-center gap-2 text-primary font-semibold">
-              <Crown className="h-5 w-5" />
-              <span>{result?.planActive ? 'Plan Premium Activo' : 'Activando Plan Premium...'}</span>
+            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full text-primary font-bold text-lg">
+              <Crown className="h-6 w-6" />
+              <span>{result?.planActive ? `Suscripción ${result?.planName} Activa` : `Activando Plan ${result?.planName}...`}</span>
             </div>
           </div>
 
-          <div className="bg-muted/50 rounded-lg p-6">
-            <h3 className="font-semibold mb-4">Ahora puedes disfrutar de:</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Productos, clientes y usuarios ilimitados</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Exportación a PDF y Excel</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Reportes avanzados y análisis</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Gestión completa de proveedores</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Alertas automáticas de stock</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Soporte prioritario</span>
-              </li>
-            </ul>
+          <div className="bg-muted/30 rounded-2xl p-8 border border-muted-foreground/10">
+            <h3 className="font-bold text-xl mb-6 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              Tu plan incluye:
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-base">
+              {isEntrepreneur ? (
+                <>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Hasta <strong>300 productos</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Hasta <strong>200 clientes</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span><strong>Dueño + 1 Empleado</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span><strong>10 Proveedores</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span><strong>30 días</strong> de reportes</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Exportación <strong>PDF y Excel</strong></span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Productos <strong>ilimitados</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Clientes <strong>ilimitados</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Usuarios <strong>ilimitados</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Facturación <strong>ilimitada</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Reportes <strong>históricos</strong></span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Soporte <strong>prioritario</strong></span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          {paymentId && (
-            <div className="text-center text-sm text-muted-foreground">
-              <p>ID de pago: {paymentId}</p>
-              {externalReference && <p>Referencia: {externalReference}</p>}
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button asChild className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <Button asChild className="flex-1 h-14 text-lg font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
               <Link href="/dashboard">
                 Ir al Dashboard
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1">
+            <Button asChild variant="outline" className="flex-1 h-14 text-lg border-2 hover:bg-muted transition-all">
               <Link href="/subscription">
                 Ver mi suscripción
               </Link>
             </Button>
           </div>
+
+          <p className="text-center text-sm text-muted-foreground pt-4">
+            ¿Necesitas ayuda? Escríbenos a <span className="text-primary font-medium">soporte@stockcito.com</span>
+          </p>
         </CardContent>
       </Card>
-
-      <p className="text-center text-sm text-muted-foreground mt-6">
-        Recibirás un email de confirmación con los detalles de tu suscripción.
-      </p>
     </div>
   )
 }

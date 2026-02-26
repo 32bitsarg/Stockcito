@@ -51,10 +51,11 @@ export function InventoryContent({ canEdit, canExport, initialQuery }: Inventory
         Nombre: p.name,
         SKU: p.sku || '',
         Categoría: p.category?.name || 'Sin categoría',
-        Precio: Number(p.price),
-        Costo: Number(p.cost),
-        Stock: p.stock,
-        'Stock Mínimo': p.minStock
+        "Unidad": p.isWeighable ? "100 GR" : "UN",
+        "Precio Referencia": p.isWeighable ? Number(p.price) * 100 : Number(p.price),
+        "Costo Referencia": p.isWeighable ? Number(p.cost) * 100 : Number(p.cost),
+        Stock: p.isWeighable ? `${(p.stock / 1000).toFixed(3)} KG` : p.stock,
+        'Stock Mínimo': p.isWeighable ? `${(p.minStock / 1000).toFixed(3)} KG` : p.minStock
     }))
 
     return (
@@ -148,15 +149,17 @@ export function InventoryContent({ canEdit, canExport, initialQuery }: Inventory
                                                     ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg scale-110"
                                                     : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
                                             )}>
-                                                {product.stock.toString().padStart(2, '0')}
+                                                {product.isWeighable ? `${(product.stock / 1000).toFixed(3)} KG` : product.stock.toString().padStart(2, '0')}
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-mono font-black text-zinc-900 dark:text-zinc-100 italic tracking-tighter">
-                                            ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                            {product.isWeighable
+                                                ? `$${(Number(product.price) * 100).toLocaleString('es-AR', { minimumFractionDigits: 2 })} x 100gr`
+                                                : `$${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`}
                                         </TableCell>
                                         {canEdit && (
                                             <TableCell className="text-right pr-8">
-                                                <Button variant="ghost" size="sm" asChild className="rounded-xl font-black uppercase text-[10px] tracking-widest opacity-0 group-hover:opacity-100 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                                                <Button size="sm" asChild className="rounded-xl font-black uppercase text-[10px] tracking-widest bg-zinc-100 text-zinc-900 hover:bg-zinc-900 hover:text-white dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-all duration-300">
                                                     <Link href={`/inventory/${product.id}/edit`} className="flex items-center gap-2">
                                                         Editar <ExternalLink className="h-3 w-3" />
                                                     </Link>
@@ -201,15 +204,21 @@ export function InventoryContent({ canEdit, canExport, initialQuery }: Inventory
                                             : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
                                     )}>
                                         <span className="text-xs uppercase opacity-60 leading-none mb-1">Stock</span>
-                                        <span className="text-lg leading-none">{product.stock.toString().padStart(2, '0')}</span>
+                                        <span className="text-lg leading-none">
+                                            {product.isWeighable ? `${(product.stock / 1000).toFixed(3)} KG` : product.stock.toString().padStart(2, '0')}
+                                        </span>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-zinc-900">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Precio Unitario</span>
+                                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">
+                                            {product.isWeighable ? 'Precio x 100gr' : 'Precio Unitario'}
+                                        </span>
                                         <span className="font-mono font-black text-xl text-zinc-900 dark:text-zinc-100 italic tracking-tighter">
-                                            ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                            {product.isWeighable
+                                                ? `$${(Number(product.price) * 100).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+                                                : `$${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`}
                                         </span>
                                     </div>
                                     {canEdit && (

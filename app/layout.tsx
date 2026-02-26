@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Manrope, Roboto_Mono } from "next/font/google";
+import { Outfit, Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
@@ -17,12 +17,12 @@ if (typeof window === 'undefined') {
   validateEnv();
 }
 
-const manrope = Manrope({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const spaceGrotesk = Space_Grotesk({
+const outfit = Outfit({
   variable: "--font-heading",
   subsets: ["latin"],
 });
@@ -80,7 +80,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${manrope.variable} ${spaceGrotesk.variable} ${robotoMono.variable} antialiased`}
+        className={`${inter.variable} ${outfit.variable} ${robotoMono.variable} antialiased`}
       >
         <QueryProvider>
           <ThemeProvider

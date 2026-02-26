@@ -63,11 +63,12 @@ export function BarcodeProvider({ children }: { children: ReactNode }) {
                     // Si estamos en POS, disparamos un evento custom para evitar recargas de URL
                     // que pueden causar duplicados o problemas de estado
                     window.dispatchEvent(new CustomEvent('barcode-scanned', {
-                        detail: { code, product: result.product }
+                        detail: { code, product: result.product, weight: result.weightFromScale }
                     }))
                 } else {
                     // Redirigir al POS
-                    router.push(`/sales/new?addSku=${encodeURIComponent(code)}`)
+                    const weightParam = result.weightFromScale ? `&weight=${result.weightFromScale}` : ''
+                    router.push(`/sales/new?addSku=${encodeURIComponent(code)}${weightParam}`)
                 }
             } else {
                 // Producto no encontrado

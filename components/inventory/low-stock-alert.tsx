@@ -14,6 +14,7 @@ interface LowStockAlertProps {
         stock: number
         minStock: number
         sku: string | null
+        isWeighable?: boolean
     }>
 }
 
@@ -80,10 +81,10 @@ export function LowStockAlert({ products }: LowStockAlertProps) {
                                     </div>
                                     <div className="flex flex-col items-end gap-1">
                                         <div className="text-base font-black font-mono tracking-tighter text-red-500 dark:text-red-400">
-                                            {product.stock.toString().padStart(2, '0')}
+                                            {product.isWeighable ? `${(product.stock / 1000).toFixed(3)}kg` : product.stock.toString().padStart(2, '0')}
                                         </div>
                                         <div className="text-[8px] font-black uppercase tracking-widest text-zinc-300 dark:text-zinc-700">
-                                            Disp. / {product.minStock}
+                                            Disp. / {product.isWeighable ? `${(product.minStock / 1000).toFixed(3)}kg` : product.minStock}
                                         </div>
                                     </div>
                                 </motion.div>

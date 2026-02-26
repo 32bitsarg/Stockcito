@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import { SaleSuccessModal } from "./sale-success-modal"
 import * as motion from "framer-motion/client"
 import { usePOSOffline } from "@/hooks/use-pos-offline"
+import { ScaleModal } from "./scale-modal"
 
 interface CartItem {
     id: string
@@ -26,6 +27,8 @@ interface CartItem {
     taxRate: number
     discountAmount?: number
     discountRate?: number
+    unitMeasure?: string
+    isWeighable?: boolean
 }
 
 interface Product {
@@ -38,6 +41,8 @@ interface Product {
     category?: {
         name: string
     } | null
+    unitMeasure?: string
+    isWeighable?: boolean
 }
 
 interface Client {
@@ -74,19 +79,55 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         isOpen: false,
         product: null
     })
+    const [scaleModal, setScaleModal] = useState<{ isOpen: boolean, product: any | null }>({
+        isOpen: false,
+        product: null
+    })
 
     const initialSkuProcessed = useRef(false)
 
-    // Initial SKU processing (only runs once products are loaded)
+    // Listener para scanner hardware vía CustomEvent
+    useEffect(() => {
+        const handleBarcodeScanned = (e: any) => {
+            const { code, product, weight } = e.detail
+            if (product) {
+                // Find complete product from local cache to make sure offline states are fine,
+                // But fallback to the scanned one.
+                const localProd = products.find(p => p.id === product.id) || product as Product
+
+                if (localProd.stock <= 0) {
+                    toast.error(`Sin stock: ${localProd.name}`)
+                    return
+                }
+
+                if (localProd.isWeighable && weight) {
+                    addToCart(localProd, weight)
+                } else if (localProd.isWeighable && !weight) {
+                    // scanned a weighable product but without weight -> Open manual scale
+                    setScaleModal({ isOpen: true, product: localProd })
+                } else {
+                    addToCart(localProd, 1)
+                }
+            }
+        }
+        window.addEventListener('barcode-scanned', handleBarcodeScanned)
+        return () => window.removeEventListener('barcode-scanned', handleBarcodeScanned)
+    }, [products])
+
+    // Initial SKU processing (via URL param during redirect)
     useEffect(() => {
         const processInitialSku = async () => {
-            if (!initialSku || initialSkuProcessed.current || products.length === 0) return
+            const url = new URL(window.location.href)
+            const addSku = url.searchParams.get('addSku')
+            const weightParam = url.searchParams.get('weight')
+
+            if (!addSku || initialSkuProcessed.current || products.length === 0) return
             initialSkuProcessed.current = true
 
-            let product = products.find(p => p.sku === initialSku)
+            let product = products.find(p => p.sku === addSku)
             if (!product && isOnline) {
                 try {
-                    const result = await searchByBarcode(initialSku)
+                    const result = await searchByBarcode(addSku)
                     if (result.found && result.product) {
                         // Optimistically add to local list if found online but not in cache
                         // Note: In a real scenario we might want to update the cache
@@ -107,25 +148,32 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                         } : undefined
                     })
                 } else {
-                    addToCart(product)
+                    if (product.isWeighable && weightParam) {
+                        addToCart(product, parseInt(weightParam))
+                    } else if (product.isWeighable && !weightParam) {
+                        setScaleModal({ isOpen: true, product })
+                    } else {
+                        addToCart(product, 1)
+                    }
                 }
-                const url = new URL(window.location.href)
-                url.searchParams.delete('addSku')
-                window.history.replaceState({}, '', url.toString())
+                const newUrl = new URL(window.location.href)
+                newUrl.searchParams.delete('addSku')
+                newUrl.searchParams.delete('weight')
+                window.history.replaceState({}, '', newUrl.toString())
             }
         }
         processInitialSku()
-    }, [initialSku, products, canEditStock, isOnline])
+    }, [products, canEditStock, isOnline])
 
-    const addToCart = (product: Product) => {
+    const addToCart = (product: Product, qtyOrWeight: number = 1) => {
         setCart(prev => {
             const existing = prev.find(item => item.productId === product.id)
             if (existing) {
-                if (existing.quantity >= product.stock) {
+                if (existing.quantity + qtyOrWeight > product.stock) {
                     toast.warning("Stock máximo alcanzado")
-                    return prev
                 }
-                return prev.map(item => item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+                // Si es pesable, los gramos se suman
+                return prev.map(item => item.productId === product.id ? { ...item, quantity: Math.min(item.quantity + qtyOrWeight, product.stock) } : item)
             } else {
                 if (product.stock <= 0) return prev
                 return [...prev, {
@@ -133,13 +181,29 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     productId: product.id,
                     name: product.name,
                     price: Number(product.price),
-                    quantity: 1,
+                    quantity: Math.min(qtyOrWeight, product.stock),
                     taxRate: Number(product.taxRate || 21),
                     discountAmount: 0,
-                    discountRate: 0
+                    discountRate: 0,
+                    unitMeasure: product.unitMeasure,
+                    isWeighable: product.isWeighable
                 }]
             }
         })
+    }
+
+    const handleProductClick = (product: Product) => {
+        if (product.stock <= 0) {
+            toast.error("Sin stock", {
+                action: canEditStock ? { label: "Cargar", onClick: () => setStockModal({ isOpen: true, product }) } : undefined
+            })
+            return
+        }
+        if (product.isWeighable) {
+            setScaleModal({ isOpen: true, product })
+        } else {
+            addToCart(product, 1)
+        }
     }
 
     const updateQuantity = (cartItemId: string, delta: number) => {
@@ -213,7 +277,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             <div className="flex-1 flex flex-col border-r border-zinc-200 dark:border-zinc-800 h-full overflow-hidden">
                 <POSProductList
                     products={products}
-                    onAddToCart={addToCart}
+                    onAddToCart={handleProductClick}
                     onEditStock={(p) => setStockModal({ isOpen: true, product: p })}
                 />
             </div>
@@ -312,6 +376,15 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                 onClose={() => setLastSale(null)}
                 sale={lastSale?.sale}
                 organization={lastSale?.organization}
+            />
+
+            <ScaleModal
+                isOpen={scaleModal.isOpen}
+                onClose={() => setScaleModal({ isOpen: false, product: null })}
+                product={scaleModal.product}
+                onConfirm={(weight) => {
+                    addToCart(scaleModal.product, weight)
+                }}
             />
         </div>
     )

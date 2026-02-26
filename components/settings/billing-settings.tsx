@@ -19,7 +19,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { PaymentInfo } from "@/lib/payments/mercadopago" // Assuming this type is exported or similar
 
 interface BillingSettingsProps {
     currentPlan: string
