@@ -36,6 +36,8 @@ export const productSchema = z.object({
     taxRate: z.coerce.number().min(0, "El IVA debe ser mayor o igual a 0").default(21),
     categoryId: z.coerce.number().int().optional(),
     supplierId: z.coerce.number().int().optional(),
+    unitMeasure: z.string().default("UN"),
+    isWeighable: z.boolean().default(false),
 })
 
 export type ProductFormValues = z.infer<typeof productSchema>

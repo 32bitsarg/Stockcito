@@ -134,12 +134,14 @@ export async function loginUser(data: z.infer<typeof loginSchema>) {
       ? 60 * 60 * 24 * 30  // 30 days
       : 60 * 60 * 24       // 1 day
 
+    const isSecure = process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https')
+
     const cookieStore = await cookies()
     cookieStore.set({
       name: 'session',
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       path: '/',
       sameSite: 'lax',
       maxAge: sessionDuration
@@ -232,12 +234,14 @@ export async function loginWithPin(data: z.infer<typeof loginPinSchema>) {
       ? 60 * 60 * 24 * 30  // 30 days
       : 60 * 60 * 24       // 1 day
 
+    const isSecure = process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https')
+
     const cookieStore = await cookies()
     cookieStore.set({
       name: 'session',
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       path: '/',
       sameSite: 'lax',
       maxAge: sessionDuration
@@ -415,12 +419,14 @@ export async function loginWithBusinessCode(data: {
       organizationId: organization.id
     })
 
+    const isSecure = process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https')
+
     const cookieStore = await cookies()
     cookieStore.set({
       name: 'session',
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       path: '/',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7 // 7 days

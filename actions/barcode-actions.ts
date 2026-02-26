@@ -17,10 +17,14 @@ export interface BarcodeSearchResult {
         // Sensitive data - only for authorized roles
         costPrice?: number | null
         minStock?: number | null
+        unitMeasure?: string
+        isWeighable?: boolean
     }
     canCreateProduct: boolean
     canEditStock: boolean
     scannedCode: string
+    weightFromScale?: number
+    parsedSku?: string
 }
 
 /**
@@ -46,6 +50,24 @@ export async function searchByBarcode(code: string): Promise<BarcodeSearchResult
     const canEditStock = hasPermission(permissions, 'inventory', 'adjustStock')
     const canViewCost = hasPermission(permissions, 'inventory', 'viewCost')
 
+    // Check for scale barcodes (e.g., 20PPPPWWWWWXC)
+    let isScaleBarcode = false;
+    let scaleWeight = 0;
+    let searchSku = code;
+
+    // Configuración adaptable: Se podría leer de db.organization.settings a futuro
+    const scalePrefix = "20";
+    const scaleSkuLength = 4;
+    const scaleWeightLength = 5;
+
+    // EAN-13 standard for in-store weighing: 13 digits starting with prefix "20" (or similar)
+    if (code.length === 13 && code.startsWith(scalePrefix)) {
+        isScaleBarcode = true;
+        searchSku = code.substring(scalePrefix.length, scalePrefix.length + scaleSkuLength);
+        const weightStr = code.substring(scalePrefix.length + scaleSkuLength, scalePrefix.length + scaleSkuLength + scaleWeightLength);
+        scaleWeight = parseInt(weightStr, 10);
+    }
+
     // Search for product by SKU
     const product = await db.product.findFirst({
         where: {
@@ -53,7 +75,12 @@ export async function searchByBarcode(code: string): Promise<BarcodeSearchResult
             OR: [
                 { sku: code },
                 { sku: code.toLowerCase() },
-                { sku: code.toUpperCase() }
+                { sku: code.toUpperCase() },
+                ...(isScaleBarcode ? [
+                    { sku: searchSku },
+                    { sku: searchSku.toLowerCase() },
+                    { sku: searchSku.toUpperCase() }
+                ] : [])
             ]
         },
         select: {
@@ -65,6 +92,10 @@ export async function searchByBarcode(code: string): Promise<BarcodeSearchResult
             taxRate: true,
             cost: true,
             minStock: true,
+            // @ts-ignore
+            unitMeasure: true,
+            // @ts-ignore
+            isWeighable: true,
             category: {
                 select: {
                     name: true
@@ -92,14 +123,21 @@ export async function searchByBarcode(code: string): Promise<BarcodeSearchResult
             price: Number(product.price),
             stock: product.stock,
             taxRate: Number(product.taxRate),
+            // @ts-ignore
             category: product.category?.name || null,
             // Only include sensitive data if user has permission
             costPrice: canViewCost ? Number(product.cost) : undefined,
-            minStock: canViewCost ? product.minStock : undefined
+            minStock: canViewCost ? product.minStock : undefined,
+            // @ts-ignore
+            unitMeasure: product.unitMeasure,
+            // @ts-ignore
+            isWeighable: product.isWeighable
         },
         canCreateProduct,
         canEditStock,
-        scannedCode: code
+        scannedCode: code,
+        weightFromScale: isScaleBarcode ? scaleWeight : undefined,
+        parsedSku: searchSku
     }
 }
 

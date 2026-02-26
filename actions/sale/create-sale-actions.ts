@@ -285,7 +285,17 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
                     }
                 },
                 include: {
-                    items: true,
+                    items: {
+                        include: {
+                            product: {
+                                // @ts-ignore (El cliente de prisma aún no está actualizado en el language server)
+                                select: {
+                                    isWeighable: true,
+                                    unitMeasure: true
+                                }
+                            }
+                        }
+                    },
                     client: true
                 }
             })

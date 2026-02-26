@@ -73,7 +73,7 @@ export async function registerUser(data: z.infer<typeof registerSchema>) {
 
     // Generate unique business code from business name
     const businessCode = await generateBusinessCode(sanitizedBusinessName)
-    
+
     // Generate email verification token
     const verificationToken = generateVerificationToken()
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
@@ -129,18 +129,19 @@ export async function registerUser(data: z.infer<typeof registerSchema>) {
         .catch(err => authLogger.error('Failed to send verification email', err))
 
     // Create JWT with organization info
-    const token = signToken({ 
-        userId: result2.user.id, 
+    const token = signToken({
+        userId: result2.user.id,
         role: result2.user.role,
         organizationId: result2.org.id
     })
+    const isSecure = process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_APP_URL?.startsWith('https')
     const cookieStore = await cookies()
-    cookieStore.set({ 
-        name: 'session', 
-        value: token, 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        path: '/', 
+    cookieStore.set({
+        name: 'session',
+        value: token,
+        httpOnly: true,
+        secure: isSecure,
+        path: '/',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7
     })
@@ -149,16 +150,16 @@ export async function registerUser(data: z.infer<typeof registerSchema>) {
     const { logAudit } = await import('./audit-actions')
     await logAudit(result2.user.id, "register", "user", result2.user.id, "Registro de nuevo usuario y organización", ip, result2.org.id)
 
-    return { 
-        success: true, 
-        user: { 
-            id: result2.user.id, 
-            name: result2.user.name, 
+    return {
+        success: true,
+        user: {
+            id: result2.user.id,
+            name: result2.user.name,
             email: result2.user.email,
             organizationId: result2.org.id,
             businessCode: result2.org.businessCode,
             trialEndsAt: trialEnd,
             emailVerificationPending: true
-        } 
+        }
     }
 }

@@ -24,6 +24,8 @@ export interface SubscriptionInfo {
   planStatus: string
   isTrialing: boolean
   isPremium: boolean
+  isEntrepreneur: boolean
+  isPaid: boolean
   isFree: boolean
   trialDaysRemaining: number | null
   subscriptionDaysRemaining: number | null

@@ -14,6 +14,8 @@ interface CartItem {
     taxRate: number
     discountAmount?: number
     discountRate?: number
+    unitMeasure?: string
+    isWeighable?: boolean
 }
 
 interface POSCartProps {
@@ -72,7 +74,9 @@ export function POSCart({
                                 <div className="min-w-0 flex-1">
                                     <h4 className="font-black text-sm leading-tight text-zinc-900 dark:text-zinc-100 uppercase italic tracking-tighter line-clamp-2">{item.name}</h4>
                                     <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1.5 font-mono">
-                                        UNIDAD: ${item.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                        {item.isWeighable
+                                            ? `1 KG: $${(item.price * 1000).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+                                            : `UNIDAD: $${item.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`}
                                     </div>
                                 </div>
                                 <div className="font-black text-base tabular-nums tracking-tighter text-zinc-900 dark:text-zinc-100 font-mono">
@@ -85,16 +89,20 @@ export function POSCart({
                                     <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-lg p-0.5 border border-zinc-200 dark:border-zinc-800">
                                         <button
                                             className="h-8 w-8 flex items-center justify-center hover:bg-white dark:hover:bg-zinc-800 rounded-md transition-all active:scale-90"
-                                            onClick={() => onUpdateQuantity(item.id, -1)}
+                                            onClick={() => onUpdateQuantity(item.id, item.isWeighable ? -50 : -1)}
                                         >
                                             <Minus className="h-3.5 w-3.5" />
                                         </button>
-                                        <span className="w-10 text-center text-xs font-black font-mono selection:bg-none">
-                                            {item.quantity.toString().padStart(2, '0')}
+                                        <span className={cn("text-center text-xs font-black font-mono selection:bg-none", item.isWeighable ? "w-16" : "w-10")}>
+                                            {item.isWeighable && item.quantity >= 1000
+                                                ? `${(item.quantity / 1000).toFixed(3)} KG`
+                                                : item.isWeighable
+                                                    ? `${item.quantity} GR`
+                                                    : item.quantity.toString().padStart(2, '0')}
                                         </span>
                                         <button
                                             className="h-8 w-8 flex items-center justify-center hover:bg-white dark:hover:bg-zinc-800 rounded-md transition-all active:scale-90"
-                                            onClick={() => onUpdateQuantity(item.id, 1)}
+                                            onClick={() => onUpdateQuantity(item.id, item.isWeighable ? 50 : 1)}
                                         >
                                             <Plus className="h-3.5 w-3.5" />
                                         </button>

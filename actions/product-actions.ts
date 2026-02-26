@@ -29,6 +29,8 @@ export interface PaginatedProductsResult {
         taxRate: number
         categoryId: number | null
         category: { id: number; name: string } | null
+        unitMeasure: string
+        isWeighable: boolean
         createdAt: Date
         updatedAt: Date
     }>

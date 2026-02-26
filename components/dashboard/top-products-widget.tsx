@@ -11,6 +11,7 @@ interface TopProductsWidgetProps {
             id: number
             name: string
             sku: string | null
+            isWeighable?: boolean
         } | null
         totalQuantity: number
         totalRevenue: number
@@ -87,7 +88,9 @@ export function TopProductsWidget({ products }: TopProductsWidgetProps) {
                                                     ${item.totalRevenue.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                                                 </div>
                                                 <div className="text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tighter bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full inline-block mt-1">
-                                                    {item.totalQuantity} VENDIDOS
+                                                    {item.product.isWeighable
+                                                        ? (item.totalQuantity >= 1000 ? `${(item.totalQuantity / 1000).toFixed(3)} KG` : `${item.totalQuantity} GR`)
+                                                        : `${item.totalQuantity} UN`}
                                                 </div>
                                             </div>
                                         </div>

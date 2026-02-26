@@ -17,10 +17,12 @@ interface Product {
     sku: string | null
     price: any
     stock: number
-    taxRate: any
     category?: {
         name: string
     } | null
+    isWeighable?: boolean
+    unitMeasure?: string
+    taxRate: any
     [key: string]: any
 }
 
@@ -106,18 +108,22 @@ export function POSProductList({ products, onAddToCart, onEditStock }: POSProduc
                                                     {product.sku || '-'}
                                                 </TableCell>
                                                 <TableCell className="text-right font-black font-mono text-zinc-900 dark:text-zinc-100">
-                                                    ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                                    {product.isWeighable
+                                                        ? `$${(Number(product.price) * 1000).toLocaleString('es-AR', { minimumFractionDigits: 2 })} x Kg`
+                                                        : `$${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`}
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <button
                                                         onClick={() => onEditStock?.(product)}
                                                         className={cn(
-                                                            "font-mono font-black text-[11px] px-2 py-0.5 rounded-full transition-all hover:scale-110",
-                                                            product.stock <= 5 && product.stock > 0 ? "bg-zinc-900 text-white" :
-                                                                product.stock === 0 ? "bg-zinc-200 text-zinc-500" : "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-300"
+                                                            "font-mono text-[11px] px-2 py-0.5 rounded-full transition-all hover:scale-110",
+                                                            product.isWeighable ? "font-bold bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" : "font-black",
+                                                            !product.isWeighable && product.stock <= 5 && product.stock > 0 ? "bg-zinc-900 text-white" : "",
+                                                            product.stock === 0 ? "bg-zinc-200 text-zinc-500" : "",
+                                                            !product.isWeighable && product.stock > 5 ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-300" : ""
                                                         )}
                                                     >
-                                                        {product.stock.toString().padStart(2, '0')}
+                                                        {product.isWeighable ? `${(product.stock / 1000).toFixed(3)}kg` : product.stock.toString().padStart(2, '0')}
                                                     </button>
                                                 </TableCell>
                                                 <TableCell className="pr-6">

@@ -24,6 +24,7 @@ interface QuickStockModalProps {
         id: number
         name: string
         stock: number
+        isWeighable?: boolean
     }
     onSuccess: (newStock: number) => void
 }
@@ -67,6 +68,13 @@ export function QuickStockModal({
     const currentStock = product.stock
     const finalStock = currentStock + adjustment
 
+    const formatStock = (stock: number) => {
+        if (product.isWeighable) {
+            return `${(stock / 1000).toFixed(3)} KG`
+        }
+        return stock
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
@@ -81,24 +89,24 @@ export function QuickStockModal({
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex flex-col items-center p-3 border rounded-lg bg-muted/50 w-full">
                             <span className="text-xs text-muted-foreground uppercase">Actual</span>
-                            <span className="text-2xl font-bold">{currentStock}</span>
+                            <span className="text-2xl font-bold">{formatStock(currentStock)}</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <span className="text-muted-foreground">→</span>
                         </div>
                         <div className="flex flex-col items-center p-3 border rounded-lg bg-primary/10 w-full animate-in fade-in">
                             <span className="text-xs text-primary uppercase">Nuevo</span>
-                            <span className="text-2xl font-bold text-primary">{finalStock}</span>
+                            <span className="text-2xl font-bold text-primary">{formatStock(finalStock)}</span>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Ajuste</Label>
+                        <Label>Ajuste {product.isWeighable && "(en Gramos)"}</Label>
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => setAdjustment(prev => prev - 1)}
+                                onClick={() => setAdjustment(prev => prev - (product.isWeighable ? 50 : 1))}
                             >
                                 <Minus className="h-4 w-4" />
                             </Button>
@@ -111,7 +119,7 @@ export function QuickStockModal({
                             <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => setAdjustment(prev => prev + 1)}
+                                onClick={() => setAdjustment(prev => prev + (product.isWeighable ? 50 : 1))}
                             >
                                 <Plus className="h-4 w-4" />
                             </Button>

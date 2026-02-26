@@ -172,6 +172,8 @@ model Product {
   cost           Decimal
   stock          Int
   minStock       Int           @default(0)
+  unitMeasure    String        @default("UN") // "UN" = Unidad, "GR" = Gramos, "KG" = Kilos (Frontend manejará GR internamente)
+  isWeighable    Boolean       @default(false) // Indica si este producto permite fracciones/lectura de balanza
   taxRate        Decimal       @default(21) // IVA % por defecto
   categoryId     Int?
   category       Category?     @relation(fields: [categoryId], references: [id])

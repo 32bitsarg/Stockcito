@@ -8,6 +8,7 @@ export interface SubscriptionStatus {
   isTrialing: boolean
   isPremium: boolean
   isEntrepreneur: boolean
+  isPaid: boolean
   isFree: boolean
   trialDaysRemaining: number | null
   subscriptionDaysRemaining: number | null
@@ -56,7 +57,8 @@ export async function getSubscriptionStatus(organizationId: number): Promise<Sub
     isTrialing: org.planStatus === 'trial',
     isPremium: plan === 'premium' && isActive,
     isEntrepreneur: plan === 'entrepreneur' && isActive,
-    isFree: plan === 'free' || org.planStatus === 'expired' || org.planStatus === 'cancelled',
+    isPaid: isPaidPlan && isActive,
+    isFree: !isPaidPlan || org.planStatus === 'expired' || org.planStatus === 'cancelled',
     trialDaysRemaining,
     subscriptionDaysRemaining,
     canUpgrade: plan === 'free' || plan === 'entrepreneur' || org.planStatus === 'expired' || org.planStatus === 'cancelled',
@@ -84,7 +86,7 @@ export async function startTrial(organizationId: number): Promise<void> {
       data: {
         organizationId,
         event: 'trial_started',
-        toPlan: 'premium',
+        toPlan: 'free', // Plan is free with trial status granting temporary premium access
         details: JSON.stringify({ trialDays: TRIAL_DAYS, endsAt: trialEnd.toISOString() })
       }
     })
@@ -139,12 +141,16 @@ export async function upgradeToPremium(
 export async function renewSubscription(
   organizationId: number,
   paymentId: string,
-  amount: number
+  amount: number,
+  currentPlan?: 'entrepreneur' | 'premium'
 ): Promise<void> {
   const org = await db.organization.findUnique({
     where: { id: organizationId },
-    select: { subscriptionEndsAt: true }
+    select: { subscriptionEndsAt: true, plan: true }
   })
+
+  // Use provided plan or fall back to the org's current plan
+  const planForLog = currentPlan || (org?.plan as 'entrepreneur' | 'premium') || 'premium'
 
   const now = new Date()
   // If subscription hasn't expired yet, add 30 days from current end
@@ -170,7 +176,7 @@ export async function renewSubscription(
       data: {
         organizationId,
         event: 'renewed',
-        toPlan: 'premium',
+        toPlan: planForLog,
         amount,
         paymentMethod: 'mercadopago',
         transactionId: paymentId,
@@ -179,6 +185,7 @@ export async function renewSubscription(
     })
   ])
 }
+
 
 // Cancel subscription (will expire at end of period)
 export async function cancelSubscription(organizationId: number): Promise<void> {
@@ -255,10 +262,10 @@ export async function checkExpiredSubscriptions(): Promise<number> {
           planStatus: 'trial',
           trialEndsAt: { lt: now }
         },
-        // Subscription expired
+        // Subscription expired (any paid plan)
         {
           planStatus: 'active',
-          plan: 'premium',
+          plan: { in: ['premium', 'entrepreneur'] },
           subscriptionEndsAt: { lt: now }
         }
       ]
@@ -295,7 +302,7 @@ export async function verifySubscriptionOnline(organizationId: number): Promise<
     // Auto-expire if needed
     if (org.planStatus === 'trial' && org.trialEndsAt && new Date(org.trialEndsAt) < now) {
       await expireSubscription(organizationId)
-    } else if (org.planStatus === 'active' && org.plan === 'premium' && org.subscriptionEndsAt && new Date(org.subscriptionEndsAt) < now) {
+    } else if (org.planStatus === 'active' && (org.plan === 'premium' || org.plan === 'entrepreneur') && org.subscriptionEndsAt && new Date(org.subscriptionEndsAt) < now) {
       await expireSubscription(organizationId)
     }
   }

@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import Link from "next/link"
+import { Switch } from "@/components/ui/switch"
 
 interface ProductFormProps {
     initialData?: any
@@ -25,6 +26,8 @@ interface ProductFormProps {
 export function ProductForm({ initialData, categories = [], initialSku }: ProductFormProps) {
     const router = useRouter()
     const [error, setError] = useState<string | null>(null)
+    const [kilos, setKilos] = useState(initialData?.isWeighable ? Math.floor((initialData?.stock || 0) / 1000) : 0)
+    const [gramos, setGramos] = useState(initialData?.isWeighable ? (initialData?.stock || 0) % 1000 : 0)
 
     const mutation = useOfflineMutation({
         mutationFn: (data: ProductFormValues) =>
@@ -56,18 +59,30 @@ export function ProductForm({ initialData, categories = [], initialSku }: Produc
             name: initialData?.name || "",
             sku: initialData?.sku || initialSku || "",
             description: initialData?.description || "",
-            price: initialData?.price || 0,
-            cost: initialData?.cost || 0,
+            price: initialData?.isWeighable ? (initialData?.price * 1000) : (initialData?.price || 0),
+            cost: initialData?.isWeighable ? (initialData?.cost * 1000) : (initialData?.cost || 0),
             stock: initialData?.stock || 0,
             minStock: initialData?.minStock || 0,
             taxRate: initialData?.taxRate || 21,
             categoryId: initialData?.categoryId || undefined,
+            isWeighable: initialData?.isWeighable || false,
+            unitMeasure: initialData?.unitMeasure || "UN",
         }
     })
 
     function onSubmit(data: ProductFormValues) {
         setError(null)
-        mutation.mutate(data)
+        // Transformar la data antes de guardar
+        const payload = { ...data }
+        if (payload.isWeighable) {
+            payload.stock = (kilos * 1000) + gramos
+            payload.unitMeasure = 'GR'
+            payload.price = payload.price / 1000   // Guardar precio por gramo
+            payload.cost = payload.cost / 1000     // Guardar costo por gramo
+        } else {
+            payload.unitMeasure = 'UN'
+        }
+        mutation.mutate(payload)
     }
 
     return (
@@ -85,6 +100,29 @@ export function ProductForm({ initialData, categories = [], initialSku }: Produc
                         <CardTitle className="text-base">Información básica</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="isWeighable"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mb-4">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base text-primary font-bold">
+                                            Este artículo se vende por peso
+                                        </FormLabel>
+                                        <FormDescription>
+                                            Activa esta opción si vendés por fracciones o gramos (Ej: Verdulería, Fiambrería).
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={(details) => field.onChange(details.checked)}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
@@ -190,7 +228,7 @@ export function ProductForm({ initialData, categories = [], initialSku }: Produc
                                 name="price"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Precio Final *</FormLabel>
+                                        <FormLabel>{form.watch("isWeighable") ? "Precio x Kilo *" : "Precio Final *"}</FormLabel>
                                         <FormControl>
                                             <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} />
                                         </FormControl>
@@ -223,26 +261,57 @@ export function ProductForm({ initialData, categories = [], initialSku }: Produc
                         <CardTitle className="text-base">Inventario</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="stock"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Stock Actual *</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" min="0" placeholder="0" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                        {form.watch("isWeighable") ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border p-4 rounded-lg bg-orange-50/50 dark:bg-orange-950/20">
+                                <div className="space-y-2">
+                                    <FormLabel>Stock Kilos</FormLabel>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        value={kilos === 0 && !initialData ? "" : kilos}
+                                        onChange={(e) => setKilos(parseInt(e.target.value) || 0)}
+                                        placeholder="0 Kilos"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1 text-orange-600 dark:text-orange-400">Sumará kilos enteros</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <FormLabel>Stock Gramos</FormLabel>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="999"
+                                        value={gramos === 0 && !initialData ? "" : gramos}
+                                        onChange={(e) => setGramos(parseInt(e.target.value) || 0)}
+                                        placeholder="0 Gramos"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1 text-orange-600 dark:text-orange-400">Sumará los gramos restantes al total</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-4">
+                                <FormField
+                                    control={form.control}
+                                    name="stock"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Stock Actual *</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" min="0" placeholder="0" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                             <FormField
                                 control={form.control}
                                 name="minStock"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Stock Mínimo</FormLabel>
+                                        <FormLabel>{form.watch("isWeighable") ? "Stock Mínimo (Gramos)" : "Stock Mínimo"}</FormLabel>
                                         <FormControl>
                                             <Input type="number" min="0" placeholder="0" {...field} />
                                         </FormControl>

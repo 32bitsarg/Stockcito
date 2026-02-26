@@ -17,7 +17,6 @@ const sections = [
   { id: 'intro', title: 'Introducción' },
   { id: 'shortcuts', title: 'Atajos de Teclado' },
   { id: 'features', title: 'Funcionalidades' },
-  { id: 'tables', title: 'Gestión de Mesas' },
   { id: 'roles', title: 'Roles y Permisos' },
   { id: 'faq', title: 'Preguntas Frecuentes' },
 ]
@@ -218,12 +217,11 @@ export default function DocsPage() {
             <div className="grid md:grid-cols-2 gap-12">
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 border border-zinc-100 dark:border-zinc-900 flex items-center justify-center italic font-black text-xl italic select-none">F</div>
-                  <h3 className="text-[16px] font-black uppercase tracking-[0.2em] italic">Facturación Fiscal</h3>
+                  <div className="w-10 h-10 border border-zinc-100 dark:border-zinc-900 flex items-center justify-center italic font-black text-xl italic select-none">B</div>
+                  <h3 className="text-[16px] font-black uppercase tracking-[0.2em] italic">Venta por Peso & Balanzas</h3>
                 </div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500 leading-relaxed italic border-l-2 border-zinc-100 dark:border-zinc-800 pl-6">
-                  Emisión de comprobantes A, B y C integrados con AFIP.
-                  Generación de factura electrónica y envío por email.
+                  Soporte nativo para vender fraccionado en gramos o kilos, incluyendo compatibilidad con códigos de barra de balanzas electrónicas conectadas.
                 </p>
               </div>
               <div className="space-y-6">
@@ -239,55 +237,7 @@ export default function DocsPage() {
             </div>
           </section>
 
-          {/* Tables Management */}
-          <section id="tables" className="scroll-mt-32 space-y-12">
-            <div className="space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 italic">Organización</span>
-              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Control de Mesas</h2>
-              <div className="h-px w-20 bg-zinc-900 dark:bg-white" />
-            </div>
 
-            <div className="border border-zinc-100 dark:border-zinc-800 p-12 space-y-12">
-              <div className="grid gap-8">
-                <div className="space-y-6">
-                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-zinc-500 italic border-b border-zinc-100 dark:border-zinc-800 pb-2 block w-max">Estados de las Mesas</span>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Libre</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Ocupada</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-yellow-500" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Reservada</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Servicio</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-12">
-                  <div className="space-y-4">
-                    <h4 className="text-[11px] font-black uppercase tracking-widest italic border-l-2 border-zinc-900 dark:border-white pl-4">Sector Gastronomía</h4>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-500 italic leading-relaxed">
-                      Asignación de pedidos a mesas o sectores, y gestión de reservas por horario.
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="text-[11px] font-black uppercase tracking-widest italic border-l-2 border-zinc-900 dark:border-white pl-4">Mapeo Dinámico</h4>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-500 italic leading-relaxed">
-                      Configuración visual de tu local para ver el estado de cada mesa de forma rápida.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* Roles y Permisos */}
           <section id="roles" className="scroll-mt-32 space-y-12">
@@ -312,7 +262,6 @@ export default function DocsPage() {
                     { r: 'Admin', p: 'Config/Usuarios', re: 'Borrado de Base' },
                     { r: 'Manager', p: 'Inventario/Caja', re: 'Config Crítica' },
                     { r: 'Cajero', p: 'Operativa POS', re: 'Historial Global' },
-                    { r: 'Mozo', p: 'Mesas/Pedidos', re: 'Sin Cobro' },
                   ].map((row, i) => (
                     <tr key={i} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
                       <td className="p-6 text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-white italic">{row.r}</td>

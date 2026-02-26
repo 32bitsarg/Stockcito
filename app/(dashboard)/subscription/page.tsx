@@ -94,11 +94,11 @@ export default async function SubscriptionPage() {
       {/* Plan Card */}
       <div className="rounded-lg border bg-card overflow-hidden">
         {/* Plan Header */}
-        <div className={`p-6 ${subscription.isPremium ? "bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10" : "bg-muted/30"}`}>
+        <div className={`p-6 ${subscription.isPaid ? "bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10" : "bg-muted/30"}`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${subscription.isPremium ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white" : "bg-muted"}`}>
-                <Crown className={`w-7 h-7 ${subscription.isPremium ? "text-white" : "text-muted-foreground"}`} />
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${subscription.isPaid ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white" : "bg-muted"}`}>
+                <Crown className={`w-7 h-7 ${subscription.isPaid ? "text-white" : "text-muted-foreground"}`} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export default async function SubscriptionPage() {
                   {subscription.isTrialing && (
                     <>Período de prueba — <span className="font-medium text-primary">{subscription.trialDaysRemaining} días restantes</span></>
                   )}
-                  {!subscription.isTrialing && subscription.isPremium && (
+                  {!subscription.isTrialing && subscription.isPaid && (
                     <>Tu suscripción se renueva en <span className="font-medium">{subscription.subscriptionDaysRemaining} días</span></>
                   )}
                   {subscription.isFree && !subscription.isTrialing && (
@@ -150,7 +150,7 @@ export default async function SubscriptionPage() {
             <div>
               <p className="text-xs text-muted-foreground">Próxima renovación</p>
               <p className="font-medium">
-                {subscription.isPremium
+                {subscription.isPaid
                   ? formatDate(paymentStatus.nextPaymentDue)
                   : "—"}
               </p>

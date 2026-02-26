@@ -17,6 +17,44 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.2.0',
+        date: '2026-02-26',
+        title: 'Ventas por Peso y Escáner de Balanzas ⚖️',
+        description: '¡Ahora podés vender fiambres, quesos o verduras por gramos! Adaptamos todo el sistema para que leer y gestionar el peso sea comodísimo.',
+        changes: [
+            {
+                type: 'new',
+                title: 'Nuevos Productos "Pesables"',
+                description: 'Al crear un producto vas a poder elegir si "Se vende por peso". Podrás cargar el precio de 1 Kilo, administrar el stock midiendo los gramos, y el sistema hará los cálculos por vos.'
+            },
+            {
+                type: 'new',
+                title: 'Soporte para Balanzas de Mostrador',
+                description: 'Caja conectada: Si tenés una balanza (como Kretz o Systel) que imprime un código de barras con el peso, pasá el lector y Stockcito sumará exactamente los gramos reales al carrito.'
+            },
+            {
+                type: 'new',
+                title: 'Balanza Virtual y Botones Rápidos',
+                description: 'Si cortás fiambrería a mano, inventamos un panel para agregar súper rápido: 100g, 250g o medio kilo tocando un solo botón en la pantalla de cobro.'
+            },
+            {
+                type: 'improvement',
+                title: 'Inventario mucho más inteligente',
+                description: 'Mejoramos la tabla de tus productos. En los artículos que vendas por peso, vas a visualizar siempre el valor de "Precio x 100gr", para ajustarte al estándar de fiambrerías y verdulerías.'
+            },
+            {
+                type: 'improvement',
+                title: 'Tickets Transparentes',
+                description: 'Tus clientes van a ver impreso claramente la cantidad de "GR" (Gramos) o "KG" (Kilos) de los artículos pesados que se están llevando.'
+            },
+            {
+                type: 'improvement',
+                title: 'Suscripciones Mejoradas',
+                description: 'Perfeccionamos el plan Emprendedor con MercadoPago para que la gestión de facturación sea infalible y transparente a la hora de suscribirte.'
+            }
+        ]
+    },
+    {
         version: '0.1.8',
         date: '2026-02-19',
         title: 'Sincronización en Tiempo Real & Mejoras de Planes ⚡',
