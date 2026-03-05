@@ -4,19 +4,7 @@ import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-
-interface CartItem {
-    id: string
-    productId: number
-    name: string
-    price: number
-    quantity: number
-    taxRate: number
-    discountAmount?: number
-    discountRate?: number
-    unitMeasure?: string
-    isWeighable?: boolean
-}
+import type { CartItem } from "@/lib/types/pos"
 
 interface POSCartProps {
     items: CartItem[]

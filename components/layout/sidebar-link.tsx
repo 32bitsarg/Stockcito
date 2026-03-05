@@ -18,6 +18,7 @@ import {
   Calculator,
   Clock,
   User,
+  Barcode,
   LucideIcon
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +39,7 @@ const iconMap: Record<string, LucideIcon> = {
   Calculator,
   Clock,
   User,
+  Barcode,
 }
 
 interface SidebarLinkProps {
@@ -45,9 +47,10 @@ interface SidebarLinkProps {
   label: string
   iconName: string
   badge?: number
+  isNew?: boolean
 }
 
-export function SidebarLink({ href, label, iconName, badge }: SidebarLinkProps) {
+export function SidebarLink({ href, label, iconName, badge, isNew }: SidebarLinkProps) {
   const pathname = usePathname()
   const isActive = pathname === href || pathname.startsWith(href + '/')
   const Icon = iconMap[iconName] || Package
@@ -65,8 +68,13 @@ export function SidebarLink({ href, label, iconName, badge }: SidebarLinkProps) 
     >
       <Icon className="h-4 w-4" />
       {label}
+      {isNew && (
+        <span className="ml-auto text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5 rounded-full animate-pulse">
+          Nuevo
+        </span>
+      )}
       {
-        badge !== undefined && badge > 0 && (
+        !isNew && badge !== undefined && badge > 0 && (
           <Badge className="ml-auto">{badge}</Badge>
         )
       }
@@ -80,6 +88,7 @@ interface SidebarLinksProps {
     label: string
     iconName: string
     badge?: number
+    isNew?: boolean
   }>
 }
 
@@ -93,6 +102,7 @@ export function SidebarLinks({ routes }: SidebarLinksProps) {
           label={route.label}
           iconName={route.iconName}
           badge={route.badge}
+          isNew={route.isNew}
         />
       ))}
     </>

@@ -8,28 +8,13 @@ import { LayoutGrid, List, Search, Plus } from "lucide-react"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-
 import { cn } from "@/lib/utils"
-
-interface Product {
-    id: number
-    name: string
-    sku: string | null
-    price: any
-    stock: number
-    category?: {
-        name: string
-    } | null
-    isWeighable?: boolean
-    unitMeasure?: string
-    taxRate: any
-    [key: string]: any
-}
+import type { POSProduct } from "@/lib/types/pos"
 
 interface POSProductListProps {
-    products: Product[]
-    onAddToCart: (product: Product) => void
-    onEditStock?: (product: Product) => void
+    products: POSProduct[]
+    onAddToCart: (product: POSProduct) => void
+    onEditStock?: (product: POSProduct) => void
 }
 
 export function POSProductList({ products, onAddToCart, onEditStock }: POSProductListProps) {
@@ -70,7 +55,7 @@ export function POSProductList({ products, onAddToCart, onEditStock }: POSProduc
                 ) : (
                     <div className="p-6">
                         {viewMode === "grid" ? (
-                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-12">
+                            <div className="grid grid-cols-2 xl:grid-cols-3 gap-6 pb-12">
                                 {products.map(product => (
                                     <POSProductCard
                                         key={product.id}

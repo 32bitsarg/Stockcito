@@ -31,21 +31,21 @@ function StatCard({ title, value, icon, trend, trendLabel, delay = 0, variant = 
                     ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-none lg:scale-105 z-10"
                     : "bg-white dark:bg-zinc-950 hover:border-zinc-900 dark:hover:border-zinc-100"
             )}>
-                <CardContent className="p-6">
+                <CardContent className="p-3 md:p-6">
                     <div className="flex items-start justify-between">
-                        <div className="space-y-4">
+                        <div className="space-y-1 md:space-y-4">
                             <p className={cn(
-                                "text-[10px] font-black uppercase tracking-widest italic",
+                                "text-[8px] md:text-[10px] font-black uppercase tracking-widest italic leading-tight",
                                 variant === 'premium' ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"
                             )}>
                                 {title}
                             </p>
-                            <div className="text-4xl font-black tracking-tighter font-mono italic">
+                            <div className="text-lg md:text-4xl font-black tracking-tighter font-mono italic">
                                 {value}
                             </div>
                         </div>
                         <div className={cn(
-                            "p-3 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
+                            "p-2 md:p-3 rounded-xl md:rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 [&_svg]:h-4 [&_svg]:w-4 md:[&_svg]:h-6 md:[&_svg]:w-6",
                             variant === 'premium'
                                 ? "bg-white/10 dark:bg-zinc-900/5 text-white dark:text-zinc-900"
                                 : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 dark:text-zinc-600 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900"
@@ -56,21 +56,21 @@ function StatCard({ title, value, icon, trend, trendLabel, delay = 0, variant = 
 
                     {trend !== undefined && (
                         <div className={cn(
-                            "flex items-center gap-2 mt-6 pt-6 border-t",
+                            "flex items-center gap-1.5 md:gap-2 mt-3 md:mt-6 pt-3 md:pt-6 border-t",
                             variant === 'premium' ? "border-white/10 dark:border-zinc-200" : "border-zinc-100 dark:border-zinc-900"
                         )}>
                             <div className={cn(
-                                "flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black italic uppercase",
+                                "flex items-center gap-1 px-1.5 md:px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-black italic uppercase",
                                 isPositiveTrend
                                     ? (variant === 'premium' ? "bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white" : "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900")
                                     : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
                             )}>
-                                {isPositiveTrend ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                                {isPositiveTrend ? <ArrowUpRight className="h-2.5 w-2.5 md:h-3 md:w-3" /> : <ArrowDownRight className="h-2.5 w-2.5 md:h-3 md:w-3" />}
                                 {Math.abs(trend).toFixed(1)}%
                             </div>
                             {trendLabel && (
                                 <span className={cn(
-                                    "text-[9px] font-black uppercase tracking-tighter opacity-60",
+                                    "text-[7px] md:text-[9px] font-black uppercase tracking-tighter opacity-60 hidden sm:inline",
                                     variant === 'premium' ? "text-white" : "text-zinc-400"
                                 )}>
                                     {trendLabel}
@@ -82,7 +82,7 @@ function StatCard({ title, value, icon, trend, trendLabel, delay = 0, variant = 
 
                 {/* Background Pattern */}
                 <div className={cn(
-                    "absolute -right-4 -bottom-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.07] transition-opacity duration-700",
+                    "absolute -right-4 -bottom-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.07] transition-opacity duration-700 hidden md:block",
                     variant === 'premium' ? "text-white" : "text-zinc-900"
                 )}>
                     <Hash className="w-24 h-24 md:w-32 md:h-32" />
@@ -108,7 +108,7 @@ interface DashboardStatsProps {
 
 export function DashboardStats({ metrics }: DashboardStatsProps) {
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 pb-4">
+        <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4 pb-4">
             <StatCard
                 variant="premium"
                 title="Flujo de Ingresos / Hoy"

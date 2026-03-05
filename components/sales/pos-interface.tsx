@@ -2,11 +2,8 @@
 
 import { useState, useEffect, useTransition, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { getProducts } from "@/actions/product-actions"
-import { getClientsAll } from "@/actions/client-actions"
-import { createSale } from "@/actions/sale-actions"
 import { Button } from "@/components/ui/button"
-import { User, ArrowRight, CreditCard, ChevronRight } from "lucide-react"
+import { User, ArrowRight, CreditCard, ChevronRight, Banknote, Smartphone } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { POSProductList } from "./pos-product-list"
 import { searchByBarcode } from "@/actions/barcode-actions"
@@ -14,53 +11,16 @@ import { POSCart } from "./pos-cart"
 import { QuickStockModal } from "@/components/inventory/quick-stock-modal"
 import { toast } from "sonner"
 import { SaleSuccessModal } from "./sale-success-modal"
-import * as motion from "framer-motion/client"
 import { usePOSOffline } from "@/hooks/use-pos-offline"
 import { ScaleModal } from "./scale-modal"
-
-interface CartItem {
-    id: string
-    productId: number
-    name: string
-    price: number
-    quantity: number
-    taxRate: number
-    discountAmount?: number
-    discountRate?: number
-    unitMeasure?: string
-    isWeighable?: boolean
-}
-
-interface Product {
-    id: number
-    name: string
-    sku: string | null
-    price: number | any
-    stock: number
-    taxRate: number | any
-    category?: {
-        name: string
-    } | null
-    unitMeasure?: string
-    isWeighable?: boolean
-}
-
-interface Client {
-    id: number
-    name: string
-}
-
-interface Table {
-    id: number
-    number: number
-    name: string | null
-    capacity: number
-    status: 'available' | 'occupied' | 'reserved' | 'cleaning'
-}
+import { TableSelector } from "./table-selector"
+import { BarcodeScannerModal } from "./barcode-scanner-modal"
+import { cn } from "@/lib/utils"
+import type { CartItem, POSProduct, POSTable, PaymentMethod } from "@/lib/types/pos"
 
 interface POSInterfaceProps {
     tableManagementEnabled?: boolean
-    tables?: Table[]
+    tables?: POSTable[]
     initialSku?: string
     userRole?: string
 }
@@ -75,6 +35,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
     const [cart, setCart] = useState<CartItem[]>([])
     const [selectedClientId, setSelectedClientId] = useState<string>("")
     const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo')
     const [stockModal, setStockModal] = useState<{ isOpen: boolean, product: any | null }>({
         isOpen: false,
         product: null
@@ -84,6 +45,8 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         product: null
     })
 
+    // UID estable de sesión — se genera 1 vez al montar el componente
+    const sessionUID = useRef(crypto.randomUUID().slice(0, 8).toUpperCase())
     const initialSkuProcessed = useRef(false)
 
     // Listener para scanner hardware vía CustomEvent
@@ -93,7 +56,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
             if (product) {
                 // Find complete product from local cache to make sure offline states are fine,
                 // But fallback to the scanned one.
-                const localProd = products.find(p => p.id === product.id) || product as Product
+                const localProd = products.find(p => p.id === product.id) || product as POSProduct
 
                 if (localProd.stock <= 0) {
                     toast.error(`Sin stock: ${localProd.name}`)
@@ -165,7 +128,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         processInitialSku()
     }, [products, canEditStock, isOnline])
 
-    const addToCart = (product: Product, qtyOrWeight: number = 1) => {
+    const addToCart = (product: POSProduct, qtyOrWeight: number = 1) => {
         setCart(prev => {
             const existing = prev.find(item => item.productId === product.id)
             if (existing) {
@@ -192,7 +155,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         })
     }
 
-    const handleProductClick = (product: Product) => {
+    const handleProductClick = (product: POSProduct) => {
         if (product.stock <= 0) {
             toast.error("Sin stock", {
                 action: canEditStock ? { label: "Cargar", onClick: () => setStockModal({ isOpen: true, product }) } : undefined
@@ -245,7 +208,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     subtotal: item.price * item.quantity,
                     discountRate: item.discountRate
                 })),
-                paymentMethod: "efectivo",
+                paymentMethod,
                 userId: undefined,
                 requireOpenDrawer: false,
                 tableId: selectedTableId ?? undefined
@@ -275,6 +238,31 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
         <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] md:h-full bg-white dark:bg-zinc-950 font-sans overflow-hidden">
             {/* Left: Product Selection */}
             <div className="flex-1 flex flex-col border-r border-zinc-200 dark:border-zinc-800 h-full overflow-hidden">
+                {/* Botón de scanner cámara — solo mobile */}
+                <div className="md:hidden flex items-center gap-2 px-4 pt-3">
+                    <BarcodeScannerModal
+                        onProductFound={({ product, weight }) => {
+                            const localProd = products.find(p => p.id === product.id) || {
+                                ...product,
+                                category: product.category ? { name: product.category } : null
+                            } as POSProduct
+
+                            if (localProd.stock <= 0) {
+                                toast.error(`Sin stock: ${localProd.name}`)
+                                return
+                            }
+
+                            if (localProd.isWeighable && weight) {
+                                addToCart(localProd, weight)
+                            } else if (localProd.isWeighable && !weight) {
+                                setScaleModal({ isOpen: true, product: localProd })
+                            } else {
+                                addToCart(localProd, 1)
+                            }
+                        }}
+                    />
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Escanear con cámara</span>
+                </div>
                 <POSProductList
                     products={products}
                     onAddToCart={handleProductClick}
@@ -291,7 +279,7 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                             <h2 className="text-[10px] md:text-xs font-black uppercase tracking-widest italic">Terminal / Facturación</h2>
                         </div>
                         <span className="text-[9px] font-mono font-black border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded uppercase">
-                            UID: {Math.floor(Date.now() / 1000).toString().slice(-6)}
+                            UID: {sessionUID.current}
                         </span>
                     </div>
 
@@ -318,6 +306,18 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
                     </div>
                 </div>
 
+                {/* Selector de mesa (solo si está habilitado) */}
+                {tableManagementEnabled && tables.length > 0 && (
+                    <div className="px-4 md:px-5 pb-3">
+                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-zinc-400 italic mb-1 block">Asignación de Mesa</label>
+                        <TableSelector
+                            tables={tables}
+                            selectedTableId={selectedTableId}
+                            onSelectTable={setSelectedTableId}
+                        />
+                    </div>
+                )}
+
                 <POSCart
                     items={cart}
                     onUpdateQuantity={updateQuantity}
@@ -328,6 +328,32 @@ export function POSInterface({ tableManagementEnabled = false, tables = [], init
 
                 {/* Footer: Totals */}
                 <div className="p-4 md:p-5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-t-[24px] md:rounded-t-[32px] shadow-2xl space-y-3 md:space-y-5">
+                    {/* Selector de método de pago */}
+                    <div className="space-y-1.5">
+                        <span className="text-[8px] font-black uppercase tracking-widest opacity-60">Método de Pago</span>
+                        <div className="flex gap-1.5">
+                            {[
+                                { value: 'efectivo' as PaymentMethod, label: 'Efectivo', icon: Banknote },
+                                { value: 'tarjeta' as PaymentMethod, label: 'Tarjeta', icon: CreditCard },
+                                { value: 'transferencia' as PaymentMethod, label: 'Transfer', icon: Smartphone },
+                            ].map(({ value, label, icon: Icon }) => (
+                                <button
+                                    key={value}
+                                    onClick={() => setPaymentMethod(value)}
+                                    className={cn(
+                                        "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
+                                        paymentMethod === value
+                                            ? "bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white shadow-md"
+                                            : "bg-white/10 dark:bg-zinc-200/10 opacity-60 hover:opacity-100"
+                                    )}
+                                >
+                                    <Icon className="h-3.5 w-3.5" />
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="space-y-1">
                         <div className="flex justify-between text-[8px] font-black uppercase tracking-widest opacity-60 tabular-nums">
                             <span>Base Imponible</span>

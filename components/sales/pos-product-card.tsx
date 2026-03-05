@@ -1,14 +1,14 @@
 "use client"
 
-import { Product } from "@prisma/client"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { POSProduct } from "@/lib/types/pos"
 
 interface POSProductCardProps {
-    product: Product & { category?: { name: string } | null }
-    onAddToCart: (product: any) => void
-    onEditStock?: (product: any) => void
+    product: POSProduct
+    onAddToCart: (product: POSProduct) => void
+    onEditStock?: (product: POSProduct) => void
     compact?: boolean
 }
 

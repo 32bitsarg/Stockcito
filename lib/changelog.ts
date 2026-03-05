@@ -17,6 +17,74 @@ export interface ChangelogEntry {
 
 export const changelogEntries: ChangelogEntry[] = [
     {
+        version: '0.2.2',
+        date: '2026-03-04',
+        title: 'Mejoras en el POS, Seguridad y Experiencia de Usuario 🛡️⚡',
+        description: 'Actualizamos el punto de venta con nuevas funcionalidades, reforzamos la seguridad de tus datos y pulimos la interfaz.',
+        changes: [
+            {
+                type: 'fix',
+                title: 'Protección Reforzada de Datos',
+                description: 'Corregimos una vulnerabilidad que, en teoría, podía permitir acceder a información de otro comercio. Ahora cada negocio tiene sus datos 100% aislados y protegidos.'
+            },
+            {
+                type: 'new',
+                title: 'Elegí Cómo Te Pagan',
+                description: 'Ahora al cobrar podés elegir entre Efectivo, Tarjeta o Transferencia con un solo toque. Ya no queda todo registrado como efectivo.'
+            },
+            {
+                type: 'new',
+                title: 'Aviso de Nueva Versión',
+                description: 'Cuando actualicemos Stockcito, te va a aparecer un cartelito avisándote qué hay de nuevo. Así siempre estás al tanto de las mejoras.'
+            },
+            {
+                type: 'improvement',
+                title: 'Terminal de Venta más Estable',
+                description: 'Eliminamos errores internos que aparecían al procesar ventas. Ahora todo funciona de forma más limpia y sin advertencias en el sistema.'
+            },
+            {
+                type: 'fix',
+                title: 'Ventana de Cambio de Usuario Arreglada',
+                description: 'Corregimos la ventana que aparecía al querer cambiar de usuario. Antes se veía rota y pegada arriba de la pantalla, ahora se abre centrada como corresponde.'
+            },
+            {
+                type: 'improvement',
+                title: 'Barra Superior más Limpia',
+                description: 'Sacamos el botón de "Ir a la página principal" de la barra de arriba para que quede más despejada y solo tenga los accesos que realmente usás.'
+            },
+            {
+                type: 'improvement',
+                title: 'Logo del Menú con más Espacio',
+                description: 'Agregamos más aire al nombre y logo de Stockcito en el menú lateral para que no quede tan apretado contra los bordes.'
+            },
+            {
+                type: 'improvement',
+                title: 'Dashboard más Cómodo en el Celular',
+                description: 'Rediseñamos cómo se ven las tarjetas y gráficos del dashboard en pantallas chicas. Ahora todo es más compacto y necesitás menos scroll para ver tus métricas.'
+            },
+            {
+                type: 'new',
+                title: 'Escáner de Código de Barras con Cámara',
+                description: 'Desde el celular podés escanear códigos de barras con la cámara para agregar productos al carrito. Soporta todos los códigos de productos argentinos y etiquetas de balanza.'
+            },
+            {
+                type: 'new',
+                title: 'Generador de Códigos de Barras',
+                description: 'Si tenés productos propios, ahora podés generar códigos de barras EAN-13 únicos e imprimir etiquetas directo desde Stockcito. Elegí cuántas etiquetas querés por producto y listo.'
+            },
+            {
+                type: 'new',
+                title: 'Etiquetas Sueltas sin Producto',
+                description: 'Podés crear etiquetas con código de barras sin vincularlas a un producto. Cuando después crees el producto con ese código, se vincula automáticamente.'
+            },
+            {
+                type: 'new',
+                title: 'Indicador de Novedades en el Menú',
+                description: 'Las secciones con funciones nuevas ahora muestran un cartelito "Nuevo" en el menú lateral que desaparece automáticamente después de unas horas.'
+            }
+        ]
+    },
+    {
         version: '0.2.1',
         date: '2026-02-26',
         title: 'Parche de Seguridad Crítico 🛡️',

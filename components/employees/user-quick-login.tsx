@@ -10,8 +10,14 @@ import { PinPad } from "./pin-pad"
 import { quickLoginWithPin, getUsersWithPin } from "@/actions/employee-actions"
 import { SYSTEM_ROLES, type SystemRole } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
-import { User, Lock, LogIn, X, Loader2 } from "lucide-react"
-import { Dialog } from "@ark-ui/react"
+import { User, Lock, LogIn, Loader2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import toast from "react-hot-toast"
 
 interface UserQuickLoginProps {
@@ -112,167 +118,159 @@ export function UserQuickLogin({ users: initialUsers, onLogin, onClose, classNam
               Seleccioná tu usuario para ingresar con PIN
             </CardDescription>
           </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {users.map((user) => {
-              const roleInfo = getRoleInfo(user.role)
-              return (
-                <Button
-                  key={user.id}
-                  variant="outline"
-                  className={cn(
-                    "h-auto flex-col p-4 gap-2 relative",
-                    !user.hasPin && "opacity-50 cursor-not-allowed"
-                  )}
-                  onClick={() => handleUserClick(user)}
-                  disabled={!user.hasPin}
-                >
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback 
-                      style={{ backgroundColor: roleInfo.color + "20", color: roleInfo.color }}
-                    >
-                      {getInitials(user.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-sm truncate w-full text-center">
-                    {user.name}
-                  </span>
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs"
-                    style={{ 
-                      backgroundColor: roleInfo.color + "20", 
-                      color: roleInfo.color 
-                    }}
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {users.map((user) => {
+                const roleInfo = getRoleInfo(user.role)
+                return (
+                  <Button
+                    key={user.id}
+                    variant="outline"
+                    className={cn(
+                      "h-auto flex-col p-4 gap-2 relative",
+                      !user.hasPin && "opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={() => handleUserClick(user)}
+                    disabled={!user.hasPin}
                   >
-                    {roleInfo.name}
-                  </Badge>
-                  {!user.hasPin && (
-                    <div className="absolute top-1 right-1">
-                      <Lock className="h-3 w-3 text-muted-foreground" />
-                    </div>
-                  )}
-                </Button>
-              )
-            })}
-          </div>
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback
+                        style={{ backgroundColor: roleInfo.color + "20", color: roleInfo.color }}
+                      >
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-sm truncate w-full text-center">
+                      {user.name}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs"
+                      style={{
+                        backgroundColor: roleInfo.color + "20",
+                        color: roleInfo.color
+                      }}
+                    >
+                      {roleInfo.name}
+                    </Badge>
+                    {!user.hasPin && (
+                      <div className="absolute top-1 right-1">
+                        <Lock className="h-3 w-3 text-muted-foreground" />
+                      </div>
+                    )}
+                  </Button>
+                )
+              })}
+            </div>
 
-          {users.some(u => !u.hasPin) && (
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              <Lock className="h-3 w-3 inline mr-1" />
-              Usuarios sin PIN deben configurarlo desde su perfil
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {users.some(u => !u.hasPin) && (
+              <p className="text-xs text-muted-foreground text-center mt-4">
+                <Lock className="h-3 w-3 inline mr-1" />
+                Usuarios sin PIN deben configurarlo desde su perfil
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-      <PinPad
-        open={pinOpen}
-        onOpenChange={setPinOpen}
-        onSubmit={handlePinSubmit}
-        title="Ingresá tu PIN"
-        userName={selectedUser?.name}
-      />
-    </>
-  )
+        <PinPad
+          open={pinOpen}
+          onOpenChange={setPinOpen}
+          onSubmit={handlePinSubmit}
+          title="Ingresá tu PIN"
+          userName={selectedUser?.name}
+        />
+      </>
+    )
   }
 
   // Renderizar como diálogo modal
   return (
     <>
-      <Dialog.Root 
-        open={isOpen} 
+      <Dialog
+        open={isOpen}
         onOpenChange={(details) => {
           setIsOpen(details.open)
           if (!details.open) onClose?.()
         }}
       >
-        <Dialog.Backdrop className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Positioner className="fixed inset-0 flex items-center justify-center z-50 p-4">
-          <Dialog.Content className="bg-background rounded-lg shadow-lg w-full max-w-2xl">
-            <div className="flex items-center justify-between p-4 border-b">
-              <Dialog.Title className="text-xl font-semibold flex items-center gap-2">
-                <LogIn className="h-5 w-5" />
-                Cambio de Usuario
-              </Dialog.Title>
-              <Dialog.CloseTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <X className="h-4 w-4" />
-                </Button>
-              </Dialog.CloseTrigger>
-            </div>
+        <DialogContent className="sm:max-w-2xl" showCloseButton>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LogIn className="h-5 w-5" />
+              Cambio de Usuario
+            </DialogTitle>
+            <DialogDescription>
+              Seleccioná tu usuario para ingresar con PIN
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="p-4">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : users.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No hay usuarios disponibles</p>
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm text-muted-foreground text-center mb-4">
-                    Seleccioná tu usuario para ingresar con PIN
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {users.map((user) => {
-                      const roleInfo = getRoleInfo(user.role)
-                      return (
-                        <Button
-                          key={user.id}
-                          variant="outline"
-                          className={cn(
-                            "h-auto flex-col p-4 gap-2 relative",
-                            !user.hasPin && "opacity-50 cursor-not-allowed"
-                          )}
-                          onClick={() => handleUserClick(user)}
-                          disabled={!user.hasPin}
-                        >
-                          <Avatar className="h-12 w-12">
-                            <AvatarFallback 
-                              style={{ backgroundColor: roleInfo.color + "20", color: roleInfo.color }}
-                            >
-                              {getInitials(user.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium text-sm truncate w-full text-center">
-                            {user.name}
-                          </span>
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs"
-                            style={{ 
-                              backgroundColor: roleInfo.color + "20", 
-                              color: roleInfo.color 
-                            }}
+          <div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No hay usuarios disponibles</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {users.map((user) => {
+                    const roleInfo = getRoleInfo(user.role)
+                    return (
+                      <Button
+                        key={user.id}
+                        variant="outline"
+                        className={cn(
+                          "h-auto flex-col p-4 gap-2 relative",
+                          !user.hasPin && "opacity-50 cursor-not-allowed"
+                        )}
+                        onClick={() => handleUserClick(user)}
+                        disabled={!user.hasPin}
+                      >
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback
+                            style={{ backgroundColor: roleInfo.color + "20", color: roleInfo.color }}
                           >
-                            {roleInfo.name}
-                          </Badge>
-                          {!user.hasPin && (
-                            <div className="absolute top-1 right-1">
-                              <Lock className="h-3 w-3 text-muted-foreground" />
-                            </div>
-                          )}
-                        </Button>
-                      )
-                    })}
-                  </div>
+                            {getInitials(user.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-sm truncate w-full text-center">
+                          {user.name}
+                        </span>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs"
+                          style={{
+                            backgroundColor: roleInfo.color + "20",
+                            color: roleInfo.color
+                          }}
+                        >
+                          {roleInfo.name}
+                        </Badge>
+                        {!user.hasPin && (
+                          <div className="absolute top-1 right-1">
+                            <Lock className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                        )}
+                      </Button>
+                    )
+                  })}
+                </div>
 
-                  {users.some(u => !u.hasPin) && (
-                    <p className="text-xs text-muted-foreground text-center mt-4">
-                      <Lock className="h-3 w-3 inline mr-1" />
-                      Usuarios sin PIN deben configurarlo desde su perfil
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+                {users.some(u => !u.hasPin) && (
+                  <p className="text-xs text-muted-foreground text-center mt-4">
+                    <Lock className="h-3 w-3 inline mr-1" />
+                    Usuarios sin PIN deben configurarlo desde su perfil
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <PinPad
         open={pinOpen}
