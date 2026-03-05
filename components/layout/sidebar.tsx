@@ -9,10 +9,27 @@ import { cn } from '@/lib/utils'
 import { SidebarLinks, SidebarLink } from './sidebar-link'
 import { APP_VERSION_DISPLAY, FEEDBACK_EMAIL } from '@/lib/changelog'
 
+/**
+ * Badges "Nuevo" en el sidebar.
+ * 
+ * Para marcar una ruta como nueva, agregá una entrada con la fecha
+ * de expiración (ISO string). El cartelito desaparece automáticamente
+ * cuando pasa la fecha.
+ * 
+ * Ejemplo: si querés que "Ventas (POS)" muestre "Nuevo" hasta las 22:00
+ * del 4 de marzo 2026, poné:
+ *   '/sales/new': '2026-03-05T01:00:00.000Z'  // 22:00 Argentina = 01:00 UTC del día siguiente
+ */
+const NEW_FEATURE_BADGES: Record<string, string> = {
+    '/sales/new': '2026-03-05T04:00:00.000Z', // Expira ~01:00 AM Argentina del 5 marzo
+    '/barcodes': '2026-03-05T04:00:00.000Z',
+}
+
 const baseRoutes = [
     { href: '/dashboard', label: 'Dashboard', iconName: 'LayoutDashboard' },
     { href: '/inventory', label: 'Inventario', iconName: 'Package' },
     { href: '/categories', label: 'Categorías', iconName: 'FolderKanban' },
+    { href: '/barcodes', label: 'Códigos de Barras', iconName: 'Barcode' },
     { href: '/sales/new', label: 'Ventas (POS)', iconName: 'ShoppingCart' },
     { href: '/sales/history', label: 'Historial', iconName: 'History' },
     // { href: '/sales/drawer', label: 'Caja', iconName: 'Calculator' },
@@ -63,7 +80,7 @@ export async function Sidebar({ className }: SidebarProps) {
 
     return (
         <div className={cn("hidden border-r bg-muted/40 md:flex flex-col w-64 min-h-screen md:sticky top-0 h-screen", className)}>
-            <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+            <div className="flex items-center border-b px-4 py-5 lg:px-6">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
                     <Package className="h-6 w-6" />
                     <span>Stockcito</span>
@@ -138,10 +155,15 @@ export async function Sidebar({ className }: SidebarProps) {
                                 return isAdmin || session?.role === 'manager';
                             }
                             return true;
-                        }).map(route => ({
-                            ...route,
-                            badge: route.href === '/inventory' ? lowCount : undefined
-                        }))}
+                        }).map(route => {
+                            const expiration = NEW_FEATURE_BADGES[route.href]
+                            const isNew = expiration ? new Date() < new Date(expiration) : false
+                            return {
+                                ...route,
+                                badge: route.href === '/inventory' ? lowCount : undefined,
+                                isNew
+                            }
+                        })}
                     />
 
                     {isAdmin && (

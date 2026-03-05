@@ -95,6 +95,32 @@ async function recordSaleInDrawer(
     }
 }
 
+/**
+ * Serializa un objeto Sale de Prisma para que sea compatible con Client Components.
+ * 
+ * Prisma usa `Decimal` (decimal.js) para campos monetarios, lo que da
+ * mayor precisión en cálculos. Pero Next.js RSC solo puede enviar
+ * "plain objects" al cliente. Esta función convierte todos los Decimal
+ * a `number` estándar de JavaScript.
+ */
+function serializeSale(sale: any) {
+    return {
+        ...sale,
+        subtotal: Number(sale.subtotal),
+        taxAmount: Number(sale.taxAmount),
+        discountAmount: Number(sale.discountAmount),
+        total: Number(sale.total),
+        items: sale.items?.map((item: any) => ({
+            ...item,
+            unitPrice: Number(item.unitPrice),
+            taxRate: Number(item.taxRate),
+            taxAmount: Number(item.taxAmount),
+            discountAmount: Number(item.discountAmount),
+            subtotal: Number(item.subtotal),
+        }))
+    }
+}
+
 export async function createSale(data: z.infer<typeof saleSchema>) {
     const session = await getSession()
     if (!session?.organizationId) {
@@ -375,7 +401,7 @@ export async function createSale(data: z.infer<typeof saleSchema>) {
 
         return {
             success: true,
-            sale: transactionResult.sale,
+            sale: serializeSale(transactionResult.sale),
             organization: transactionResult.organization,
             stockConflicts: transactionResult.stockConflicts
         }

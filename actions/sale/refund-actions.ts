@@ -134,8 +134,8 @@ export async function cancelSale(
     }
 
     try {
-        const sale = await db.sale.findUnique({
-            where: { id },
+        const sale = await db.sale.findFirst({
+            where: { id, organizationId: session.organizationId },
             include: { items: true, creditNotes: true }
         })
 
@@ -277,8 +277,8 @@ export async function createPartialRefund(
     }
 
     try {
-        const sale = await db.sale.findUnique({
-            where: { id: saleId },
+        const sale = await db.sale.findFirst({
+            where: { id: saleId, organizationId: session.organizationId },
             include: { items: true, creditNotes: true }
         })
 

@@ -256,7 +256,7 @@ function AdminDashboard({ session, showVerificationBanner }: { session: Dashboar
     }
 
     return (
-        <div className="flex flex-col gap-8 pb-10">
+        <div className="flex flex-col gap-4 md:gap-8 pb-10">
             {/* Modern Dashboard Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-1">
@@ -264,29 +264,29 @@ function AdminDashboard({ session, showVerificationBanner }: { session: Dashboar
                         <div className="h-8 w-1.5 bg-zinc-900 dark:bg-zinc-100 rounded-full" />
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Sistema Operativo / {APP_VERSION_DISPLAY}</span>
                     </Link>
-                    <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase italic">
+                    <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase italic">
                         Dashboard
                     </h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[10px]">
+                    <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[8px] md:text-[10px] hidden sm:block">
                         Métricas de rendimiento e inteligencia de negocio en tiempo real.
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
                     <OfflineDataBadge isOfflineData={offlineMetrics} dataUpdatedAt={dataUpdatedAt} />
-                    <div className={`flex items-center gap-4 ${isOnline ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200' : 'bg-red-950 dark:bg-red-100 text-red-100 dark:text-red-900 border-red-800 dark:border-red-300'} rounded-2xl px-6 py-3 shadow-2xl border transition-colors duration-500`}>
+                    <div className={`flex items-center gap-2 md:gap-4 ${isOnline ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-800 dark:border-zinc-200' : 'bg-red-950 dark:bg-red-100 text-red-100 dark:text-red-900 border-red-800 dark:border-red-300'} rounded-xl md:rounded-2xl px-3 md:px-6 py-2 md:py-3 shadow-2xl border transition-colors duration-500`}>
                         <div className="flex flex-col items-end">
-                            <span className="text-[8px] font-black uppercase tracking-widest opacity-60">
+                            <span className="text-[8px] font-black uppercase tracking-widest opacity-60 hidden md:block">
                                 {isOnline ? 'Sincronización' : 'Offline'}
                             </span>
-                            <span className="text-xs font-black uppercase italic tracking-tighter">
+                            <span className="text-[9px] md:text-xs font-black uppercase italic tracking-tighter">
                                 {isOnline
-                                    ? lastSyncTime ? `Última sync: ${lastSyncTime}` : new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
-                                    : pendingCount > 0 ? `${pendingCount} pendiente${pendingCount !== 1 ? 's' : ''}` : 'Sin conexión'
+                                    ? lastSyncTime ? `Sync: ${lastSyncTime}` : new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+                                    : pendingCount > 0 ? `${pendingCount} pend.` : 'Offline'
                                 }
                             </span>
                         </div>
-                        <div className="w-px h-8 bg-white/10 dark:bg-zinc-200" />
-                        <div className="h-10 w-10 flex items-center justify-center bg-white/10 dark:bg-zinc-900/5 rounded-xl">
+                        <div className="w-px h-6 md:h-8 bg-white/10 dark:bg-zinc-200 hidden md:block" />
+                        <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center bg-white/10 dark:bg-zinc-900/5 rounded-lg md:rounded-xl">
                             <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${isOnline
                                 ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]'
                                 : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
@@ -328,9 +328,9 @@ function AdminDashboard({ session, showVerificationBanner }: { session: Dashboar
             <DashboardStats metrics={metrics} />
 
             {/* Main Content Grid */}
-            <div className="grid gap-6 grid-cols-1 lg:grid-cols-6 items-start">
+            <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-6 items-start">
                 {/* Sales Timeline - Spans 4 columns */}
-                <div className="lg:col-span-4 h-[500px]">
+                <div className="lg:col-span-4 h-[300px] md:h-[500px]">
                     {chartData ? <SalesChart data={chartData} type="line" /> : (
                         <div className="flex items-center justify-center h-full bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                             <p className="text-sm text-zinc-400">Sin datos de gráfico disponibles</p>
@@ -339,7 +339,7 @@ function AdminDashboard({ session, showVerificationBanner }: { session: Dashboar
                 </div>
 
                 {/* Top Products - Spans 2 columns */}
-                <div className="lg:col-span-2 h-[500px]">
+                <div className="lg:col-span-2 h-[300px] md:h-[500px]">
                     {topProducts ? <TopProductsWidget products={topProducts} /> : (
                         <div className="flex items-center justify-center h-full bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                             <p className="text-sm text-zinc-400">Sin productos disponibles</p>
@@ -348,7 +348,7 @@ function AdminDashboard({ session, showVerificationBanner }: { session: Dashboar
                 </div>
 
                 {/* Recent Activity - Full width below */}
-                <div className="lg:col-span-6 min-h-[500px]">
+                <div className="lg:col-span-6 min-h-[300px] md:min-h-[500px]">
                     {recentSales ? <RecentActivity sales={recentSales} /> : (
                         <div className="flex items-center justify-center min-h-[200px] bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                             <p className="text-sm text-zinc-400">Sin ventas recientes disponibles</p>

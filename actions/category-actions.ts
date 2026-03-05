@@ -22,8 +22,11 @@ export async function getCategories() {
 
 export async function getCategoryById(id: number) {
     try {
-        return await db.category.findUnique({
-            where: { id },
+        const session = await getSession()
+        if (!session?.organizationId) return null
+
+        return await db.category.findFirst({
+            where: { id, organizationId: session.organizationId },
         })
     } catch (error) {
         console.error("Error fetching category:", error)

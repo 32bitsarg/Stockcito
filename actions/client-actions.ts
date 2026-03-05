@@ -26,22 +26,22 @@ export async function getClients(params?: PaginationParams): Promise<PaginatedRe
     if (!session?.organizationId) {
         return { data: [], total: 0, page: 1, limit: 20, totalPages: 0 }
     }
-    
+
     const page = params?.page || 1
     const limit = params?.limit || 20
     const skip = (page - 1) * limit
-    
+
     const where: any = {
         organizationId: session.organizationId
     }
-    
+
     if (params?.query) {
         where.OR = [
             { name: { contains: params.query } },
             { email: { contains: params.query } },
         ]
     }
-    
+
     const [data, total] = await Promise.all([
         db.client.findMany({
             where,
@@ -54,7 +54,7 @@ export async function getClients(params?: PaginationParams): Promise<PaginatedRe
         }),
         db.client.count({ where })
     ])
-    
+
     return {
         data,
         total,
@@ -70,18 +70,18 @@ export async function getClientsAll(query?: string) {
     if (!session?.organizationId) {
         return []
     }
-    
+
     const where: any = {
         organizationId: session.organizationId
     }
-    
+
     if (query) {
         where.OR = [
             { name: { contains: query } },
             { email: { contains: query } },
         ]
     }
-    
+
     return db.client.findMany({
         where,
         include: {
@@ -96,9 +96,9 @@ export async function getClientById(id: number) {
     if (!session?.organizationId) {
         return null
     }
-    
-    return db.client.findFirst({
-        where: { 
+
+    const client = await db.client.findFirst({
+        where: {
             id,
             organizationId: session.organizationId
         },
@@ -111,6 +111,34 @@ export async function getClientById(id: number) {
             _count: { select: { sales: true } }
         }
     })
+
+    if (!client) return null
+
+    // Serializar Decimals → numbers para Client Components
+    return {
+        ...client,
+        sales: client.sales.map(sale => ({
+            ...sale,
+            subtotal: Number(sale.subtotal),
+            taxAmount: Number(sale.taxAmount),
+            discountAmount: Number(sale.discountAmount),
+            total: Number(sale.total),
+            items: sale.items.map(item => ({
+                ...item,
+                unitPrice: Number(item.unitPrice),
+                taxRate: Number(item.taxRate),
+                taxAmount: Number(item.taxAmount),
+                discountAmount: Number(item.discountAmount),
+                subtotal: Number(item.subtotal),
+                product: item.product ? {
+                    ...item.product,
+                    price: Number(item.product.price),
+                    cost: Number(item.product.cost),
+                    taxRate: Number(item.product.taxRate || 0)
+                } : null
+            }))
+        }))
+    }
 }
 
 export async function createClient(data: z.infer<typeof clientSchema>) {
@@ -118,22 +146,22 @@ export async function createClient(data: z.infer<typeof clientSchema>) {
     if (!session?.organizationId) {
         return { error: "No autorizado" }
     }
-    
+
     // Check subscription limits
     const tracker = new UsageTracker(session.organizationId)
     const canCreate = await tracker.canCreate("clients")
     if (!canCreate) {
-        return { 
+        return {
             error: "Has alcanzado el límite de clientes de tu plan. Actualiza a Premium para agregar más clientes.",
             limitReached: true
         }
     }
-    
+
     const result = clientSchema.safeParse(data)
     if (!result.success) return { error: result.error.flatten().fieldErrors }
 
     try {
-        const client = await db.client.create({ 
+        const client = await db.client.create({
             data: {
                 ...result.data,
                 organizationId: session.organizationId
@@ -154,7 +182,7 @@ export async function updateClient(id: number, data: z.infer<typeof clientSchema
     if (!session?.organizationId) {
         return { error: "No autorizado" }
     }
-    
+
     const result = clientSchema.safeParse(data)
     if (!result.success) return { error: result.error.flatten().fieldErrors }
 
@@ -166,7 +194,7 @@ export async function updateClient(id: number, data: z.infer<typeof clientSchema
         if (!existing) {
             return { error: "Cliente no encontrado" }
         }
-        
+
         await db.client.update({
             where: { id },
             data: result.data
@@ -187,21 +215,21 @@ export async function deleteClient(id: number) {
     if (!session?.organizationId) {
         return { error: "No autorizado" }
     }
-    
+
     try {
         // Check if client belongs to org and has sales
         const client = await db.client.findFirst({
-            where: { 
+            where: {
                 id,
                 organizationId: session.organizationId
             },
             include: { _count: { select: { sales: true } } }
         })
-        
+
         if (!client) {
             return { error: "Cliente no encontrado" }
         }
-        
+
         if (client._count.sales > 0) {
             return { error: "No se puede eliminar un cliente con ventas asociadas." }
         }
@@ -219,18 +247,18 @@ export async function getClientSalesHistory(clientId: number, page = 1, limit = 
     if (!session?.organizationId) {
         return { sales: [], total: 0, pages: 0 }
     }
-    
+
     const skip = (page - 1) * limit
-    
+
     // Verify client belongs to organization
     const client = await db.client.findFirst({
         where: { id: clientId, organizationId: session.organizationId }
     })
-    
+
     if (!client) {
         return { sales: [], total: 0, pages: 0 }
     }
-    
+
     const [sales, total] = await Promise.all([
         db.sale.findMany({
             where: { clientId },
@@ -244,5 +272,28 @@ export async function getClientSalesHistory(clientId: number, page = 1, limit = 
         db.sale.count({ where: { clientId } })
     ])
 
-    return { sales, total, pages: Math.ceil(total / limit) }
+    // Serializar Decimals → numbers para Client Components
+    const serializedSales = sales.map(sale => ({
+        ...sale,
+        subtotal: Number(sale.subtotal),
+        taxAmount: Number(sale.taxAmount),
+        discountAmount: Number(sale.discountAmount),
+        total: Number(sale.total),
+        items: sale.items.map(item => ({
+            ...item,
+            unitPrice: Number(item.unitPrice),
+            taxRate: Number(item.taxRate),
+            taxAmount: Number(item.taxAmount),
+            discountAmount: Number(item.discountAmount),
+            subtotal: Number(item.subtotal),
+            product: item.product ? {
+                ...item.product,
+                price: Number(item.product.price),
+                cost: Number(item.product.cost),
+                taxRate: Number(item.product.taxRate || 0)
+            } : null
+        }))
+    }))
+
+    return { sales: serializedSales, total, pages: Math.ceil(total / limit) }
 }

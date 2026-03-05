@@ -12,17 +12,10 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-
-interface Table {
-    id: number
-    number: number
-    name: string | null
-    capacity: number
-    status: 'available' | 'occupied' | 'reserved' | 'cleaning'
-}
+import type { POSTable } from "@/lib/types/pos"
 
 interface TableSelectorProps {
-    tables: Table[]
+    tables: POSTable[]
     selectedTableId: number | null
     onSelectTable: (tableId: number | null) => void
 }
@@ -33,7 +26,7 @@ export function TableSelector({ tables, selectedTableId, onSelectTable }: TableS
     const selectedTable = tables.find(t => t.id === selectedTableId)
     const availableTables = tables.filter(t => t.status === 'available')
 
-    const getStatusColor = (status: Table['status']) => {
+    const getStatusColor = (status: POSTable['status']) => {
         switch (status) {
             case 'available':
                 return 'bg-green-100 border-green-300 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300'
@@ -46,7 +39,7 @@ export function TableSelector({ tables, selectedTableId, onSelectTable }: TableS
         }
     }
 
-    const handleSelect = (table: Table) => {
+    const handleSelect = (table: POSTable) => {
         if (table.status !== 'available') return
         onSelectTable(table.id)
         setOpen(false)

@@ -6,22 +6,11 @@ import { Search } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { getProducts } from '@/actions/product-actions'
-
-interface Product {
-    id: number
-    name: string
-    sku: string | null
-    price: any
-    stock: number
-    taxRate: number | any
-    category?: {
-        name: string
-    } | null
-}
+import type { POSProduct } from "@/lib/types/pos"
 
 interface ProductSearchProps {
-    products: Product[]
-    onSelect: (product: Product) => void
+    products: POSProduct[]
+    onSelect: (product: POSProduct) => void
     placeholder?: string
 }
 
@@ -57,7 +46,7 @@ export function ProductSearch({ products, onSelect, placeholder = "Buscar produc
     const filteredProducts = results.slice(0, 10)
 
     // Manejar selección
-    const handleSelect = (product: Product) => {
+    const handleSelect = (product: POSProduct) => {
         onSelect(product)
         setSearchTerm("")
         setIsOpen(false)
