@@ -11,6 +11,7 @@ import { SyncService } from "@/components/offline/sync-service";
 import { validateEnv } from "@/lib/env";
 import { Toaster } from "sonner";
 import { UpdateNotifier } from "@/components/layout/update-notifier";
+import Script from "next/script";
 
 // Validate environment variables at startup
 if (typeof window === 'undefined') {
@@ -83,6 +84,20 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-S55PN94557"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-S55PN94557');
+          `}
+        </Script>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
