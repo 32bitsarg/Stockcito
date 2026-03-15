@@ -10,6 +10,8 @@ import { LandingDownload } from '@/components/landing/download'
 import { getSession } from '@/actions/auth-actions'
 import { redirect } from 'next/navigation'
 
+import { LandingFAQ } from '@/components/landing/faq'
+
 export default async function Landing() {
   // Check if user is already logged in
   const session = await getSession()
@@ -28,6 +30,7 @@ export default async function Landing() {
         <LandingDownload />
         <LandingFeatures />
         <LandingPricing />
+        <LandingFAQ />
         <LandingTestimonials />
         <LandingCTA />
       </main>

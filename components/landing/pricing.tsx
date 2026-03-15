@@ -31,7 +31,7 @@ const plans = [
 
 export function LandingPricing() {
   return (
-    <section className="bg-white dark:bg-zinc-950 py-32 border-t border-zinc-50 dark:border-zinc-900">
+    <section id="planes" className="bg-white dark:bg-zinc-950 py-32 border-t border-zinc-50 dark:border-zinc-900">
       <div className="container mx-auto px-8">
         <div className="max-w-6xl mx-auto space-y-20">
           <div className="text-center space-y-4">

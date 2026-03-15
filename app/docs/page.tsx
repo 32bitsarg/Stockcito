@@ -83,6 +83,9 @@ export default function DocsPage() {
         </div>
 
         <div className="flex items-center gap-6">
+          <Link href="/" className="hidden lg:block text-[9px] font-black uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors italic">Inicio</Link>
+          <Link href="/changelog" className="text-[9px] font-black uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors italic">Novedades</Link>
+          <div className="w-px h-3 bg-zinc-100 dark:bg-zinc-900 hidden sm:block" />
           <Link href="/login" className="text-[9px] font-black uppercase tracking-[0.3em] hover:text-zinc-500 transition-colors">Ingreso</Link>
           <Link href="/register" className="h-9 px-6 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center text-[9px] font-black uppercase tracking-[0.3em] hover:opacity-90 transition-opacity">
             Desplegar
@@ -109,6 +112,7 @@ export default function DocsPage() {
                 <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-zinc-900 dark:group-focus-within:text-white transition-colors" />
                 <Input
                   placeholder="BUSCAR EN LA GUÍA..."
+                  aria-label="Buscar en la documentación de Stockcito"
                   className="pl-8 h-10 bg-transparent border-0 border-b border-zinc-100 dark:border-zinc-800 rounded-none px-0 focus-visible:ring-0 focus-visible:border-zinc-900 dark:focus-visible:border-white transition-all font-bold uppercase text-[10px] tracking-widest placeholder:text-zinc-200 dark:placeholder:text-zinc-800"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -154,9 +158,9 @@ export default function DocsPage() {
           <section id="intro" className="scroll-mt-32 space-y-12">
             <div className="space-y-4">
               <div className="w-12 h-px bg-zinc-900 dark:bg-white mb-8" />
-              <h1 className="text-6xl lg:text-7xl font-black tracking-tighter uppercase italic leading-none">Ayuda para el <br /> Usuario</h1>
+              <h1 className="text-6xl lg:text-7xl font-black tracking-tighter uppercase italic leading-none">Centro de Ayuda <br /> y Documentación</h1>
               <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-zinc-500 leading-relaxed italic max-w-2xl">
-                Guía completa para la configuración y el uso diario de Stockcito en tu negocio.
+                Guía completa para la configuración avanzada y el uso diario de Stockcito en tu comercio.
               </p>
             </div>
 
@@ -186,7 +190,7 @@ export default function DocsPage() {
           <section id="shortcuts" className="scroll-mt-32 space-y-12">
             <div className="space-y-4">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 italic">Agilidad en Caja</span>
-              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Atajos Rápidos</h2>
+              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Atajos de Teclado <br /> para Ventas Rápidas</h2>
               <div className="h-px w-20 bg-zinc-900 dark:bg-white" />
             </div>
 
@@ -210,7 +214,7 @@ export default function DocsPage() {
           <section id="features" className="scroll-mt-32 space-y-12">
             <div className="space-y-4">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 italic">Gestión de Negocio</span>
-              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Funciones de Stockcito</h2>
+              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Gestión de Stock <br /> e Inventario</h2>
               <div className="h-px w-20 bg-zinc-900 dark:bg-white" />
             </div>
 
@@ -243,7 +247,7 @@ export default function DocsPage() {
           <section id="roles" className="scroll-mt-32 space-y-12">
             <div className="space-y-4">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 italic">Equipo de Trabajo</span>
-              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Roles y Permisos</h2>
+              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Permisos y <br /> Roles de Equipo</h2>
               <div className="h-px w-20 bg-zinc-900 dark:bg-white" />
             </div>
 
@@ -278,7 +282,7 @@ export default function DocsPage() {
           <section id="faq" className="scroll-mt-32 space-y-12 pb-32">
             <div className="space-y-4">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 italic">Consultas Frecuentes</span>
-              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Centro de Ayuda</h2>
+              <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-none">Soporte Técnico <br /> y FAQ</h2>
               <div className="h-px w-20 bg-zinc-900 dark:bg-white" />
             </div>
 

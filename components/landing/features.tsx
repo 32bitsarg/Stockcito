@@ -6,29 +6,29 @@ import { Shield, BarChart, Terminal, Database } from 'lucide-react'
 const features = [
   {
     icon: <Terminal className="w-5 h-5" />,
-    title: "Ventas sin Esperas",
-    description: "Punto de venta diseñado para ser ágil. Realizá cobros en segundos sin fricciones para tus clientes."
+    title: "Cero Filas",
+    description: "Punto de venta ultra rápido. Cobrá en segundos y evitá que tus clientes esperen, incluso en horas pico."
   },
   {
     icon: <Database className="w-5 h-5" />,
-    title: "Control de Stock",
-    description: "Alertas automáticas de falta de mercadería y seguimiento preciso de cada unidad en tus depósitos."
+    title: "Stock Inteligente",
+    description: "Olvidate de los faltantes. Recibí alertas automáticas antes de que se agote tu mercadería estrella."
   },
   {
     icon: <BarChart className="w-5 h-5" />,
-    title: "Reportes de Ganancia",
-    description: "Visualizá tus márgenes reales y productos más vendidos con gráficos simples y detallados."
+    title: "Precios vs Inflación",
+    description: "Actualizá toda tu lista de precios en un clic. Mantené tus márgenes de ganancia siempre protegidos."
   },
   {
     icon: <Shield className="w-5 h-5" />,
-    title: "Datos Protegidos",
-    description: "Toda tu información contable y de clientes está respaldada en la nube con máxima seguridad."
+    title: "Soporte Regional",
+    description: "Soporte humano y cercano. Estamos para ayudarte a que tu negocio nunca deje de vender."
   }
 ]
 
 export function LandingFeatures() {
   return (
-    <section className="bg-white dark:bg-zinc-950 py-32 border-t border-zinc-50 dark:border-zinc-900">
+    <section id="soluciones" className="bg-white dark:bg-zinc-950 py-32 border-t border-zinc-50 dark:border-zinc-900">
       <div className="container mx-auto px-8">
         <div className="flex flex-col md:flex-row gap-20">
           <div className="w-full md:w-1/3 space-y-4">

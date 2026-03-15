@@ -5,6 +5,7 @@ export interface ChangelogChange {
     type: 'new' | 'improvement' | 'fix' | 'performance'
     title: string
     description: string
+    docsPath?: string
 }
 
 export interface ChangelogEntry {
@@ -25,7 +26,8 @@ export const changelogEntries: ChangelogEntry[] = [
             {
                 type: 'fix',
                 title: 'Protección Reforzada de Datos',
-                description: 'Corregimos una vulnerabilidad que, en teoría, podía permitir acceder a información de otro comercio. Ahora cada negocio tiene sus datos 100% aislados y protegidos.'
+                description: 'Corregimos una vulnerabilidad que, en teoría, podía permitir acceder a información de otro comercio. Ahora cada negocio tiene sus datos 100% aislados y protegidos.',
+                docsPath: '/docs#faq'
             },
             {
                 type: 'new',
@@ -65,7 +67,8 @@ export const changelogEntries: ChangelogEntry[] = [
             {
                 type: 'new',
                 title: 'Escáner de Código de Barras con Cámara',
-                description: 'Desde el celular podés escanear códigos de barras con la cámara para agregar productos al carrito. Soporta todos los códigos de productos argentinos y etiquetas de balanza.'
+                description: 'Desde el celular podés escanear códigos de barras con la cámara para agregar productos al carrito. Soporta todos los códigos de productos argentinos y etiquetas de balanza.',
+                docsPath: '/docs#features'
             },
             {
                 type: 'new',

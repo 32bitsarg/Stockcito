@@ -1,3 +1,8 @@
 User-agent: *
 Allow: /
-Sitemap: /sitemap.xml
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /_next/
+Disallow: /verify-email/
+
+Sitemap: https://stockcito.com/sitemap.xml

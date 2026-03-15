@@ -98,8 +98,8 @@ export function ChangelogContent({ isAuthenticated }: ChangelogContentProps) {
                 {/* Side List - Versions */}
                 <div className="w-full md:w-64 lg:w-72 border-r border-border flex flex-col bg-muted/20 shrink-0 h-auto md:h-[calc(100vh-65px)] md:sticky md:top-[65px]">
                     <div className="p-6 border-b border-border">
-                        <h2 className="text-lg font-semibold tracking-tight">Registro de Cambios</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Explorá las últimas versiones</p>
+                        <h2 className="text-lg font-semibold tracking-tight">Historial de Versiones</h2>
+                        <p className="text-sm text-muted-foreground mt-1">Explorá nuestra evolución</p>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-none p-3 space-y-1">
                         {changelogEntries.map((entry) => (
@@ -146,7 +146,7 @@ export function ChangelogContent({ isAuthenticated }: ChangelogContentProps) {
                                     </Badge>
 
                                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground balance-text">
-                                        {selectedEntry.title}
+                                        Novedades: {selectedEntry.title}
                                     </h1>
 
                                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -208,6 +208,14 @@ export function ChangelogContent({ isAuthenticated }: ChangelogContentProps) {
                                                                     <p className="text-sm text-muted-foreground leading-relaxed">
                                                                         {change.description}
                                                                     </p>
+                                                                    {change.docsPath && (
+                                                                        <Link
+                                                                            href={change.docsPath}
+                                                                            className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-primary hover:underline mt-2 italic"
+                                                                        >
+                                                                            Ver en documentación <ChevronRight className="w-3 h-3 ml-1" />
+                                                                        </Link>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         ))}

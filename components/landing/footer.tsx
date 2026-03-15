@@ -11,7 +11,7 @@ export function LandingFooter() {
           <div className="space-y-4">
             <span className="text-xl font-black tracking-tighter uppercase italic leading-none">Stockcito</span>
             <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400 max-w-xs leading-relaxed italic">
-              Un sistema operativo moderno para nodos comerciales argentinos. Diseñado para velocidad y fiabilidad.
+              Un sistema operativo moderno para nodos comerciales argentinos. Diseñado con orgullo desde Pergamino para todo el interior.
             </p>
           </div>
 
@@ -20,8 +20,9 @@ export function LandingFooter() {
               <h4 className="text-[10px] font-black uppercase tracking-[0.4em]">Infraestructura</h4>
               <ul className="space-y-3">
                 <li><Link href="/docs" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Documentación</Link></li>
-                <li><Link href="/changelog" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Actualizaciones</Link></li>
-                <li><Link href="/api" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Acceso API</Link></li>
+                <li><Link href="#soluciones" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Soluciones</Link></li>
+                <li><Link href="#planes" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">Planes</Link></li>
+                <li><Link href="#faq" className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors italic">FAQ</Link></li>
               </ul>
             </div>
             <div className="space-y-6">

@@ -1,0 +1,24 @@
+# Stockcito - Sistema de Gestión Comercial Inteligente
+
+## Descripción General
+Stockcito es un sistema POS (Punto de Venta) y de gestión de inventario moderno, diseñado específicamente para comercios minoristas y PYMES en Argentina. Su enfoque principal es la simplicidad operativa, la velocidad de venta y la adaptabilidad a contextos de alta inflación.
+
+## Capacidades Clave
+- **Infraestructura Offline-first:** Capacidad de operar sin internet y sincronizar datos automáticamente (PWA).
+- **Control de Inventario Preciso:** Gestión de stock, alertas de reposición y auditoría de movimientos.
+- **Punto de Venta (POS):** Interfaz optimizada para el despacho rápido de clientes.
+- **Gestión de Precios Dinámica:** Actualizaciones masivas de precios para proteger márgenes ante la inflación.
+- **Enfoque Regional:** Soporte y optimización para el mercado de Pergamino y el interior de la provincia de Buenos Aires.
+
+## Integraciones y Tecnología
+- Basado en tecnología web moderna (Next.js, Prisma, PostgreSQL).
+- Interfaz premium, minimalista y de alta performance.
+- Soporte para escaneo de códigos de barra y generación de etiquetas.
+
+## Público Objetivo
+Dueños de comercios de indumentaria, almacenes, ferreterías, dietéticas y sectores gastronómicos que buscan digitalizar su gestión sin complicaciones técnicas.
+
+## Información de Acceso
+- Landing Page: https://stockcito.com
+- Registro: https://stockcito.com/register
+- Soporte: Regional (Pergamino, Bs. As.)

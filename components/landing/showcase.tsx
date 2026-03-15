@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 export function LandingShowcase() {
     return (
@@ -16,9 +17,12 @@ export function LandingShowcase() {
                     {/* Glossy reflection effect */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10" />
 
-                    <img
+                    <Image
                         src="/assets/images/landing.webp"
-                        alt="Stockcito Dashboard Interface"
+                        alt="Stockcito: Sistema POS y control de inventario en Pergamino - Panel de Ventas Rápido"
+                        width={1400}
+                        height={800}
+                        priority
                         className="w-full h-auto object-cover md:object-contain grayscale hover:grayscale-0 transition-all duration-1000 ease-in-out"
                     />
                 </motion.div>

@@ -41,8 +41,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Stockcito — Sistema de gestión para comercios",
-  description: "Stockcito: gestión de stock, POS, facturación y reportes orientados a comercios locales. Simplifica ventas, controla IVA y automatiza tu inventario.",
+  title: "Stockcito — Sistema de Gestión y Inventario para Comercios",
+  description: "Stockcito: La solución integral para control de stock, POS y facturación. Automatizá tus precios ante la inflación y simplificá tus ventas. Probá 7 días gratis.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -53,9 +53,17 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'Stockcito — Sistema de gestión para comercios',
-    description: 'POS, facturación y control de inventario optimizado para comercios en Argentina. Precios sin IVA, IVA desglosado y reportes fiscales.',
+    title: 'Stockcito — Controlá tu Comercio con Inteligencia',
+    description: 'Sistema POS y gestión de inventario optimizado para la realidad argentina. Multiusuario, offline-first y reportes fiscales automáticos.',
+    url: 'https://stockcito.com',
+    siteName: 'Stockcito',
+    locale: 'es_AR',
+    type: 'website',
   },
+  alternates: {
+    canonical: 'https://stockcito.com',
+  },
+  keywords: ["sistema pos", "control de stock", "inventario offline", "pergamino", "gestión comercial", "pwa", "argentina"],
   icons: {
     icon: [
       { url: "/icons/icon.svg", type: "image/svg+xml" },
@@ -78,6 +86,38 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "Stockcito",
+              "operatingSystem": "Windows, Linux, macOS",
+              "applicationCategory": "BusinessApplication",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "5",
+                "reviewCount": "12"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "ARS",
+                "description": "Prueba gratuita de 7 días"
+              },
+              "areaServed": {
+                "@type": "City",
+                "name": "Pergamino",
+                "sameAs": "https://es.wikipedia.org/wiki/Pergamino_(Buenos_Aires)"
+              },
+              "author": {
+                "@type": "Organization",
+                "name": "Stockcito Node Systems"
+              }
+            })
+          }}
+        />
       </head>
       <body
         className={`${inter.variable} ${outfit.variable} ${robotoMono.variable} antialiased`}

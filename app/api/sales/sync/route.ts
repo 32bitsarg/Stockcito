@@ -4,10 +4,14 @@ import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import Decimal from 'decimal.js'
 
+export async function HEAD() {
+  return new NextResponse(null, { status: 200 });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    
+
     if (!session || !session.organizationId) {
       return NextResponse.json(
         { error: 'No autenticado' },
@@ -82,7 +86,7 @@ export async function POST(request: NextRequest) {
       const lineTotal = price.times(quantity)
       const lineTax = lineTotal.minus(itemDiscount).times(taxRate).dividedBy(100)
       const lineSubtotal = lineTotal.minus(itemDiscount)
-      
+
       subtotal = subtotal.plus(lineTotal)
       totalTax = totalTax.plus(lineTax)
       totalDiscount = totalDiscount.plus(itemDiscount)
@@ -156,7 +160,7 @@ export async function POST(request: NextRequest) {
           action: 'create',
           entity: 'sale',
           entityId: newSale.id,
-          details: isOffline 
+          details: isOffline
             ? `Venta offline sincronizada. ID offline: ${offlineSaleId}`
             : null
         }
